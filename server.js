@@ -1,125 +1,159 @@
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
+const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 const ROOT = __dirname;
+const PUBLIC_DIR = path.join(ROOT, "public");
 const SONGS_DIR = path.join(ROOT, "songs");
-const IMAGES_DIR = path.join(ROOT, "images");
 
-for (const dir of [SONGS_DIR, IMAGES_DIR]) {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-}
+app.use(express.json());
+app.use(express.static(PUBLIC_DIR));
 
-app.use(express.json({ limit: "2mb" }));
-app.use(express.static(ROOT));
-
-const AUDIO_EXTENSIONS = new Set([".mp3", ".m4a", ".aac", ".ogg", ".wav", ".webm"]);
-const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
-
-function cleanTitle(filename) {
-  return path.basename(filename, path.extname(filename))
-    .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function categoryFromPath(relativePath) {
-  const parts = relativePath.split(path.sep);
-  return parts.length > 1 ? parts[0] : "All Songs";
-}
-
-function findCover(category, relativeSongPath) {
-  const folder = path.join(SONGS_DIR, path.dirname(relativeSongPath));
-  const candidates = [
-    path.join(folder, "cover.jpg"),
-    path.join(folder, "cover.jpeg"),
-    path.join(folder, "cover.png"),
-    path.join(folder, "cover.webp"),
-    path.join(IMAGES_DIR, `${category}.jpg`),
-    path.join(IMAGES_DIR, `${category}.png`),
-    path.join(IMAGES_DIR, "default-cover.jpg")
-  ];
-  for (const file of candidates) {
-    if (fs.existsSync(file)) {
-      const rel = path.relative(ROOT, file).split(path.sep).join("/");
-      return "/" + rel.split("/").map(encodeURIComponent).join("/");
+// Serve music files
+app.use(
+  "/songs",
+  express.static(SONGS_DIR, {
+    setHeaders: (res) => {
+      res.setHeader("Accept-Ranges", "bytes");
+      res.setHeader("Cache-Control", "public, max-age=3600");
     }
-  }
-  return "/images/default-cover.svg";
-}
+  })
+);
 
-function scanSongs() {
-  const result = [];
+function getAudioFiles(dir, category = null, results = []) {
+  if (!fs.existsSync(dir)) return results;
 
-  function walk(dir) {
-    if (!fs.existsSync(dir)) return;
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) walk(full);
-      else if (AUDIO_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
-        const relative = path.relative(SONGS_DIR, full);
-        const category = categoryFromPath(relative);
-        const encodedPath = relative.split(path.sep).map(encodeURIComponent).join("/");
-        result.push({
-          id: Buffer.from(relative).toString("base64url"),
-          title: cleanTitle(entry.name),
-          artist: category === "All Songs" ? "स्वरAJ" : category,
-          album: category,
-          category,
-          url: `/songs/${encodedPath}`,
-          cover: findCover(category, relative),
-          filename: entry.name
-        });
-      }
+  const items = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const item of items) {
+    const fullPath = path.join(dir, item.name);
+
+    if (item.isDirectory()) {
+      const nextCategory = category || item.name;
+      getAudioFiles(fullPath, nextCategory, results);
+      continue;
+    }
+
+    const ext = path.extname(item.name).toLowerCase();
+
+    if ([".mp3", ".wav", ".ogg", ".m4a", ".aac", ".flac"].includes(ext)) {
+      const relativePath = path.relative(SONGS_DIR, fullPath);
+      const urlPath = relativePath
+        .split(path.sep)
+        .map(encodeURIComponent)
+        .join("/");
+
+      results.push({
+        id: results.length + 1,
+        title: path.basename(item.name, ext),
+        category: category || "Music",
+        url: `/songs/${urlPath}`,
+        file: relativePath.replace(/\\/g, "/")
+      });
     }
   }
 
-  walk(SONGS_DIR);
-  result.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
-  return result.map((song, index) => ({ ...song, index }));
+  return results;
 }
 
+function getSongs() {
+  return getAudioFiles(SONGS_DIR);
+}
+
+// Health check
 app.get("/api/health", (req, res) => {
-  const songs = scanSongs();
   res.json({
-    ok: true,
-    service: "स्वरAJ",
-    songs: songs.length,
-    time: new Date().toISOString()
+    status: "ok",
+    songsDirectory: SONGS_DIR,
+    songsDirectoryExists: fs.existsSync(SONGS_DIR),
+    songCount: getSongs().length
   });
 });
 
+// All songs
 app.get("/api/songs", (req, res) => {
-  res.json(scanSongs());
-});
+  try {
+    const songs = getSongs();
 
-app.get("/api/categories", (req, res) => {
-  const songs = scanSongs();
-  const map = new Map();
-  for (const song of songs) {
-    if (!map.has(song.category)) map.set(song.category, 0);
-    map.set(song.category, map.get(song.category) + 1);
+    res.json({
+      success: true,
+      count: songs.length,
+      songs
+    });
+  } catch (error) {
+    console.error("Song scan error:", error);
+
+    res.status(500).json({
+      success: false,
+      count: 0,
+      songs: [],
+      error: error.message
+    });
   }
-  const categories = [...map.entries()].map(([name, count]) => ({ name, count }));
-  res.json(categories);
 });
 
+// Categories
+app.get("/api/categories", (req, res) => {
+  const songs = getSongs();
+
+  const categories = [...new Set(songs.map(song => song.category))];
+
+  res.json({
+    success: true,
+    categories
+  });
+});
+
+// Search
 app.get("/api/search", (req, res) => {
-  const q = String(req.query.q || "").trim().toLowerCase();
-  if (!q) return res.json([]);
-  const songs = scanSongs().filter(s =>
-    [s.title, s.artist, s.album, s.category].some(v => v.toLowerCase().includes(q))
+  const query = String(req.query.q || "").toLowerCase().trim();
+
+  const songs = getSongs();
+
+  if (!query) {
+    return res.json({
+      success: true,
+      count: songs.length,
+      songs
+    });
+  }
+
+  const results = songs.filter(song =>
+    song.title.toLowerCase().includes(query) ||
+    song.category.toLowerCase().includes(query)
   );
-  res.json(songs);
+
+  res.json({
+    success: true,
+    count: results.length,
+    songs: results
+  });
 });
 
-app.get("*splat", (req, res) => {
-  if (req.path.startsWith("/api/")) return res.status(404).json({ error: "API route not found" });
-  res.sendFile(path.join(ROOT, "index.html"));
+// Prevent API 404 from being confused with frontend routing
+app.use("/api", (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: "API endpoint not found"
+  });
+});
+
+// Frontend
+app.get("*", (req, res) => {
+  const indexFile = path.join(PUBLIC_DIR, "index.html");
+
+  if (fs.existsSync(indexFile)) {
+    res.sendFile(indexFile);
+  } else {
+    res.status(404).send("index.html not found");
+  }
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`स्वरAJ running on port ${PORT}`);
+  console.log(`Swaraj Music running on port ${PORT}`);
+  console.log(`Songs directory: ${SONGS_DIR}`);
+  console.log(`Songs found: ${getSongs().length}`);
 });

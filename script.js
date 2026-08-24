@@ -1,13 +1,29 @@
 let songs = [];
 
+let currentSong = null;
+
+let currentMode = "video";
+
 const songList =
   document.getElementById("songList");
 
 const categoryList =
   document.getElementById("categoryList");
 
+const songCount =
+  document.getElementById("songCount");
+
 const audioPlayer =
   document.getElementById("audioPlayer");
+
+const youtubePlayer =
+  document.getElementById("youtubePlayer");
+
+const youtubeFrame =
+  document.getElementById("youtubeFrame");
+
+const videoContainer =
+  document.getElementById("videoContainer");
 
 const playerTitle =
   document.getElementById("playerTitle");
@@ -15,38 +31,56 @@ const playerTitle =
 const playerArtist =
   document.getElementById("playerArtist");
 
-const youtubeModal =
-  document.getElementById("youtubeModal");
+const playerCover =
+  document.getElementById("playerCover");
 
-const youtubeFrame =
-  document.getElementById("youtubeFrame");
+const miniPlayer =
+  document.getElementById("miniPlayer");
 
-const youtubeTitle =
-  document.getElementById("youtubeTitle");
+const miniTitle =
+  document.getElementById("miniTitle");
 
-const youtubeArtist =
-  document.getElementById("youtubeArtist");
+const miniArtist =
+  document.getElementById("miniArtist");
 
-const closeYoutube =
-  document.getElementById("closeYoutube");
+const musicModeButton =
+  document.getElementById("musicModeButton");
+
+const videoModeButton =
+  document.getElementById("videoModeButton");
+
+const minimizeButton =
+  document.getElementById("minimizeButton");
+
+const closeButton =
+  document.getElementById("closeButton");
+
+const expandButton =
+  document.getElementById("expandButton");
+
+const miniCloseButton =
+  document.getElementById("miniCloseButton");
 
 
-/* ==================================================
+/* =====================================================
    LOAD SONGS
-================================================== */
+===================================================== */
 
 async function loadSongs() {
 
   try {
 
     const response =
-      await fetch("/api/songs", {
-        cache: "no-store"
-      });
+      await fetch(
+        "/api/songs",
+        {
+          cache: "no-store"
+        }
+      );
 
     if (!response.ok) {
       throw new Error(
-        `Songs API returned ${response.status}`
+        `API error ${response.status}`
       );
     }
 
@@ -72,32 +106,33 @@ async function loadSongs() {
     );
 
     songList.innerHTML = `
-      <div class="song">
+      <div class="loading-card glass">
         ❌ Unable to load songs.
-        <br><br>
-        ${escapeHtml(error.message)}
       </div>
     `;
   }
 }
 
 
-/* ==================================================
-   LOAD CATEGORIES
-================================================== */
+/* =====================================================
+   CATEGORIES
+===================================================== */
 
 async function loadCategories() {
 
   try {
 
     const response =
-      await fetch("/api/categories", {
-        cache: "no-store"
-      });
+      await fetch(
+        "/api/categories",
+        {
+          cache: "no-store"
+        }
+      );
 
     if (!response.ok) {
       throw new Error(
-        `Categories API returned ${response.status}`
+        `API error ${response.status}`
       );
     }
 
@@ -107,42 +142,37 @@ async function loadCategories() {
     const categories =
       Array.isArray(data)
         ? data
-        : Array.isArray(data.categories)
-          ? data.categories
-          : [];
+        : data.categories || [];
 
     renderCategories(categories);
 
   } catch (error) {
 
     console.error(
-      "LOAD CATEGORIES ERROR:",
+      "CATEGORY ERROR:",
       error
     );
 
     categoryList.innerHTML = `
-      <div class="category">
-        Unable to load categories
+      <div class="loading-card glass">
+        Unable to load categories.
       </div>
     `;
   }
 }
 
 
-/* ==================================================
+/* =====================================================
    RENDER CATEGORIES
-================================================== */
+===================================================== */
 
 function renderCategories(categories) {
 
-  if (
-    !categories ||
-    categories.length === 0
-  ) {
+  if (!categories.length) {
 
     categoryList.innerHTML = `
-      <div class="category">
-        No categories yet
+      <div class="loading-card glass">
+        No categories yet.
       </div>
     `;
 
@@ -150,11 +180,12 @@ function renderCategories(categories) {
   }
 
   categoryList.innerHTML =
-    categories
-      .map((category) => {
+    categories.map(
+      category => {
 
         const name =
-          category.category || "Other";
+          category.category ||
+          "Other";
 
         const count =
           Number(
@@ -163,15 +194,19 @@ function renderCategories(categories) {
 
         return `
           <div
-            class="category"
+            class="category-card glass"
             onclick="filterCategory(${JSON.stringify(name)})"
           >
+
+            <span class="section-kicker">
+              MOOD
+            </span>
+
+            <br><br>
 
             <strong>
               ${escapeHtml(name)}
             </strong>
-
-            <br>
 
             <small>
               ${count} songs
@@ -179,24 +214,28 @@ function renderCategories(categories) {
 
           </div>
         `;
-      })
-      .join("");
+      }
+    ).join("");
 }
 
 
-/* ==================================================
+/* =====================================================
    RENDER SONGS
-================================================== */
+===================================================== */
 
 function renderSongs(list) {
 
-  if (
-    !list ||
-    list.length === 0
-  ) {
+  songCount.textContent =
+    `${list.length} ${
+      list.length === 1
+        ? "song"
+        : "songs"
+    }`;
+
+  if (!list.length) {
 
     songList.innerHTML = `
-      <div class="song">
+      <div class="loading-card glass">
         No songs available.
       </div>
     `;
@@ -205,31 +244,46 @@ function renderSongs(list) {
   }
 
   songList.innerHTML =
-    list
-      .map((song) => {
+    list.map(
+      song => {
 
-        let source =
-          "No source";
+        const isYouTube =
+          Boolean(
+            song.youtube_url
+          );
 
-        if (song.audio_url) {
-          source =
-            "🎵 MP3";
-        } else if (song.youtube_url) {
-          source =
-            "▶ YouTube";
-        }
+        const badge =
+          isYouTube
+            ? "▶ YouTube"
+            : "🎵 MP3";
+
+        const cover =
+          song.cover_url
+            ? `
+              <img
+                src="${escapeAttribute(song.cover_url)}"
+                alt=""
+                loading="lazy"
+              >
+            `
+            : "♪";
 
         return `
           <div
-            class="song"
+            class="song-card glass"
             onclick="playSong(${Number(song.id)})"
           >
 
-            <div class="song-info">
+            <div class="song-art">
+              ${cover}
+            </div>
+
+            <div class="song-details">
 
               <strong>
                 ${escapeHtml(
-                  song.title
+                  song.title ||
+                  "Unknown Song"
                 )}
               </strong>
 
@@ -242,48 +296,43 @@ function renderSongs(list) {
 
             </div>
 
-            <div class="song-type">
-              ${source}
+            <div class="song-badge">
+              ${badge}
             </div>
 
           </div>
         `;
-      })
-      .join("");
+      }
+    ).join("");
 }
 
 
-/* ==================================================
+/* =====================================================
    PLAY SONG
-================================================== */
+===================================================== */
 
 function playSong(id) {
 
   const song =
     songs.find(
-      (item) =>
+      item =>
         Number(item.id) ===
         Number(id)
     );
 
-  if (!song) {
-    return;
-  }
+  if (!song) return;
 
-  playerTitle.textContent =
-    song.title || "Unknown Song";
+  currentSong = song;
 
-  playerArtist.textContent =
-    song.artist || "SwarAJ";
+  updatePlayerInfo(song);
 
-
-  /* -----------------------------------------------
-     MP3 / CLOUDINARY
-  ------------------------------------------------ */
+  /*
+   * MP3 / CLOUDINARY
+   */
 
   if (song.audio_url) {
 
-    closeYouTubePlayer();
+    closeYouTube();
 
     audioPlayer.style.display =
       "block";
@@ -294,22 +343,20 @@ function playSong(id) {
     audioPlayer.load();
 
     audioPlayer.play()
-      .catch((error) => {
-
-        console.warn(
-          "Audio autoplay blocked:",
-          error.message
-        );
-
-      });
+      .catch(
+        error =>
+          console.warn(
+            "Autoplay blocked:",
+            error.message
+          )
+      );
 
     return;
   }
 
-
-  /* -----------------------------------------------
-     YOUTUBE
-  ------------------------------------------------ */
+  /*
+   * YOUTUBE
+   */
 
   if (song.youtube_url) {
 
@@ -324,107 +371,137 @@ function playSong(id) {
     audioPlayer.style.display =
       "none";
 
-    openYouTubePlayer(song);
+    /*
+     * Default YouTube mode:
+     * Video
+     */
+
+    openYouTube(
+      song,
+      "video"
+    );
 
     return;
   }
 
-  console.warn(
-    "Song has no playable source:",
-    song
+  alert(
+    "This song has no playable source."
   );
 }
 
 
-/* ==================================================
-   EXTRACT YOUTUBE VIDEO ID
-================================================== */
+/* =====================================================
+   PLAYER INFO
+===================================================== */
+
+function updatePlayerInfo(song) {
+
+  const title =
+    song.title ||
+    "Unknown Song";
+
+  const artist =
+    song.artist ||
+    "SwarAJ";
+
+  playerTitle.textContent =
+    title;
+
+  playerArtist.textContent =
+    artist;
+
+  miniTitle.textContent =
+    title;
+
+  miniArtist.textContent =
+    artist;
+
+  if (song.cover_url) {
+
+    playerCover.innerHTML = `
+      <img
+        src="${escapeAttribute(song.cover_url)}"
+        alt=""
+        style="
+          width:100%;
+          height:100%;
+          object-fit:cover;
+          border-radius:inherit;
+        "
+      >
+    `;
+
+  } else {
+
+    playerCover.textContent =
+      "♪";
+  }
+}
+
+
+/* =====================================================
+   YOUTUBE ID
+===================================================== */
 
 function getYouTubeVideoId(url) {
 
-  if (!url) {
-    return null;
-  }
+  if (!url) return null;
 
   try {
 
     const parsed =
       new URL(url);
 
-    const hostname =
+    const host =
       parsed.hostname
         .toLowerCase()
         .replace(/^www\./, "");
 
-    /* youtu.be/VIDEO_ID */
-
     if (
-      hostname === "youtu.be"
+      host === "youtu.be"
     ) {
 
-      return cleanVideoId(
+      return cleanYouTubeId(
         parsed.pathname
-          .replace("/", "")
+          .replace(/^\/+/, "")
+          .split("/")[0]
       );
     }
 
-
-    /* youtube.com/watch?v=VIDEO_ID */
-
     if (
-      hostname === "youtube.com" ||
-      hostname === "m.youtube.com"
+      host === "youtube.com" ||
+      host === "m.youtube.com"
     ) {
 
-      const watchId =
+      const watch =
         parsed.searchParams.get("v");
 
-      if (watchId) {
-        return cleanVideoId(
-          watchId
+      if (watch) {
+        return cleanYouTubeId(
+          watch
         );
       }
 
+      const patterns = [
+        /^\/shorts\/([^/?]+)/,
+        /^\/embed\/([^/?]+)/,
+        /^\/live\/([^/?]+)/
+      ];
 
-      /* /shorts/VIDEO_ID */
+      for (
+        const pattern of patterns
+      ) {
 
-      const shortsMatch =
-        parsed.pathname.match(
-          /^\/shorts\/([^/?]+)/
-        );
+        const match =
+          parsed.pathname.match(
+            pattern
+          );
 
-      if (shortsMatch) {
-        return cleanVideoId(
-          shortsMatch[1]
-        );
-      }
-
-
-      /* /embed/VIDEO_ID */
-
-      const embedMatch =
-        parsed.pathname.match(
-          /^\/embed\/([^/?]+)/
-        );
-
-      if (embedMatch) {
-        return cleanVideoId(
-          embedMatch[1]
-        );
-      }
-
-
-      /* /live/VIDEO_ID */
-
-      const liveMatch =
-        parsed.pathname.match(
-          /^\/live\/([^/?]+)/
-        );
-
-      if (liveMatch) {
-        return cleanVideoId(
-          liveMatch[1]
-        );
+        if (match) {
+          return cleanYouTubeId(
+            match[1]
+          );
+        }
       }
     }
 
@@ -441,17 +518,15 @@ function getYouTubeVideoId(url) {
 }
 
 
-/* ==================================================
-   CLEAN VIDEO ID
-================================================== */
+/* =====================================================
+   CLEAN YOUTUBE ID
+===================================================== */
 
-function cleanVideoId(id) {
+function cleanYouTubeId(id) {
 
-  if (!id) {
-    return null;
-  }
+  if (!id) return null;
 
-  const cleaned =
+  const value =
     String(id)
       .trim()
       .replace(
@@ -460,21 +535,24 @@ function cleanVideoId(id) {
       );
 
   if (
-    cleaned.length < 5 ||
-    cleaned.length > 20
+    value.length < 5 ||
+    value.length > 20
   ) {
     return null;
   }
 
-  return cleaned;
+  return value;
 }
 
 
-/* ==================================================
-   OPEN YOUTUBE PLAYER
-================================================== */
+/* =====================================================
+   OPEN YOUTUBE
+===================================================== */
 
-function openYouTubePlayer(song) {
+function openYouTube(
+  song,
+  mode = "video"
+) {
 
   const videoId =
     getYouTubeVideoId(
@@ -490,45 +568,115 @@ function openYouTubePlayer(song) {
     return;
   }
 
-  youtubeTitle.textContent =
-    song.title ||
-    "YouTube Song";
+  currentMode =
+    mode;
 
-  youtubeArtist.textContent =
-    song.artist ||
-    "SwarAJ";
-
-
-  /*
-   * YouTube embedded player.
-   *
-   * autoplay=1:
-   * Starts after the user's song click.
-   *
-   * playsinline=1:
-   * Important for mobile playback.
-   *
-   * rel=0:
-   * Limits related-video behavior.
-   */
-
-  const embedUrl =
-    `https://www.youtube.com/embed/${encodeURIComponent(videoId)}` +
-    `?autoplay=1` +
-    `&playsinline=1` +
-    `&rel=0` +
-    `&modestbranding=1`;
-
-  youtubeFrame.src =
-    embedUrl;
-
-  youtubeModal.classList.add(
+  youtubePlayer.classList.add(
     "active"
   );
 
-  youtubeModal.setAttribute(
-    "aria-hidden",
-    "false"
+  youtubePlayer.classList.remove(
+    "music-only"
+  );
+
+  miniPlayer.classList.remove(
+    "active"
+  );
+
+  document.body.style.overflow =
+    "hidden";
+
+  updatePlayerInfo(song);
+
+  setPlayerMode(
+    mode,
+    false
+  );
+
+  /*
+   * Official YouTube embed.
+   */
+
+  const params =
+    new URLSearchParams({
+      autoplay: "1",
+      playsinline: "1",
+      rel: "0",
+      modestbranding: "1",
+      controls: "1"
+    });
+
+  youtubeFrame.src =
+    `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?${params.toString()}`;
+}
+
+
+/* =====================================================
+   MUSIC ONLY
+===================================================== */
+
+function setMusicOnly() {
+
+  if (!currentSong) return;
+
+  currentMode =
+    "music";
+
+  youtubePlayer.classList.add(
+    "music-only"
+  );
+
+  videoContainer.style.display =
+    "";
+
+  musicModeButton.classList.add(
+    "active"
+  );
+
+  videoModeButton.classList.remove(
+    "active"
+  );
+
+  /*
+   * We keep the same YouTube iframe
+   * playing while hiding the video.
+   */
+
+  miniPlayer.classList.add(
+    "active"
+  );
+}
+
+
+/* =====================================================
+   VIDEO MODE
+===================================================== */
+
+function setVideoMode() {
+
+  if (!currentSong) return;
+
+  currentMode =
+    "video";
+
+  youtubePlayer.classList.remove(
+    "music-only"
+  );
+
+  musicModeButton.classList.remove(
+    "active"
+  );
+
+  videoModeButton.classList.add(
+    "active"
+  );
+
+  miniPlayer.classList.remove(
+    "active"
+  );
+
+  youtubePlayer.classList.add(
+    "active"
   );
 
   document.body.style.overflow =
@@ -536,84 +684,229 @@ function openYouTubePlayer(song) {
 }
 
 
-/* ==================================================
-   CLOSE YOUTUBE PLAYER
-================================================== */
+/* =====================================================
+   MODE
+===================================================== */
 
-function closeYouTubePlayer() {
+function setPlayerMode(
+  mode,
+  reload
+) {
 
-  if (!youtubeModal) {
-    return;
+  if (mode === "music") {
+
+    setMusicOnly();
+
+  } else {
+
+    setVideoMode();
+
   }
 
-  youtubeFrame.src =
-    "about:blank";
+  if (reload) {
 
-  youtubeModal.classList.remove(
+    reloadCurrentYouTube();
+  }
+}
+
+
+/* =====================================================
+   RELOAD CURRENT YOUTUBE
+===================================================== */
+
+function reloadCurrentYouTube() {
+
+  if (!currentSong) return;
+
+  const videoId =
+    getYouTubeVideoId(
+      currentSong.youtube_url
+    );
+
+  if (!videoId) return;
+
+  const params =
+    new URLSearchParams({
+      autoplay: "1",
+      playsinline: "1",
+      rel: "0",
+      modestbranding: "1",
+      controls: "1"
+    });
+
+  youtubeFrame.src =
+    `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?${params.toString()}`;
+}
+
+
+/* =====================================================
+   MINIMIZE
+===================================================== */
+
+function minimizePlayer() {
+
+  if (!currentSong) return;
+
+  youtubePlayer.classList.remove(
     "active"
   );
 
-  youtubeModal.setAttribute(
-    "aria-hidden",
-    "true"
+  miniPlayer.classList.add(
+    "active"
   );
 
   document.body.style.overflow =
     "";
+
+  /*
+   * Important:
+   * We DO NOT clear the iframe.
+   * Therefore the YouTube playback continues.
+   */
 }
 
 
-/* ==================================================
-   CLOSE BUTTON
-================================================== */
+/* =====================================================
+   EXPAND
+===================================================== */
 
-if (closeYoutube) {
+function expandPlayer() {
 
-  closeYoutube.addEventListener(
-    "click",
-    closeYouTubePlayer
+  youtubePlayer.classList.add(
+    "active"
   );
+
+  miniPlayer.classList.remove(
+    "active"
+  );
+
+  document.body.style.overflow =
+    "hidden";
 }
 
 
-/* ==================================================
-   BACKDROP CLICK
-================================================== */
+/* =====================================================
+   CLOSE
+===================================================== */
 
-if (youtubeModal) {
+function closeYouTube() {
 
-  youtubeModal.addEventListener(
+  youtubeFrame.src =
+    "about:blank";
+
+  youtubePlayer.classList.remove(
+    "active"
+  );
+
+  miniPlayer.classList.remove(
+    "active"
+  );
+
+  document.body.style.overflow =
+    "";
+
+  currentSong =
+    null;
+}
+
+
+/* =====================================================
+   BUTTON EVENTS
+===================================================== */
+
+musicModeButton.addEventListener(
+  "click",
+  () => {
+
+    setMusicOnly();
+
+  }
+);
+
+videoModeButton.addEventListener(
+  "click",
+  () => {
+
+    setVideoMode();
+
+  }
+);
+
+minimizeButton.addEventListener(
+  "click",
+  () => {
+
+    minimizePlayer();
+
+  }
+);
+
+closeButton.addEventListener(
+  "click",
+  () => {
+
+    closeYouTube();
+
+  }
+);
+
+expandButton.addEventListener(
+  "click",
+  () => {
+
+    expandPlayer();
+
+  }
+);
+
+miniCloseButton.addEventListener(
+  "click",
+  () => {
+
+    closeYouTube();
+
+  }
+);
+
+
+/* =====================================================
+   BACKDROP
+===================================================== */
+
+const youtubeBackdrop =
+  document.querySelector(
+    ".youtube-backdrop"
+  );
+
+if (youtubeBackdrop) {
+
+  youtubeBackdrop.addEventListener(
     "click",
-    (event) => {
+    () => {
 
-      if (
-        event.target.classList.contains(
-          "youtube-backdrop"
-        )
-      ) {
-
-        closeYouTubePlayer();
-
-      }
+      minimizePlayer();
 
     }
   );
 }
 
 
-/* ==================================================
-   ESCAPE KEY
-================================================== */
+/* =====================================================
+   ESC
+===================================================== */
 
 document.addEventListener(
   "keydown",
-  (event) => {
+  event => {
 
     if (
-      event.key === "Escape"
+      event.key === "Escape" &&
+      youtubePlayer.classList.contains(
+        "active"
+      )
     ) {
 
-      closeYouTubePlayer();
+      minimizePlayer();
 
     }
 
@@ -621,15 +914,17 @@ document.addEventListener(
 );
 
 
-/* ==================================================
+/* =====================================================
    CATEGORY FILTER
-================================================== */
+===================================================== */
 
-function filterCategory(category) {
+function filterCategory(
+  category
+) {
 
   const filtered =
     songs.filter(
-      (song) =>
+      song =>
         song.category ===
         category
     );
@@ -638,24 +933,17 @@ function filterCategory(category) {
     filtered
   );
 
-  const songsSection =
-    document.getElementById(
-      "songs"
-    );
-
-  if (songsSection) {
-
-    songsSection.scrollIntoView({
+  document
+    .getElementById("songs")
+    .scrollIntoView({
       behavior: "smooth"
     });
-
-  }
 }
 
 
-/* ==================================================
-   HTML ESCAPE
-================================================== */
+/* =====================================================
+   ESCAPE
+===================================================== */
 
 function escapeHtml(value) {
 
@@ -684,9 +972,13 @@ function escapeHtml(value) {
     );
 }
 
+function escapeAttribute(value) {
+  return escapeHtml(value);
+}
 
-/* ==================================================
+
+/* =====================================================
    START
-================================================== */
+===================================================== */
 
 loadSongs();

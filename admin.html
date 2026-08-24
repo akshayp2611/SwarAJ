@@ -20,24 +20,18 @@
 
     body {
       margin: 0;
-      font-family:
-        Arial,
-        sans-serif;
-
-      background:
-        #08080d;
-
+      background: #08080d;
       color: white;
+      font-family: Arial, sans-serif;
     }
 
     .container {
       max-width: 900px;
       width: 94%;
-      margin: 40px auto;
+      margin: 30px auto 100px;
     }
 
     h1 {
-      font-size: 32px;
       margin-bottom: 5px;
     }
 
@@ -46,7 +40,7 @@
       margin-bottom: 25px;
     }
 
-    form {
+    .card {
       background: #15151d;
       border: 1px solid #292936;
       border-radius: 18px;
@@ -74,41 +68,54 @@
 
     textarea {
       min-height: 120px;
+      resize: vertical;
+    }
+
+    input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
     }
 
     button {
       width: 100%;
       padding: 15px;
       margin-top: 25px;
-      border: none;
+      border: 0;
       border-radius: 10px;
       background: #8b5cf6;
       color: white;
-      font-weight: bold;
       font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
     }
 
-    button:hover {
-      opacity: .9;
+    button:disabled {
+      opacity: .6;
+      cursor: wait;
     }
 
     .result {
       margin-top: 20px;
       padding: 15px;
       border-radius: 10px;
-      background: #111119;
+      background: #101018;
+      border: 1px solid #292936;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
+      line-height: 1.6;
     }
 
-    .info {
+    .help {
       margin-top: 20px;
-      padding: 15px;
-      border-radius: 10px;
-      background: #111119;
+      padding: 18px;
+      background: #101018;
+      border-radius: 12px;
       color: #aaa;
-      line-height: 1.6;
+      line-height: 1.7;
+    }
+
+    code {
+      color: #c4b5fd;
     }
 
   </style>
@@ -122,10 +129,13 @@
   <h1>🎵 स्वरAJ Admin</h1>
 
   <div class="subtitle">
-    Add and manage your SwarAJ music library
+    Add songs to your SwarAJ library
   </div>
 
-  <form id="uploadForm">
+  <form
+    id="uploadForm"
+    class="card"
+  >
 
     <label>
       Song Title *
@@ -134,7 +144,7 @@
     <input
       type="text"
       name="title"
-      placeholder="Ganpati Bappa Morya"
+      placeholder="Song title"
       required
     >
 
@@ -164,41 +174,15 @@
 
     <select name="category">
 
-      <option>
-        Bhakti
-      </option>
-
-      <option>
-        Marathi
-      </option>
-
-      <option>
-        Hindi
-      </option>
-
-      <option>
-        Love
-      </option>
-
-      <option>
-        Energetic
-      </option>
-
-      <option>
-        Emotional
-      </option>
-
-      <option>
-        Party
-      </option>
-
-      <option>
-        Devotional
-      </option>
-
-      <option>
-        Instrumental
-      </option>
+      <option>Bhakti</option>
+      <option>Marathi</option>
+      <option>Hindi</option>
+      <option>Love</option>
+      <option>Energetic</option>
+      <option>Emotional</option>
+      <option>Party</option>
+      <option>Devotional</option>
+      <option>Instrumental</option>
 
     </select>
 
@@ -229,7 +213,7 @@
     <input
       type="text"
       name="audio_url"
-      placeholder="https://your-storage.com/song.mp3"
+      placeholder="https://example.com/song.mp3"
     >
 
     <label>
@@ -239,11 +223,11 @@
     <input
       type="text"
       name="youtube_url"
-      placeholder="https://youtu.be/w-ocXpNDCkI"
+      placeholder="https://youtu.be/VIDEO_ID"
     >
 
     <label>
-      Upload MP3 to Cloudinary
+      OR Upload MP3
     </label>
 
     <input
@@ -253,13 +237,13 @@
     >
 
     <label>
-      Cover URL
+      Cover Image URL
     </label>
 
     <input
       type="text"
       name="cover_url"
-      placeholder="https://your-storage.com/cover.jpg"
+      placeholder="https://example.com/cover.jpg"
     >
 
     <label>
@@ -268,7 +252,7 @@
 
     <textarea
       name="lyrics"
-      placeholder="Enter lyrics..."
+      placeholder="Lyrics..."
     ></textarea>
 
     <label>
@@ -277,14 +261,16 @@
         type="checkbox"
         name="featured"
         value="true"
-        style="width:auto"
       >
 
-      Featured Song
+      Featured song
 
     </label>
 
-    <button type="submit">
+    <button
+      id="submitButton"
+      type="submit"
+    >
       🎵 ADD SONG
     </button>
 
@@ -297,23 +283,35 @@
     Ready.
   </div>
 
-  <div class="info">
+  <div class="help">
 
-    <strong>MP3:</strong>
+    <strong>Three ways to add a song:</strong>
 
-    Use a direct MP3 URL or upload an MP3.
+    <br><br>
 
-    <br>
-
-    <strong>YouTube:</strong>
-
-    Paste the YouTube video URL.
+    1. Direct MP3 URL
 
     <br>
 
-    <strong>Example:</strong>
+    <code>
+      https://example.com/song.mp3
+    </code>
 
-    https://youtu.be/w-ocXpNDCkI
+    <br><br>
+
+    2. YouTube URL
+
+    <br>
+
+    <code>
+      https://youtu.be/VIDEO_ID
+    </code>
+
+    <br><br>
+
+    3. Upload an MP3.
+
+    The server uploads it to Cloudinary.
 
   </div>
 
@@ -331,14 +329,24 @@ const result =
     "result"
   );
 
+const button =
+  document.getElementById(
+    "submitButton"
+  );
+
 form.addEventListener(
   "submit",
-  async function(event) {
+  async (event) => {
 
     event.preventDefault();
 
+    button.disabled = true;
+
+    button.textContent =
+      "⏳ Adding...";
+
     result.textContent =
-      "⏳ Adding song...";
+      "Uploading / saving song...";
 
     try {
 
@@ -354,46 +362,85 @@ form.addEventListener(
           }
         );
 
-      const data =
-        await response.json();
+      const text =
+        await response.text();
+
+      let data;
+
+      try {
+        data =
+          JSON.parse(text);
+      } catch {
+        data = {
+          error: text
+        };
+      }
 
       if (!response.ok) {
+
         throw new Error(
-          data.error ||
-          data.details ||
-          "Upload failed"
+          [
+            data.error,
+            data.details,
+            data.code
+              ? `Code: ${data.code}`
+              : "",
+            data.detail
+              ? `Detail: ${data.detail}`
+              : "",
+            data.hint
+              ? `Hint: ${data.hint}`
+              : ""
+          ]
+            .filter(Boolean)
+            .join("\n")
         );
+
       }
 
       result.textContent =
-        "✅ SONG ADDED\n\n" +
-
-        "Title: " +
-        data.song.title +
-
-        "\n\nMP3 URL:\n" +
-        (
+        [
+          "✅ SONG ADDED SUCCESSFULLY",
+          "",
+          `ID: ${data.song.id}`,
+          `Title: ${data.song.title}`,
+          `Artist: ${data.song.artist || "-"}`,
+          `Category: ${data.song.category}`,
+          "",
+          "MP3 URL:",
           data.song.audio_url ||
-          "Not provided"
-        ) +
-
-        "\n\nYouTube URL:\n" +
-        (
+            "Not provided",
+          "",
+          "YouTube URL:",
           data.song.youtube_url ||
-          "Not provided"
-        );
+            "Not provided"
+        ].join("\n");
 
       form.reset();
 
     } catch (error) {
 
       result.textContent =
-        "❌ ERROR\n\n" +
-        error.message;
+        [
+          "❌ ERROR",
+          "",
+          error.message ||
+            "Unknown error"
+        ].join("\n");
+
+      console.error(error);
+
+    } finally {
+
+      button.disabled = false;
+
+      button.textContent =
+        "🎵 ADD SONG";
 
     }
 
-  });
+  }
+);
 
 </script>
 

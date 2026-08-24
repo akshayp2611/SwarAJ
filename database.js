@@ -1,70 +1,152 @@
 const { Pool } = require("pg");
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is required");
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  console.warn("DATABASE_URL is not configured.");
 }
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+const pool = connectionString
+  ? new Pool({
+      connectionString,
+      ssl: {
+        rejectUnauthorized: false
+      }
+    })
+  : null;
 
-  ssl: {
-    rejectUnauthorized: false
-  },
+async function initDatabase() {
+  if (!pool) {
+    console.warn("Database initialization skipped.");
+    return;
+  }
 
-  max: 5,
-
-  idleTimeoutMillis: 30000,
-
-  connectionTimeoutMillis: 10000
-});
-
-pool.on("error", (error) => {
-  console.error("PostgreSQL pool error:", error);
-});
-
-async function initializeDatabase() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS songs (
       id SERIAL PRIMARY KEY,
-
       title TEXT NOT NULL,
-
-      artist TEXT
-        DEFAULT 'Unknown Artist',
-
-      album TEXT
-        DEFAULT 'Unknown Album',
-
-      category TEXT
-        DEFAULT 'Other',
-
-      audio_url TEXT NOT NULL UNIQUE,
-
+      artist TEXT DEFAULT 'Unknown Artist',
+      album TEXT DEFAULT 'Unknown Album',
+      category TEXT DEFAULT 'Other',
+      audio_url TEXT NOT NULL,
       cover_url TEXT,
-
-      cloudinary_public_id TEXT,
-
       duration INTEGER DEFAULT 0,
-
-      created_at TIMESTAMP
-        DEFAULT CURRENT_TIMESTAMP
+      liked BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-  `);
-
-  await pool.query(`
-    CREATE INDEX IF NOT EXISTS idx_songs_category
-    ON songs(category)
-  `);
-
-  await pool.query(`
-    CREATE INDEX IF NOT EXISTS idx_songs_title
-    ON songs(title)
   `);
 
   console.log("PostgreSQL database initialized.");
 }
 
+async function getSongs() {
+  if (!pool) return [];
+
+  const result = await pool.query(`
+    SELECT
+      id,
+      title,
+      artist,
+      album,
+      category,
+      audio_url,
+      cover_url,
+      duration,
+      liked,
+      created_at
+    FROM songs
+    ORDER BY created_at DESC
+  `);
+
+  return result.rows;
+}
+
+async function getCategories() {
+  if (!pool) return [];
+
+  const result = await pool.query(`
+    SELECT
+      category,
+      COUNT(*)::INTEGER AS song_count
+    FROM songs
+    WHERE category IS NOT NULL
+      AND category <> ''
+    GROUP BY category
+    ORDER BY category
+  `);
+
+  return result.rows;
+}
+
+async function createSong(song) {
+  if (!pool) {
+    throw new Error("Database is not configured");
+  }
+
+  const result = await pool.query(
+    `
+    INSERT INTO songs
+    (
+      title,
+      artist,
+      album,
+      category,
+      audio_url,
+      cover_url,
+      duration
+    )
+    VALUES ($1,$2,$3,$4,$5,$6,$7)
+    RETURNING *
+    `,
+    [
+      song.title,
+      song.artist || "Unknown Artist",
+      song.album || "Unknown Album",
+      song.category || "Other",
+      song.audio_url,
+      song.cover_url || null,
+      Number(song.duration || 0)
+    ]
+  );
+
+  return result.rows[0];
+}
+
+async function deleteSong(id) {
+  if (!pool) {
+    throw new Error("Database is not configured");
+  }
+
+  await pool.query(
+    `DELETE FROM songs WHERE id = $1`,
+    [id]
+  );
+}
+
+async function toggleLike(id) {
+  if (!pool) {
+    throw new Error("Database is not configured");
+  }
+
+  const result = await pool.query(
+    `
+    UPDATE songs
+    SET liked = NOT liked
+    WHERE id = $1
+    RETURNING *
+    `,
+    [id]
+  );
+
+  return result.rows[0];
+}
+
 module.exports = {
   pool,
-  initializeDatabase
+  initDatabase,
+  getSongs,
+  getCategories,
+  createSong,
+  deleteSong,
+  toggleLike
 };

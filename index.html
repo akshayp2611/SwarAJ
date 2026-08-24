@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -16,106 +14,92 @@
     rel="stylesheet"
     href="/styles.css"
   >
-
 </head>
 
 <body>
 
 <header>
-
-  <div class="logo">
-    स्वरAJ
-  </div>
+  <div class="logo">स्वरAJ</div>
 
   <nav>
-
-    <a href="/">
-      ⌂ Home
-    </a>
-
-    <a href="#songs">
-      ♫ All Songs
-    </a>
-
-    <a href="#categories">
-      Categories
-    </a>
-
-    <a href="/admin">
-      Admin
-    </a>
-
+    <a href="/">⌂ Home</a>
+    <a href="#songs">♫ All Songs</a>
+    <a href="#categories">Categories</a>
+    <a href="/admin">Admin</a>
   </nav>
-
 </header>
 
 <main>
 
-<section class="hero">
+  <section class="hero">
 
-  <div>
+    <div>
 
-    <p class="small">
-      WELCOME TO स्वरAJ
-    </p>
+      <p class="small">
+        WELCOME TO स्वरAJ
+      </p>
 
-    <h1>
-      Music for<br>
-      Every Mood
-    </h1>
+      <h1>
+        Music for<br>
+        Every Mood
+      </h1>
 
-    <p>
-      Your personal premium music library.
-      Discover, play and enjoy your music
-      anytime, anywhere.
-    </p>
+      <p>
+        Your personal premium music library.
+        Discover, play and enjoy your music
+        anytime, anywhere.
+      </p>
 
-    <a
-      class="button"
-      href="#songs"
+      <a
+        class="button"
+        href="#songs"
+      >
+        Explore Now →
+      </a>
+
+    </div>
+
+  </section>
+
+  <section id="categories">
+
+    <h2>Categories</h2>
+
+    <div
+      id="categoryList"
+      class="categories"
     >
-      Explore Now →
-    </a>
+      Loading...
+    </div>
 
-  </div>
+  </section>
 
-</section>
+  <section id="songs">
 
-<section id="categories">
+    <h2>All Songs</h2>
 
-  <h2>
-    Categories
-  </h2>
+    <div
+      id="songList"
+      class="songs"
+    >
+      Loading songs...
+    </div>
 
-  <div
-    id="categoryList"
-    class="categories"
-  >
-    Loading...
-  </div>
-
-</section>
-
-<section id="songs">
-
-  <h2>
-    All Songs
-  </h2>
-
-  <div
-    id="songList"
-    class="songs"
-  >
-    Loading songs...
-  </div>
-
-</section>
+  </section>
 
 </main>
 
-<div class="player">
 
-  <div>
+<!-- ==================================================
+     PLAYER
+================================================== -->
+
+<div
+  id="player"
+  class="player"
+>
+
+  <div class="player-info">
 
     <strong id="playerTitle">
       Select a song
@@ -135,8 +119,88 @@
 
 </div>
 
+
+<!-- ==================================================
+     YOUTUBE PLAYER MODAL
+================================================== -->
+
+<div
+  id="youtubeModal"
+  class="youtube-modal"
+  aria-hidden="true"
+>
+
+  <div class="youtube-backdrop"></div>
+
+  <div
+    class="youtube-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="youtubeTitle"
+  >
+
+    <button
+      id="closeYoutube"
+      class="youtube-close"
+      type="button"
+      aria-label="Close YouTube player"
+    >
+      ×
+    </button>
+
+    <div class="youtube-header">
+
+      <div>
+
+        <div
+          id="youtubeTitle"
+          class="youtube-title"
+        >
+          YouTube Song
+        </div>
+
+        <div
+          id="youtubeArtist"
+          class="youtube-artist"
+        >
+          स्वरAJ
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="youtube-video">
+
+      <iframe
+        id="youtubeFrame"
+        title="SwarAJ YouTube Player"
+        src="about:blank"
+        allow="
+          accelerometer;
+          autoplay;
+          clipboard-write;
+          encrypted-media;
+          gyroscope;
+          picture-in-picture;
+          web-share
+        "
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+
+    </div>
+
+    <div class="youtube-note">
+      Playing inside स्वरAJ
+    </div>
+
+  </div>
+
+</div>
+
+
 <script src="/script.js"></script>
 
 </body>
-
 </html>

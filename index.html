@@ -5,25 +5,15 @@
 
   <meta
     name="viewport"
-    content="width=device-width,initial-scale=1,viewport-fit=cover"
+    content="width=device-width, initial-scale=1.0"
   >
 
   <meta
     name="theme-color"
-    content="#070711"
+    content="#080b14"
   >
 
-  <title>स्वरAJ — Music</title>
-
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  >
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap"
-    rel="stylesheet"
-  >
+  <title>SwarAJ Music</title>
 
   <link
     rel="stylesheet"
@@ -33,637 +23,666 @@
 
 <body>
 
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
 
-<div class="app">
+  <header class="topbar">
 
-  <!-- SIDEBAR -->
-
-  <aside
-    class="sidebar"
-    id="sidebar"
-  >
-
-    <div class="logo">
-      <div class="logo-mark">
-        स्व
+    <div class="brand">
+      <div class="brand-logo">
+        S
       </div>
 
       <div>
-        <div class="logo-text">
-          स्वर<span>AJ</span>
-        </div>
-
-        <small>
-          PREMIUM MUSIC
-        </small>
+        <h1>SwarAJ</h1>
+        <span>Music</span>
       </div>
     </div>
 
-    <nav>
+    <div class="search-box">
+      <span>⌕</span>
 
-      <button
-        class="nav active"
-        data-page="home"
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="Search songs, artists, albums..."
+        autocomplete="off"
       >
-        🏠 Home
-      </button>
-
-      <button
-        class="nav"
-        data-page="admin"
-      >
-        ⚙ Admin
-      </button>
-
-    </nav>
-
-    <div class="side-title">
-      CATEGORIES
     </div>
 
-    <div
-      id="sideCategories"
-      class="side-categories"
-    ></div>
+    <button
+      id="openAdmin"
+      class="admin-top-btn"
+      type="button"
+    >
+      ⚙ Admin
+    </button>
 
-  </aside>
+  </header>
 
-  <!-- MAIN -->
+
+  <!-- =====================================================
+       NAVIGATION
+  ====================================================== -->
+
+  <nav class="navigation">
+
+    <button
+      class="nav-btn active"
+      data-target="home"
+      type="button"
+    >
+      Home
+    </button>
+
+    <button
+      class="nav-btn"
+      data-target="songs"
+      type="button"
+    >
+      Songs
+    </button>
+
+    <button
+      class="nav-btn"
+      data-target="categories"
+      type="button"
+    >
+      Categories
+    </button>
+
+    <button
+      class="nav-btn"
+      data-target="admin"
+      type="button"
+    >
+      Admin
+    </button>
+
+  </nav>
+
 
   <main>
 
-    <header class="topbar">
-
-      <button
-        id="menuButton"
-        class="menu"
-      >
-        ☰
-      </button>
-
-      <div class="search">
-
-        <span>⌕</span>
-
-        <input
-          id="searchInput"
-          placeholder="Search songs, artists, categories..."
-        >
-
-      </div>
-
-      <button
-        id="refreshButton"
-        class="glass-button"
-      >
-        ↻
-      </button>
-
-      <div class="avatar">
-        AJ
-      </div>
-
-    </header>
-
-    <!-- HOME -->
+    <!-- ===================================================
+         HOME
+    ==================================================== -->
 
     <section
-      id="homePage"
-      class="page active-page"
+      id="home"
+      class="page-section active"
     >
 
-      <section class="hero">
+      <div class="hero">
 
         <div class="hero-content">
 
-          <div class="pill">
-            ● YOUR MUSIC SPACE
-          </div>
+          <span class="eyebrow">
+            SWARAJ MUSIC
+          </span>
 
-          <h1>
-            Music for
-            <span>
-              every moment.
-            </span>
-          </h1>
+          <h2>
+            Your music.
+            <br>
+            Your way.
+          </h2>
 
           <p>
-            Your personal MP3 and YouTube
-            music library powered by
-            PostgreSQL.
+            Discover your uploaded music,
+            direct MP3 streams and YouTube
+            songs in one place.
           </p>
 
-          <div class="hero-buttons">
-
-            <button
-              id="playAll"
-              class="primary"
-            >
-              ▶ Play All
-            </button>
-
-            <button
-              id="shuffleAll"
-              class="secondary"
-            >
-              ⤨ Shuffle
-            </button>
-
-          </div>
-
-        </div>
-
-        <div class="hero-disc">
-          <div>
-            स्व
-          </div>
-        </div>
-
-      </section>
-
-      <!-- STATS -->
-
-      <section class="stats">
-
-        <div class="stat">
-          <b id="songCount">
-            0
-          </b>
-          <span>
-            SONGS
-          </span>
-        </div>
-
-        <div class="stat">
-          <b id="mp3Count">
-            0
-          </b>
-          <span>
-            MP3
-          </span>
-        </div>
-
-        <div class="stat">
-          <b id="youtubeCount">
-            0
-          </b>
-          <span>
-            YOUTUBE
-          </span>
-        </div>
-
-        <div class="stat">
-          <b id="categoryCount">
-            0
-          </b>
-          <span>
-            CATEGORIES
-          </span>
-        </div>
-
-      </section>
-
-      <!-- CATEGORIES -->
-
-      <section class="section">
-
-        <div class="heading">
-
-          <div>
-            <small>
-              DISCOVER
-            </small>
-
-            <h2>
-              Browse your music
-            </h2>
-          </div>
-
           <button
-            id="showAll"
-            class="link"
+            class="primary-btn"
+            onclick="showSection('songs')"
           >
-            Show all →
+            Explore Music
           </button>
 
         </div>
 
-        <div
-          id="categoryGrid"
-          class="category-grid"
-        ></div>
-
-      </section>
-
-      <!-- SONGS -->
-
-      <section class="section">
-
-        <div class="heading">
-
-          <div>
-
-            <small>
-              LIBRARY
-            </small>
-
-            <h2 id="songHeading">
-              All Songs
-            </h2>
-
-          </div>
-
-        </div>
-
-        <div
-          id="songList"
-          class="song-list"
-        ></div>
-
-      </section>
-
-    </section>
-
-    <!-- ADMIN -->
-
-    <section
-      id="adminPage"
-      class="page"
-    >
-
-      <div class="page-header">
-
-        <small>
-          MANAGEMENT
-        </small>
-
-        <h1>
-          Admin Studio
-        </h1>
-
-        <p>
-          Add MP3 files, MP3 URLs and
-          YouTube URLs to PostgreSQL.
-        </p>
+        <div class="hero-glow"></div>
 
       </div>
 
-      <!-- AUTH -->
 
-      <div class="admin-auth glass">
+      <div class="section-header">
 
-        <h2>
-          Admin Authentication
-        </h2>
+        <div>
+          <span class="eyebrow">
+            QUICK PICKS
+          </span>
 
-        <input
-          id="adminKey"
-          type="password"
-          placeholder="ADMIN_KEY"
+          <h2>Featured Songs</h2>
+        </div>
+
+        <span
+          id="songCount"
+          class="song-count"
         >
+          0 songs
+        </span>
+
+      </div>
+
+      <div
+        id="featuredList"
+        class="featured-grid"
+      ></div>
+
+    </section>
+
+
+    <!-- ===================================================
+         SONGS
+    ==================================================== -->
+
+    <section
+      id="songs"
+      class="page-section"
+    >
+
+      <div class="section-header">
+
+        <div>
+          <span class="eyebrow">
+            LIBRARY
+          </span>
+
+          <h2>All Songs</h2>
+        </div>
 
         <button
-          id="verifyAdmin"
-          class="primary"
+          class="secondary-btn"
+          onclick="loadSongs()"
         >
-          Verify Admin
+          ↻ Refresh
         </button>
 
       </div>
 
-      <div class="admin-grid">
+      <div
+        id="songList"
+        class="song-grid"
+      >
 
-        <!-- MP3 FILE -->
-
-        <div class="admin-card glass">
-
-          <div class="admin-icon">
-            🎵
-          </div>
-
-          <h2>
-            Upload MP3 File
-          </h2>
-
-          <p>
-            The actual audio file is
-            stored inside PostgreSQL.
-          </p>
-
-          <input
-            id="mp3Title"
-            placeholder="Song title"
-          >
-
-          <input
-            id="mp3Artist"
-            placeholder="Artist"
-          >
-
-          <input
-            id="mp3Album"
-            placeholder="Album"
-          >
-
-          <input
-            id="mp3Category"
-            placeholder="Category"
-          >
-
-          <input
-            id="mp3Cover"
-            placeholder="Cover URL (optional)"
-          >
-
-          <input
-            id="mp3File"
-            type="file"
-            accept=".mp3,.m4a,.wav,.ogg,.aac,audio/*"
-          >
-
-          <button
-            id="uploadMp3"
-            class="primary full"
-          >
-            Upload MP3
-          </button>
-
+        <div class="loading">
+          Loading songs...
         </div>
 
-        <!-- MP3 URL -->
+      </div>
 
-        <div class="admin-card glass">
+    </section>
 
-          <div class="admin-icon">
-            🔗
-          </div>
 
-          <h2>
-            Add MP3 URL
-          </h2>
+    <!-- ===================================================
+         CATEGORIES
+    ==================================================== -->
 
-          <p>
-            Store an external MP3 URL
-            in PostgreSQL.
-          </p>
+    <section
+      id="categories"
+      class="page-section"
+    >
 
-          <input
-            id="urlTitle"
-            placeholder="Song title"
-          >
+      <div class="section-header">
 
-          <input
-            id="urlArtist"
-            placeholder="Artist"
-          >
+        <div>
+          <span class="eyebrow">
+            BROWSE
+          </span>
 
-          <input
-            id="urlAlbum"
-            placeholder="Album"
-          >
-
-          <input
-            id="urlCategory"
-            placeholder="Category"
-          >
-
-          <input
-            id="urlCover"
-            placeholder="Cover URL (optional)"
-          >
-
-          <input
-            id="mp3Url"
-            placeholder="https://example.com/song.mp3"
-          >
-
-          <button
-            id="addMp3Url"
-            class="primary full"
-          >
-            Add MP3 URL
-          </button>
-
+          <h2>Categories</h2>
         </div>
 
-        <!-- YOUTUBE -->
+      </div>
 
-        <div class="admin-card glass">
+      <div
+        id="categoryList"
+        class="category-grid"
+      ></div>
 
-          <div class="admin-icon">
-            ▶
-          </div>
+    </section>
 
-          <h2>
-            Add YouTube Song
-          </h2>
 
-          <p>
-            Add a YouTube URL to the
-            SwarAJ library.
-          </p>
+    <!-- ===================================================
+         ADMIN
+    ==================================================== -->
+
+    <section
+      id="admin"
+      class="page-section"
+    >
+
+      <div class="section-header">
+
+        <div>
+          <span class="eyebrow">
+            MANAGEMENT
+          </span>
+
+          <h2>Admin Panel</h2>
+        </div>
+
+      </div>
+
+
+      <!-- LOGIN -->
+
+      <div
+        id="adminLoginPanel"
+        class="admin-card"
+      >
+
+        <div class="admin-icon">
+          🔐
+        </div>
+
+        <h3>Admin Login</h3>
+
+        <p>
+          Enter your Render
+          <code>ADMIN_KEY</code>.
+        </p>
+
+        <div class="admin-login-row">
 
           <input
-            id="youtubeTitle"
-            placeholder="Song title"
-          >
-
-          <input
-            id="youtubeArtist"
-            placeholder="Artist"
-          >
-
-          <input
-            id="youtubeAlbum"
-            placeholder="Album"
-          >
-
-          <input
-            id="youtubeCategory"
-            placeholder="Category"
-          >
-
-          <input
-            id="youtubeCover"
-            placeholder="Cover URL (optional)"
-          >
-
-          <input
-            id="youtubeUrl"
-            placeholder="https://youtube.com/watch?v=..."
+            id="adminKey"
+            type="password"
+            placeholder="Admin key"
           >
 
           <button
-            id="addYouTube"
-            class="primary full"
+            id="adminLoginBtn"
+            class="primary-btn"
+            type="button"
           >
-            Add YouTube Song
+            Login
           </button>
 
         </div>
 
       </div>
 
-      <!-- ADMIN SONG LIST -->
 
-      <section class="section">
+      <!-- DASHBOARD -->
 
-        <div class="heading">
+      <div
+        id="adminDashboard"
+        class="hidden"
+      >
 
-          <div>
-            <small>
-              DATABASE
-            </small>
+        <div class="admin-actions">
 
-            <h2>
-              Manage Songs
-            </h2>
+          <button
+            id="adminLogoutBtn"
+            class="secondary-btn"
+            type="button"
+          >
+            Logout
+          </button>
+
+          <button
+            id="refreshAdminSongs"
+            class="secondary-btn"
+            type="button"
+          >
+            ↻ Refresh
+          </button>
+
+        </div>
+
+
+        <!-- UPLOAD FILE -->
+
+        <div class="admin-card">
+
+          <div class="card-heading">
+            <span class="card-icon">
+              ⬆
+            </span>
+
+            <div>
+              <h3>
+                Upload MP3 File
+              </h3>
+
+              <p>
+                File is stored directly
+                inside PostgreSQL.
+              </p>
+            </div>
+          </div>
+
+          <form
+            id="uploadForm"
+            enctype="multipart/form-data"
+          >
+
+            <div class="form-grid">
+
+              <label>
+                Title *
+                <input
+                  name="title"
+                  required
+                  placeholder="Song title"
+                >
+              </label>
+
+              <label>
+                Artist
+                <input
+                  name="artist"
+                  value="SwarAJ"
+                >
+              </label>
+
+              <label>
+                Album
+                <input
+                  name="album"
+                  value="Singles"
+                >
+              </label>
+
+              <label>
+                Category
+                <input
+                  name="category"
+                  value="Bhakti"
+                >
+              </label>
+
+              <label class="full">
+                Cover URL
+                <input
+                  name="coverUrl"
+                  type="url"
+                  placeholder="https://..."
+                >
+              </label>
+
+              <label class="full">
+                MP3 / Audio File *
+                <input
+                  name="file"
+                  type="file"
+                  accept=".mp3,.m4a,.wav,.ogg,.aac,audio/*"
+                  required
+                >
+              </label>
+
+            </div>
+
+            <button
+              class="primary-btn"
+              type="submit"
+            >
+              Upload Song
+            </button>
+
+          </form>
+
+        </div>
+
+
+        <!-- MP3 URL -->
+
+        <div class="admin-card">
+
+          <div class="card-heading">
+
+            <span class="card-icon">
+              🔗
+            </span>
+
+            <div>
+              <h3>
+                Add MP3 URL
+              </h3>
+
+              <p>
+                Store a direct audio URL
+                in PostgreSQL.
+              </p>
+            </div>
+
+          </div>
+
+          <form id="mp3UrlForm">
+
+            <div class="form-grid">
+
+              <label>
+                Title *
+                <input
+                  name="title"
+                  required
+                  placeholder="Song title"
+                >
+              </label>
+
+              <label>
+                Artist
+                <input
+                  name="artist"
+                  value="SwarAJ"
+                >
+              </label>
+
+              <label>
+                Album
+                <input
+                  name="album"
+                  value="Singles"
+                >
+              </label>
+
+              <label>
+                Category
+                <input
+                  name="category"
+                  value="Other"
+                >
+              </label>
+
+              <label class="full">
+                MP3 / Audio URL *
+                <input
+                  name="audioUrl"
+                  type="url"
+                  required
+                  placeholder="https://example.com/song.mp3"
+                >
+              </label>
+
+              <label class="full">
+                Cover URL
+                <input
+                  name="coverUrl"
+                  type="url"
+                  placeholder="https://..."
+                >
+              </label>
+
+            </div>
+
+            <button
+              class="primary-btn"
+              type="submit"
+            >
+              Add MP3 URL
+            </button>
+
+          </form>
+
+        </div>
+
+
+        <!-- YOUTUBE -->
+
+        <div class="admin-card">
+
+          <div class="card-heading">
+
+            <span class="card-icon">
+              ▶
+            </span>
+
+            <div>
+              <h3>
+                Add YouTube Song
+              </h3>
+
+              <p>
+                Store the YouTube URL and
+                video ID in PostgreSQL.
+              </p>
+            </div>
+
+          </div>
+
+          <form id="youtubeForm">
+
+            <div class="form-grid">
+
+              <label>
+                Title *
+                <input
+                  name="title"
+                  required
+                  placeholder="Song title"
+                >
+              </label>
+
+              <label>
+                Artist
+                <input
+                  name="artist"
+                  value="SwarAJ"
+                >
+              </label>
+
+              <label>
+                Album
+                <input
+                  name="album"
+                  value="Singles"
+                >
+              </label>
+
+              <label>
+                Category
+                <input
+                  name="category"
+                  value="Other"
+                >
+              </label>
+
+              <label class="full">
+                YouTube URL *
+                <input
+                  name="youtubeUrl"
+                  type="url"
+                  required
+                  placeholder="https://www.youtube.com/watch?v=..."
+                >
+              </label>
+
+              <label class="full">
+                Cover URL
+                <input
+                  name="coverUrl"
+                  type="url"
+                  placeholder="Optional custom cover"
+                >
+              </label>
+
+            </div>
+
+            <button
+              class="primary-btn"
+              type="submit"
+            >
+              Add YouTube Song
+            </button>
+
+          </form>
+
+        </div>
+
+
+        <!-- ADMIN SONG LIST -->
+
+        <div class="admin-card">
+
+          <div class="card-heading">
+
+            <div>
+              <h3>
+                Database Songs
+              </h3>
+
+              <p>
+                Delete songs stored in
+                PostgreSQL.
+              </p>
+            </div>
+
+          </div>
+
+          <div
+            id="adminSongList"
+            class="admin-song-list"
+          >
+            Login to load songs.
           </div>
 
         </div>
 
-        <div
-          id="adminSongList"
-          class="admin-song-list"
-        ></div>
-
-      </section>
+      </div>
 
     </section>
 
   </main>
 
-</div>
 
-<!-- PLAYER -->
+  <!-- =====================================================
+       YOUTUBE PLAYER
+  ====================================================== -->
 
-<div
-  id="player"
-  class="player"
->
+  <div
+    id="youtubePlayer"
+    class="youtube-player"
+  ></div>
 
-  <div class="player-info">
 
-    <div
-      id="playerCover"
-      class="player-cover"
-    >
-      स्व
-    </div>
+  <!-- =====================================================
+       VIDEO MODAL
+  ====================================================== -->
 
-    <div>
+  <div
+    id="videoModal"
+    class="modal"
+  >
 
-      <b id="playerTitle">
-        Nothing playing
-      </b>
+    <div class="modal-content">
 
-      <span id="playerArtist">
-        Select a song
-      </span>
-
-    </div>
-
-  </div>
-
-  <div class="controls">
-
-    <button id="previous">
-      ⏮
-    </button>
-
-    <button
-      id="playButton"
-      class="play"
-    >
-      ▶
-    </button>
-
-    <button id="next">
-      ⏭
-    </button>
-
-    <button
-      id="youtubeVideoButton"
-      class="video-button"
-      onclick="showYouTubeVideo()"
-    >
-      🎬
-    </button>
-
-  </div>
-
-  <div class="progress">
-
-    <span id="currentTime">
-      0:00
-    </span>
-
-    <input
-      id="progress"
-      type="range"
-      min="0"
-      max="100"
-      value="0"
-    >
-
-    <span id="duration">
-      0:00
-    </span>
-
-  </div>
-
-</div>
-
-<!-- Hidden YouTube audio player -->
-
-<div
-  id="youtubeAudioPlayer"
-  class="youtube-audio-player"
-></div>
-
-<!-- Native MP3 player -->
-
-<audio
-  id="audio"
-  preload="metadata"
-></audio>
-
-<!-- YouTube Video Modal -->
-
-<div
-  id="videoModal"
-  class="modal"
->
-
-  <div class="modal-box">
-
-    <button
-      id="closeVideo"
-      class="close"
-    >
-      ×
-    </button>
-
-    <div class="video-heading">
-
-      <small>
-        YOUTUBE VIDEO
-      </small>
-
-      <h2 id="videoTitle">
-        YouTube
-      </h2>
-
-    </div>
-
-    <div class="video-wrapper">
+      <button
+        class="modal-close"
+        onclick="closeVideoModal()"
+        type="button"
+      >
+        ×
+      </button>
 
       <iframe
-        id="youtubeVideoFrame"
+        id="videoFrame"
         title="YouTube Video"
-        allow="autoplay; encrypted-media; picture-in-picture"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen
       ></iframe>
 
@@ -671,17 +690,112 @@
 
   </div>
 
-</div>
 
-<div
-  id="toast"
-  class="toast"
-></div>
+  <!-- =====================================================
+       MUSIC PLAYER
+  ====================================================== -->
 
-<script
-  src="/script.js"
-  defer
-></script>
+  <div
+    id="musicPlayer"
+    class="music-player"
+  >
+
+    <img
+      id="playerCover"
+      src="/images/ganpati.jpg"
+      alt=""
+    >
+
+    <div class="player-info">
+
+      <strong id="playerTitle">
+        Nothing playing
+      </strong>
+
+      <span id="playerArtist">
+        SwarAJ
+      </span>
+
+      <small id="playerSource">
+        —
+      </small>
+
+    </div>
+
+    <div class="player-controls">
+
+      <button
+        id="previousBtn"
+        type="button"
+      >
+        |◀
+      </button>
+
+      <button
+        id="playPause"
+        class="main-play"
+        type="button"
+      >
+        ▶
+      </button>
+
+      <button
+        id="nextBtn"
+        type="button"
+      >
+        ▶|
+      </button>
+
+    </div>
+
+    <div class="progress-area">
+
+      <span id="currentTime">
+        0:00
+      </span>
+
+      <input
+        id="progressBar"
+        type="range"
+        min="0"
+        max="100"
+        value="0"
+      >
+
+      <span id="duration">
+        0:00
+      </span>
+
+    </div>
+
+    <div class="volume">
+
+      🔊
+
+      <input
+        id="volumeBar"
+        type="range"
+        min="0"
+        max="100"
+        value="100"
+      >
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       TOAST
+  ====================================================== -->
+
+  <div
+    id="toastContainer"
+    class="toast-container"
+  ></div>
+
+
+  <script src="/script.js"></script>
 
 </body>
 </html>

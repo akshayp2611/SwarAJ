@@ -1,40 +1,2064 @@
-const state={songs:[],view:'home',current:null,index:-1,queue:[],queueIndex:-1,shuffle:false,repeat:0,favorites:JSON.parse(localStorage.getItem('swaraj-favorites')||'[]'),yt:null,ytReady:false,mode:'music',adminToken:localStorage.getItem('swaraj-admin-token')||''};
-const $=s=>document.querySelector(s), audio=$('#audio');
-const E={cover:$('#cover'),title:$('#title'),artist:$('#artist'),fullCover:$('#fullCover'),fullTitle:$('#fullTitle'),fullArtist:$('#fullArtist'),play:$('#play'),fullPlay:$('#fullPlay'),prev:$('#prev'),next:$('#next'),fullPrev:$('#fullPrev'),fullNext:$('#fullNext'),seek:$('#seek'),cur:$('#cur'),dur:$('#dur'),volume:$('#volume'),queue:$('#queue'),toast:$('#toast'),videoWrap:$('#ytPlayerWrap'),videoMode:$('#videoMode'),musicMode:$('#musicMode'),source:$('#sourceBadge')};
-function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
-function toast(msg){E.toast.textContent=msg;E.toast.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>E.toast.classList.remove('show'),2800)}
-function img(song){return song.cover_url||`/api/cover/${encodeURIComponent(song.category||'All Songs')}`}
-function fav(song){return state.favorites.includes(String(song.id))||state.favorites.includes(song.id)}
-function saveFav(){localStorage.setItem('swaraj-favorites',JSON.stringify(state.favorites));const likedEl=$('#likedCount'); if(likedEl) likedEl.textContent=state.favorites.length}
-function toggleFav(song){const id=String(song.id),i=state.favorites.indexOf(id);if(i<0){state.favorites.push(id);toast('Added to liked songs')}else{state.favorites.splice(i,1);toast('Removed from liked songs')}saveFav();renderAll()}
-async function json(url,opt={}){const r=await fetch(url,{cache:'no-store',...opt});const d=await r.json().catch(()=>({}));if(!r.ok||d.success===false)throw new Error(d.error||`Request failed (${r.status})`);return d}
-async function load(){try{const [songs,cats]=await Promise.all([json('/api/songs'),json('/api/categories')]);state.songs=songs.songs||[];renderCategories(cats.categories||[]);renderAll();$('#count').textContent=state.songs.length;$('#ytCount').textContent=state.songs.filter(s=>s.source_type==='youtube').length;$('#mp3Count').textContent=state.songs.filter(s=>s.source_type==='mp3').length;$('#catCount').textContent=(cats.categories||[]).length;renderSide(cats.categories||[]);loadYoutube();}catch(e){console.error(e);toast(e.message);['homeSongs','musicSongs','youtubeSongs','librarySongs','favoriteSongs'].forEach(id=>{const el=$('#'+id);if(el)el.innerHTML=`<div class="panel glass">Unable to load: ${esc(e.message)}</div>`})}}
-async function loadYoutube(){try{const d=await json('/api/youtube');renderInto($('#youtubeSongs'),d.songs||[])}catch(e){console.error(e)}}
-function renderCategories(cats){$('#categories').innerHTML=cats.length?cats.map(c=>`<article class="category" data-cat="${esc(c.name)}"><div class="symbol">${symbol(c.name)}</div><h3>${esc(c.name)}</h3><p>${c.count} songs · ${c.youtube||0} YouTube</p></article>`).join(''):`<div class="panel glass">No categories yet.</div>`;document.querySelectorAll('.category').forEach(x=>x.onclick=()=>filterCategory(x.dataset.cat))}
-function renderSide(cats){$('#sideCategories').innerHTML=cats.map(c=>`<button data-cat="${esc(c.name)}">${esc(c.name)} <small>${c.count}</small></button>`).join('');document.querySelectorAll('.side-cats button').forEach(x=>x.onclick=()=>filterCategory(x.dataset.cat))}
-function symbol(n){const x=n.toLowerCase();if(x.includes('love'))return'♥';if(x.includes('bhakti')||x.includes('ganpati'))return'ॐ';if(x.includes('marathi'))return'म';if(x.includes('energy'))return'⚡';if(x.includes('emotional'))return'◒';return'♫'}
-function card(song){const youtube=song.source_type==='youtube';return `<article class="song-card"><div class="art"><img src="${esc(img(song))}" onerror="this.style.display='none'" alt=""><span class="source">${youtube?'▶ YOUTUBE':'♫ MP3'}</span></div><div class="body"><h3>${esc(song.title)}</h3><p>${esc(song.artist||'SwarAJ')} · ${esc(song.category||'All Songs')}</p><div class="card-actions"><button class="play-now" data-play="${esc(song.id)}">▶ Play</button><button data-fav="${esc(song.id)}">${fav(song)?'♥':'♡'}</button></div></div></article>`}
-function renderInto(el,songs){if(!el)return;el.innerHTML=songs.length?songs.map(card).join(''):`<div class="panel glass">No songs found.</div>`;el.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>playById(b.dataset.play));el.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{const s=state.songs.find(x=>String(x.id)===String(b.dataset.fav));if(s)toggleFav(s)})}
-function renderAll(){renderInto($('#homeSongs'),state.songs.slice(0,24));renderInto($('#musicSongs'),state.songs.filter(s=>s.source_type==='mp3'));renderInto($('#youtubeSongs'),state.songs.filter(s=>s.source_type==='youtube'));renderInto($('#librarySongs'),state.songs);renderInto($('#favoriteSongs'),state.songs.filter(fav));const likedEl=$('#likedCount'); if(likedEl) likedEl.textContent=state.favorites.length}
-function filterCategory(cat){state.view='music';showView('music');const list=state.songs.filter(s=>s.category===cat);renderInto($('#musicSongs'),list);toast(`${cat}: ${list.length} songs`)}
-function search(q){const v=q.trim().toLowerCase();$('#clear').hidden=!v;if(!v){$('#searchResults').hidden=true;return}const list=state.songs.filter(s=>[s.title,s.artist,s.album,s.category,s.language].some(x=>String(x||'').toLowerCase().includes(v)));$('#searchResults').hidden=false;$('#resultTitle').textContent=`${list.length} result${list.length===1?'':'s'} for “${q}”`;renderInto($('#results'),list);window.scrollTo({top:0,behavior:'smooth'})}
-function showView(view){state.view=view;document.querySelectorAll('.view').forEach(v=>v.hidden=true);const el=$(`#${view}View`);if(el)el.hidden=false;document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.view===view));if(view==='admin')loadAdminSongs()}
-function stopYouTube(){if(state.yt&&state.yt.stopVideo)try{state.yt.stopVideo()}catch(_){} }
-function ensureYT(){if(state.ytReady)return Promise.resolve();return new Promise(resolve=>{if(window.YT&&window.YT.Player){state.ytReady=true;return resolve()}const old=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=()=>{state.ytReady=true;old?.();resolve()};const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)})}
-async function playYouTube(song){await ensureYT();audio.pause();audio.removeAttribute('src');if(!state.yt){state.yt=new YT.Player('ytPlayer',{height:'100%',width:'100%',videoId:song.youtube_id,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:e=>e.target.playVideo(),onStateChange:onYTState,onError:e=>toast(`YouTube player error: ${e.data}`)}})}else{state.yt.loadVideoById(song.youtube_id)}setMode('music');E.videoMode.hidden=false;E.source.textContent='YOUTUBE';updatePlayer(song);}
-function onYTState(e){if(e.data===YT.PlayerState.PLAYING){setPlaying(true)}if(e.data===YT.PlayerState.ENDED)nextSong()}
-function playMp3(song){stopYouTube();audio.src=song.audio_url||song.url;audio.load();audio.play().then(()=>setPlaying(true)).catch(e=>{console.error(e);toast('Unable to play MP3. Check the file URL.')});setMode('music');E.videoMode.hidden=true;E.source.textContent='MP3';updatePlayer(song)}
-function playById(id){const index=state.songs.findIndex(s=>String(s.id)===String(id));if(index<0)return;state.current=state.songs[index];state.index=index;if(!state.queue.length){state.queue=[...state.songs];state.queueIndex=index}else{state.queueIndex=Math.max(0,state.queue.findIndex(s=>String(s.id)===String(id)))}state.current.source_type==='youtube'?playYouTube(state.current):playMp3(state.current);renderQueue()}
-function updatePlayer(song){E.title.textContent=song.title;E.artist.textContent=song.artist||'SwarAJ';E.fullTitle.textContent=song.title;E.fullArtist.textContent=song.artist||'SwarAJ';E.cover.src=img(song);E.fullCover.src=img(song);E.like.textContent=fav(song)?'♥':'♡';document.title=`${song.title} — स्वरAJ`}
-function setPlaying(on){E.play.textContent=on?'Ⅱ':'▶';E.fullPlay.textContent=on?'Ⅱ':'▶'}
-function togglePlay(){if(!state.current){if(state.songs[0])playById(state.songs[0].id);return}if(state.current.source_type==='youtube'){const p=state.yt?.getPlayerState?.();if(p===YT.PlayerState.PLAYING){state.yt.pauseVideo();setPlaying(false)}else{state.yt.playVideo();setPlaying(true)}}else if(audio.paused)audio.play().then(()=>setPlaying(true));else audio.pause()}
-function nextSong(){if(!state.queue.length)return;if(state.repeat===1){return state.current.source_type==='youtube'?state.yt?.seekTo(0):((audio.currentTime=0),audio.play())}let i;if(state.shuffle)i=Math.floor(Math.random()*state.queue.length);else{i=state.queueIndex+1;if(i>=state.queue.length){if(state.repeat===2)i=0;else return}}state.queueIndex=i;const s=state.queue[i];state.current=s;state.index=state.songs.findIndex(x=>String(x.id)===String(s.id));s.source_type==='youtube'?playYouTube(s):playMp3(s);renderQueue()}
-function previousSong(){if(state.current?.source_type==='mp3'&&audio.currentTime>3){audio.currentTime=0;return}if(state.current?.source_type==='youtube'&&state.yt?.getCurrentTime()>3){state.yt.seekTo(0);return}if(!state.queue.length)return;let i=state.queueIndex-1;if(i<0)i=state.queue.length-1;state.queueIndex=i;const s=state.queue[i];state.current=s;s.source_type==='youtube'?playYouTube(s):playMp3(s)}
-function setMode(mode){state.mode=mode;E.musicMode.classList.toggle('active',mode==='music');E.videoMode.classList.toggle('active',mode==='video');E.videoWrap.classList.toggle('hidden',!(mode==='video'&&state.current?.source_type==='youtube'));if(mode==='video')E.fullPlayer.classList.add('open');}
-function renderQueue(){E.queue.innerHTML=state.queue.map((s,i)=>`<div class="queue-row" data-q="${i}"><img src="${esc(img(s))}" onerror="this.style.display='none'"><div><b>${esc(s.title)}</b><br><small>${s.source_type==='youtube'?'YouTube':'MP3'} · ${esc(s.artist||'SwarAJ')}</small></div></div>`).join('');E.queue.querySelectorAll('[data-q]').forEach(x=>x.onclick=()=>{const i=Number(x.dataset.q);state.queueIndex=i;const s=state.queue[i];playById(s.id)})}
-function loadAdminSongs(){const token=state.adminToken;if(!token){$('#adminStatus').textContent='Enter ADMIN_TOKEN';return}fetch('/api/admin/songs',{headers:{'x-admin-token':token}}).then(r=>r.json()).then(d=>{if(!d.success)throw Error(d.error);$('#adminStatus').textContent=`Connected · ${d.count} songs`;$('#adminSongs').innerHTML=d.songs.map(s=>`<div class="admin-row"><span>${esc(s.title)} <small>(${s.source_type})</small></span><button data-del="${s.id}">Delete</button></div>`).join('');$('#adminSongs').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>deleteAdmin(b.dataset.del))}).catch(e=>{$('#adminStatus').textContent=e.message})}
-async function deleteAdmin(id){if(!confirm('Delete this song?'))return;try{await json(`/api/admin/songs/${id}`,{method:'DELETE',headers:{'x-admin-token':state.adminToken}});toast('Song deleted');load();loadAdminSongs()}catch(e){toast(e.message)}}
-async function submitYT(e){e.preventDefault();if(!state.adminToken)return toast('Connect admin first');const fd=new FormData(e.target);fd.append('source_type','youtube');try{const d=await json('/api/admin/songs',{method:'POST',headers:{'x-admin-token':state.adminToken},body:fd});toast(`Added ${d.song.title}`);e.target.reset();load();loadAdminSongs()}catch(err){toast(err.message)}}
-async function submitMP3(e){e.preventDefault();if(!state.adminToken)return toast('Connect admin first');const fd=new FormData(e.target);fd.append('source_type','mp3');try{const d=await json('/api/admin/upload',{method:'POST',headers:{'x-admin-token':state.adminToken},body:fd});toast(`Uploaded ${d.song.title}`);e.target.reset();load();loadAdminSongs()}catch(err){toast(err.message)}}
-$('#menu').onclick=()=>$('#sidebar').classList.toggle('open');document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>showView(n.dataset.view));$('#search').oninput=e=>search(e.target.value);$('#clear').onclick=()=>{$('#search').value='';search('')};$('#refresh').onclick=load;$('#showAll').onclick=()=>{showView('home');renderAll()};$('#playAll').onclick=()=>state.songs[0]&&playById(state.songs[0].id);$('#shuffleAll').onclick=()=>{state.shuffle=true;nextSong()};E.play.onclick=togglePlay;E.fullPlay.onclick=togglePlay;E.prev.onclick=previousSong;E.fullPrev.onclick=previousSong;E.next.onclick=nextSong;E.fullNext.onclick=nextSong;E.like.onclick=()=>state.current&&toggleFav(state.current);$('#expand').onclick=()=>E.fullPlayer.classList.toggle('open');$('#musicMode').onclick=()=>setMode('music');$('#videoMode').onclick=()=>setMode('video');$('#shuffle').onclick=()=>{state.shuffle=!state.shuffle;toast(state.shuffle?'Shuffle on':'Shuffle off')};$('#repeat').onclick=()=>{state.repeat=(state.repeat+1)%3;toast(['Repeat off','Repeat one','Repeat all'][state.repeat])};$('#clearQueue').onclick=()=>{state.queue=[];state.queueIndex=-1;renderQueue();toast('Queue cleared')};$('#volume').oninput=e=>{audio.volume=Number(e.target.value);if(state.yt?.setVolume)state.yt.setVolume(Number(e.target.value)*100)};audio.volume=.8;audio.addEventListener('timeupdate',()=>{E.cur.textContent=fmt(audio.currentTime);if(audio.duration){E.dur.textContent=fmt(audio.duration);E.seek.value=audio.currentTime/audio.duration*100}});audio.addEventListener('loadedmetadata',()=>E.dur.textContent=fmt(audio.duration));audio.addEventListener('play',()=>setPlaying(true));audio.addEventListener('pause',()=>setPlaying(false));audio.addEventListener('ended',nextSong);E.seek.oninput=e=>{if(state.current?.source_type==='mp3'&&audio.duration)audio.currentTime=audio.duration*Number(e.target.value)/100};setInterval(()=>{if(state.current?.source_type==='youtube'&&state.yt?.getCurrentTime){const c=state.yt.getCurrentTime(),d=state.yt.getDuration();E.cur.textContent=fmt(c);E.dur.textContent=fmt(d);E.seek.value=d?c/d*100:0}},500);$('#saveToken').onclick=()=>{state.adminToken=$('#adminToken').value.trim();localStorage.setItem('swaraj-admin-token',state.adminToken);loadAdminSongs()};$('#adminToken').value=state.adminToken;$('#ytForm').onsubmit=submitYT;$('#mp3Form').onsubmit=submitMP3;function fmt(s){s=Number(s)||0;return `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`}
+const state = {
+  songs: [],
+  view: 'home',
+  current: null,
+  index: -1,
+  queue: [],
+  queueIndex: -1,
+  shuffle: false,
+  repeat: 0,
+  favorites: JSON.parse(localStorage.getItem('swaraj-favorites') || '[]'),
+  yt: null,
+  ytReady: false,
+  ytLoading: false,
+  mode: 'music',
+  adminToken: localStorage.getItem('swaraj-admin-token') || ''
+};
+
+const $ = selector => document.querySelector(selector);
+const audio = $('#audio');
+
+const E = {
+  cover: $('#cover'),
+  title: $('#title'),
+  artist: $('#artist'),
+
+  // IMPORTANT FIXES
+  like: $('#like'),
+  fullPlayer: $('#fullPlayer'),
+
+  fullCover: $('#fullCover'),
+  fullTitle: $('#fullTitle'),
+  fullArtist: $('#fullArtist'),
+
+  play: $('#play'),
+  fullPlay: $('#fullPlay'),
+
+  prev: $('#prev'),
+  next: $('#next'),
+  fullPrev: $('#fullPrev'),
+  fullNext: $('#fullNext'),
+
+  seek: $('#seek'),
+  cur: $('#cur'),
+  dur: $('#dur'),
+  volume: $('#volume'),
+
+  queue: $('#queue'),
+  toast: $('#toast'),
+
+  videoWrap: $('#ytPlayerWrap'),
+  videoMode: $('#videoMode'),
+  musicMode: $('#musicMode'),
+  source: $('#sourceBadge')
+};
+
+function esc(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function toast(message) {
+  if (!E.toast) return;
+
+  E.toast.textContent = message;
+  E.toast.classList.add('show');
+
+  clearTimeout(toast.timer);
+
+  toast.timer = setTimeout(() => {
+    E.toast.classList.remove('show');
+  }, 2800);
+}
+
+function imageFor(song) {
+  return song.cover_url ||
+    `/api/cover/${encodeURIComponent(song.category || 'All Songs')}`;
+}
+
+function isFavorite(song) {
+  return state.favorites.includes(String(song.id));
+}
+
+function saveFavorites() {
+  localStorage.setItem(
+    'swaraj-favorites',
+    JSON.stringify(state.favorites)
+  );
+}
+
+function toggleFavorite(song) {
+  const id = String(song.id);
+  const index = state.favorites.indexOf(id);
+
+  if (index === -1) {
+    state.favorites.push(id);
+    toast('Added to liked songs');
+  } else {
+    state.favorites.splice(index, 1);
+    toast('Removed from liked songs');
+  }
+
+  saveFavorites();
+  updateLikeButton();
+  renderAll();
+}
+
+async function api(url, options = {}) {
+  const response = await fetch(url, {
+    cache: 'no-store',
+    ...options
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || data.success === false) {
+    throw new Error(
+      data.error || `Request failed (${response.status})`
+    );
+  }
+
+  return data;
+}
+
+function normalizeSong(song) {
+  const youtubeId = song.youtube_id || null;
+
+  const sourceType =
+    String(song.source_type || '').toLowerCase() === 'youtube' ||
+    !!youtubeId
+      ? 'youtube'
+      : 'mp3';
+
+  return {
+    ...song,
+
+    id: song.id,
+
+    title: song.title || 'Untitled',
+    artist: song.artist || 'SwarAJ',
+    album: song.album || 'SwarAJ',
+    category: song.category || 'All Songs',
+    language: song.language || 'Marathi',
+
+    source_type: sourceType,
+
+    audio_url:
+      sourceType === 'mp3'
+        ? (
+            song.audio_url ||
+            song.file_url ||
+            song.url ||
+            null
+          )
+        : null,
+
+    file_path:
+      sourceType === 'mp3'
+        ? song.file_path || null
+        : null,
+
+    youtube_id:
+      sourceType === 'youtube'
+        ? youtubeId
+        : null,
+
+    youtube_url:
+      sourceType === 'youtube'
+        ? (
+            song.youtube_url ||
+            (
+              youtubeId
+                ? `https://www.youtube.com/watch?v=${youtubeId}`
+                : null
+            )
+          )
+        : null,
+
+    cover_url: song.cover_url || null,
+
+    duration: Number(song.duration || 0),
+
+    is_active: song.is_active !== false
+  };
+}
+
+async function load() {
+  try {
+    console.log('SwarAJ: loading songs...');
+
+    const [songsData, categoriesData] = await Promise.all([
+      api('/api/songs'),
+      api('/api/categories')
+    ]);
+
+    state.songs = (songsData.songs || [])
+      .map(normalizeSong)
+      .filter(song => song.is_active !== false);
+
+    console.log(
+      `SwarAJ: ${state.songs.length} songs loaded`,
+      state.songs
+    );
+
+    renderCategories(categoriesData.categories || []);
+    renderSide(categoriesData.categories || []);
+
+    renderAll();
+
+    updateStats(categoriesData.categories || []);
+
+  } catch (error) {
+    console.error('SwarAJ LOAD ERROR:', error);
+
+    toast(`Unable to load songs: ${error.message}`);
+
+    [
+      'homeSongs',
+      'musicSongs',
+      'youtubeSongs',
+      'librarySongs',
+      'favoriteSongs'
+    ].forEach(id => {
+      const element = $('#' + id);
+
+      if (element) {
+        element.innerHTML = `
+          <div class="panel glass">
+            <strong>Unable to load songs</strong>
+            <br>
+            <small>${esc(error.message)}</small>
+          </div>
+        `;
+      }
+    });
+  }
+}
+
+function updateStats(categories) {
+  const count = $('#count');
+  const youtubeCount = $('#ytCount');
+  const mp3Count = $('#mp3Count');
+  const categoryCount = $('#catCount');
+
+  if (count) {
+    count.textContent = state.songs.length;
+  }
+
+  if (youtubeCount) {
+    youtubeCount.textContent =
+      state.songs.filter(
+        song => song.source_type === 'youtube'
+      ).length;
+  }
+
+  if (mp3Count) {
+    mp3Count.textContent =
+      state.songs.filter(
+        song => song.source_type === 'mp3'
+      ).length;
+  }
+
+  if (categoryCount) {
+    categoryCount.textContent = categories.length;
+  }
+}
+
+function renderCategories(categories) {
+  const element = $('#categories');
+
+  if (!element) return;
+
+  if (!categories.length) {
+    element.innerHTML =
+      '<div class="panel glass">No categories yet.</div>';
+    return;
+  }
+
+  element.innerHTML = categories.map(category => `
+    <article
+      class="category"
+      data-category="${esc(category.name)}"
+    >
+      <div class="symbol">
+        ${symbolFor(category.name)}
+      </div>
+
+      <h3>${esc(category.name)}</h3>
+
+      <p>
+        ${Number(category.count || 0)}
+        songs ·
+        ${Number(category.youtube || 0)}
+        YouTube
+      </p>
+    </article>
+  `).join('');
+
+  element
+    .querySelectorAll('[data-category]')
+    .forEach(card => {
+      card.addEventListener(
+        'click',
+        () => filterCategory(card.dataset.category)
+      );
+    });
+}
+
+function renderSide(categories) {
+  const element = $('#sideCategories');
+
+  if (!element) return;
+
+  element.innerHTML = categories.map(category => `
+    <button data-category="${esc(category.name)}">
+      ${esc(category.name)}
+      <small>${Number(category.count || 0)}</small>
+    </button>
+  `).join('');
+
+  element
+    .querySelectorAll('[data-category]')
+    .forEach(button => {
+      button.addEventListener(
+        'click',
+        () => filterCategory(button.dataset.category)
+      );
+    });
+}
+
+function symbolFor(name) {
+  const value = String(name || '').toLowerCase();
+
+  if (value.includes('love')) return '♥';
+  if (
+    value.includes('bhakti') ||
+    value.includes('ganpati')
+  ) return 'ॐ';
+
+  if (value.includes('marathi')) return 'म';
+
+  if (
+    value.includes('energy') ||
+    value.includes('energetic')
+  ) return '⚡';
+
+  if (value.includes('emotional')) return '◒';
+
+  return '♫';
+}
+
+function songCard(song) {
+  const youtube = song.source_type === 'youtube';
+
+  return `
+    <article class="song-card">
+
+      <div class="art">
+
+        <img
+          src="${esc(imageFor(song))}"
+          alt=""
+          onerror="this.style.display='none'"
+        >
+
+        <span class="source">
+          ${youtube ? '▶ YOUTUBE' : '♫ MP3'}
+        </span>
+
+      </div>
+
+      <div class="body">
+
+        <h3>${esc(song.title)}</h3>
+
+        <p>
+          ${esc(song.artist || 'SwarAJ')}
+          ·
+          ${esc(song.category || 'All Songs')}
+        </p>
+
+        <div class="card-actions">
+
+          <button
+            class="play-now"
+            type="button"
+            data-play-id="${esc(song.id)}"
+          >
+            ▶ Play
+          </button>
+
+          <button
+            type="button"
+            data-favorite-id="${esc(song.id)}"
+          >
+            ${isFavorite(song) ? '♥' : '♡'}
+          </button>
+
+        </div>
+
+      </div>
+
+    </article>
+  `;
+}
+
+function renderInto(element, songs) {
+  if (!element) return;
+
+  if (!songs.length) {
+    element.innerHTML =
+      '<div class="panel glass">No songs found.</div>';
+    return;
+  }
+
+  element.innerHTML =
+    songs.map(songCard).join('');
+
+  element
+    .querySelectorAll('[data-play-id]')
+    .forEach(button => {
+      button.addEventListener(
+        'click',
+        () => playById(button.dataset.playId)
+      );
+    });
+
+  element
+    .querySelectorAll('[data-favorite-id]')
+    .forEach(button => {
+      button.addEventListener(
+        'click',
+        () => {
+          const song = state.songs.find(
+            item =>
+              String(item.id) ===
+              String(button.dataset.favoriteId)
+          );
+
+          if (song) {
+            toggleFavorite(song);
+          }
+        }
+      );
+    });
+}
+
+function renderAll() {
+  renderInto(
+    $('#homeSongs'),
+    state.songs.slice(0, 24)
+  );
+
+  renderInto(
+    $('#musicSongs'),
+    state.songs.filter(
+      song => song.source_type === 'mp3'
+    )
+  );
+
+  renderInto(
+    $('#youtubeSongs'),
+    state.songs.filter(
+      song => song.source_type === 'youtube'
+    )
+  );
+
+  renderInto(
+    $('#librarySongs'),
+    state.songs
+  );
+
+  renderInto(
+    $('#favoriteSongs'),
+    state.songs.filter(isFavorite)
+  );
+
+  updateLikeButton();
+}
+
+function filterCategory(category) {
+  showView('music');
+
+  const songs = state.songs.filter(
+    song =>
+      String(song.category) ===
+      String(category)
+  );
+
+  renderInto(
+    $('#musicSongs'),
+    songs
+  );
+
+  toast(
+    `${category}: ${songs.length} song${songs.length === 1 ? '' : 's'}`
+  );
+}
+
+function searchSongs(query) {
+  const value = query
+    .trim()
+    .toLowerCase();
+
+  const clear = $('#clear');
+  const resultsSection = $('#searchResults');
+
+  if (clear) {
+    clear.hidden = !value;
+  }
+
+  if (!value) {
+    if (resultsSection) {
+      resultsSection.hidden = true;
+    }
+
+    return;
+  }
+
+  const songs = state.songs.filter(song =>
+    [
+      song.title,
+      song.artist,
+      song.album,
+      song.category,
+      song.language
+    ].some(item =>
+      String(item || '')
+        .toLowerCase()
+        .includes(value)
+    )
+  );
+
+  if (resultsSection) {
+    resultsSection.hidden = false;
+  }
+
+  const resultTitle = $('#resultTitle');
+
+  if (resultTitle) {
+    resultTitle.textContent =
+      `${songs.length} result${songs.length === 1 ? '' : 's'} for “${query}”`;
+  }
+
+  renderInto(
+    $('#results'),
+    songs
+  );
+}
+
+function showView(view) {
+  state.view = view;
+
+  document
+    .querySelectorAll('.view')
+    .forEach(element => {
+      element.hidden = true;
+    });
+
+  const viewElement = $(`#${view}View`);
+
+  if (viewElement) {
+    viewElement.hidden = false;
+  }
+
+  document
+    .querySelectorAll('.nav')
+    .forEach(nav => {
+      nav.classList.toggle(
+        'active',
+        nav.dataset.view === view
+      );
+    });
+
+  if (view === 'admin') {
+    loadAdminSongs();
+  }
+}
+
+function stopYouTube() {
+  try {
+    if (
+      state.yt &&
+      typeof state.yt.stopVideo === 'function'
+    ) {
+      state.yt.stopVideo();
+    }
+  } catch (error) {
+    console.warn(
+      'YouTube stop error:',
+      error
+    );
+  }
+}
+
+function ensureYouTubeApi() {
+  if (
+    state.ytReady &&
+    window.YT &&
+    window.YT.Player
+  ) {
+    return Promise.resolve();
+  }
+
+  if (state.ytLoading) {
+    return new Promise(resolve => {
+      const timer = setInterval(() => {
+        if (
+          state.ytReady &&
+          window.YT &&
+          window.YT.Player
+        ) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 50);
+    });
+  }
+
+  state.ytLoading = true;
+
+  return new Promise(resolve => {
+
+    if (
+      window.YT &&
+      window.YT.Player
+    ) {
+      state.ytReady = true;
+      state.ytLoading = false;
+      resolve();
+      return;
+    }
+
+    const previous =
+      window.onYouTubeIframeAPIReady;
+
+    window.onYouTubeIframeAPIReady =
+      () => {
+
+        state.ytReady = true;
+        state.ytLoading = false;
+
+        if (
+          typeof previous === 'function'
+        ) {
+          previous();
+        }
+
+        resolve();
+      };
+
+    if (
+      !document.querySelector(
+        'script[data-youtube-api]'
+      )
+    ) {
+      const script =
+        document.createElement('script');
+
+      script.src =
+        'https://www.youtube.com/iframe_api';
+
+      script.async = true;
+
+      script.dataset.youtubeApi = 'true';
+
+      document.head.appendChild(script);
+    }
+  });
+}
+
+async function playYouTube(song) {
+  if (!song.youtube_id) {
+    toast(
+      'This YouTube song has no valid video ID.'
+    );
+    return;
+  }
+
+  try {
+    audio.pause();
+    audio.removeAttribute('src');
+
+    await ensureYouTubeApi();
+
+    const options = {
+      height: '100%',
+      width: '100%',
+
+      videoId: song.youtube_id,
+
+      playerVars: {
+        autoplay: 1,
+        playsinline: 1,
+        rel: 0,
+        modestbranding: 1,
+        controls: 1
+      },
+
+      events: {
+        onReady: event => {
+          event.target.playVideo();
+        },
+
+        onStateChange: handleYouTubeState,
+
+        onError: event => {
+          toast(
+            `YouTube player error: ${event.data}`
+          );
+        }
+      }
+    };
+
+    if (!state.yt) {
+
+      state.yt =
+        new YT.Player(
+          'ytPlayer',
+          options
+        );
+
+    } else if (
+      typeof state.yt.loadVideoById ===
+      'function'
+    ) {
+
+      state.yt.loadVideoById(
+        song.youtube_id
+      );
+    }
+
+    setMode('music');
+
+    if (E.videoMode) {
+      E.videoMode.hidden = false;
+    }
+
+    if (E.source) {
+      E.source.textContent = 'YOUTUBE';
+    }
+
+    updatePlayer(song);
+    setPlaying(true);
+
+  } catch (error) {
+
+    console.error(
+      'YOUTUBE PLAY ERROR:',
+      error
+    );
+
+    toast(
+      `Unable to play YouTube video: ${error.message}`
+    );
+  }
+}
+
+function handleYouTubeState(event) {
+
+  if (!window.YT) return;
+
+  if (
+    event.data ===
+    YT.PlayerState.PLAYING
+  ) {
+    setPlaying(true);
+  }
+
+  if (
+    event.data ===
+    YT.PlayerState.PAUSED
+  ) {
+    setPlaying(false);
+  }
+
+  if (
+    event.data ===
+    YT.PlayerState.ENDED
+  ) {
+    setPlaying(false);
+    nextSong();
+  }
+}
+
+function playMp3(song) {
+
+  const source =
+    song.audio_url ||
+    song.file_url ||
+    song.url;
+
+  if (!source) {
+    toast(
+      'This MP3 has no audio URL.'
+    );
+    return;
+  }
+
+  stopYouTube();
+
+  audio.src = source;
+  audio.load();
+
+  audio.play()
+    .then(() => setPlaying(true))
+    .catch(error => {
+
+      console.error(
+        'MP3 PLAY ERROR:',
+        error
+      );
+
+      toast(
+        'Unable to play MP3. Check the audio URL.'
+      );
+
+      setPlaying(false);
+    });
+
+  setMode('music');
+
+  if (E.videoMode) {
+    E.videoMode.hidden = true;
+  }
+
+  if (E.source) {
+    E.source.textContent = 'MP3';
+  }
+
+  updatePlayer(song);
+}
+
+function playById(id) {
+
+  const index =
+    state.songs.findIndex(
+      song =>
+        String(song.id) ===
+        String(id)
+    );
+
+  if (index < 0) {
+    toast(
+      'Song not found.'
+    );
+    return;
+  }
+
+  const song =
+    state.songs[index];
+
+  state.current = song;
+  state.index = index;
+
+  if (!state.queue.length) {
+    state.queue = [
+      ...state.songs
+    ];
+  }
+
+  state.queueIndex =
+    state.queue.findIndex(
+      item =>
+        String(item.id) ===
+        String(song.id)
+    );
+
+  if (state.queueIndex < 0) {
+    state.queue.push(song);
+    state.queueIndex =
+      state.queue.length - 1;
+  }
+
+  if (
+    song.source_type === 'youtube'
+  ) {
+    playYouTube(song);
+  } else {
+    playMp3(song);
+  }
+
+  renderQueue();
+}
+
+function updatePlayer(song) {
+
+  if (E.title) {
+    E.title.textContent =
+      song.title;
+  }
+
+  if (E.artist) {
+    E.artist.textContent =
+      song.artist || 'SwarAJ';
+  }
+
+  if (E.fullTitle) {
+    E.fullTitle.textContent =
+      song.title;
+  }
+
+  if (E.fullArtist) {
+    E.fullArtist.textContent =
+      song.artist || 'SwarAJ';
+  }
+
+  if (E.cover) {
+    E.cover.src =
+      imageFor(song);
+  }
+
+  if (E.fullCover) {
+    E.fullCover.src =
+      imageFor(song);
+  }
+
+  updateLikeButton();
+
+  document.title =
+    `${song.title} — स्वरAJ`;
+}
+
+function updateLikeButton() {
+
+  if (!E.like) return;
+
+  E.like.textContent =
+    state.current &&
+    isFavorite(state.current)
+      ? '♥'
+      : '♡';
+}
+
+function setPlaying(playing) {
+
+  if (E.play) {
+    E.play.textContent =
+      playing ? 'Ⅱ' : '▶';
+  }
+
+  if (E.fullPlay) {
+    E.fullPlay.textContent =
+      playing ? 'Ⅱ' : '▶';
+  }
+}
+
+function togglePlay() {
+
+  if (!state.current) {
+
+    if (state.songs.length) {
+      playById(
+        state.songs[0].id
+      );
+    }
+
+    return;
+  }
+
+  if (
+    state.current.source_type ===
+    'youtube'
+  ) {
+
+    if (!state.yt) {
+      playYouTube(
+        state.current
+      );
+      return;
+    }
+
+    const playerState =
+      state.yt.getPlayerState?.();
+
+    if (
+      window.YT &&
+      playerState ===
+      YT.PlayerState.PLAYING
+    ) {
+
+      state.yt.pauseVideo();
+      setPlaying(false);
+
+    } else {
+
+      state.yt.playVideo();
+      setPlaying(true);
+    }
+
+    return;
+  }
+
+  if (audio.paused) {
+
+    audio.play()
+      .then(() => setPlaying(true))
+      .catch(() =>
+        toast(
+          'Unable to resume MP3.'
+        )
+      );
+
+  } else {
+
+    audio.pause();
+    setPlaying(false);
+  }
+}
+
+function nextSong() {
+
+  if (!state.queue.length) {
+    return;
+  }
+
+  if (
+    state.repeat === 1 &&
+    state.current
+  ) {
+
+    if (
+      state.current.source_type ===
+      'youtube'
+    ) {
+
+      state.yt?.seekTo?.(0);
+      state.yt?.playVideo?.();
+
+    } else {
+
+      audio.currentTime = 0;
+
+      audio.play()
+        .catch(() => {});
+    }
+
+    return;
+  }
+
+  let nextIndex;
+
+  if (state.shuffle) {
+
+    nextIndex =
+      Math.floor(
+        Math.random() *
+        state.queue.length
+      );
+
+  } else {
+
+    nextIndex =
+      state.queueIndex + 1;
+
+    if (
+      nextIndex >=
+      state.queue.length
+    ) {
+
+      if (state.repeat === 2) {
+        nextIndex = 0;
+      } else {
+        return;
+      }
+    }
+  }
+
+  state.queueIndex =
+    nextIndex;
+
+  const song =
+    state.queue[nextIndex];
+
+  state.current = song;
+
+  state.index =
+    state.songs.findIndex(
+      item =>
+        String(item.id) ===
+        String(song.id)
+    );
+
+  if (
+    song.source_type ===
+    'youtube'
+  ) {
+    playYouTube(song);
+  } else {
+    playMp3(song);
+  }
+
+  renderQueue();
+}
+
+function previousSong() {
+
+  if (
+    state.current?.source_type ===
+    'mp3' &&
+    audio.currentTime > 3
+  ) {
+
+    audio.currentTime = 0;
+    return;
+  }
+
+  if (
+    state.current?.source_type ===
+    'youtube' &&
+    state.yt?.getCurrentTime?.() > 3
+  ) {
+
+    state.yt.seekTo(0);
+    return;
+  }
+
+  if (!state.queue.length) {
+    return;
+  }
+
+  let index =
+    state.queueIndex - 1;
+
+  if (index < 0) {
+    index =
+      state.queue.length - 1;
+  }
+
+  state.queueIndex =
+    index;
+
+  const song =
+    state.queue[index];
+
+  state.current = song;
+
+  state.index =
+    state.songs.findIndex(
+      item =>
+        String(item.id) ===
+        String(song.id)
+    );
+
+  if (
+    song.source_type ===
+    'youtube'
+  ) {
+    playYouTube(song);
+  } else {
+    playMp3(song);
+  }
+
+  renderQueue();
+}
+
+function setMode(mode) {
+
+  if (
+    mode === 'video' &&
+    state.current?.source_type !==
+    'youtube'
+  ) {
+    return;
+  }
+
+  state.mode = mode;
+
+  if (E.musicMode) {
+    E.musicMode.classList.toggle(
+      'active',
+      mode === 'music'
+    );
+  }
+
+  if (E.videoMode) {
+    E.videoMode.classList.toggle(
+      'active',
+      mode === 'video'
+    );
+  }
+
+  if (E.videoWrap) {
+
+    E.videoWrap.classList.toggle(
+      'hidden',
+      !(
+        mode === 'video' &&
+        state.current?.source_type ===
+        'youtube'
+      )
+    );
+  }
+
+  if (
+    mode === 'video' &&
+    E.fullPlayer
+  ) {
+    E.fullPlayer.classList.add(
+      'open'
+    );
+  }
+}
+
+function renderQueue() {
+
+  if (!E.queue) return;
+
+  if (!state.queue.length) {
+
+    E.queue.innerHTML =
+      '<div class="panel glass">Queue is empty.</div>';
+
+    return;
+  }
+
+  E.queue.innerHTML =
+    state.queue.map(
+      (song, index) => `
+        <div
+          class="queue-row"
+          data-queue-index="${index}"
+        >
+
+          <img
+            src="${esc(imageFor(song))}"
+            alt=""
+            onerror="this.style.display='none'"
+          >
+
+          <div>
+            <b>${esc(song.title)}</b>
+            <br>
+            <small>
+              ${
+                song.source_type ===
+                'youtube'
+                  ? 'YouTube'
+                  : 'MP3'
+              }
+              ·
+              ${esc(song.artist || 'SwarAJ')}
+            </small>
+          </div>
+
+        </div>
+      `
+    ).join('');
+
+  E.queue
+    .querySelectorAll(
+      '[data-queue-index]'
+    )
+    .forEach(row => {
+
+      row.addEventListener(
+        'click',
+        () => {
+
+          const index =
+            Number(
+              row.dataset.queueIndex
+            );
+
+          const song =
+            state.queue[index];
+
+          if (!song) return;
+
+          state.queueIndex =
+            index;
+
+          state.current =
+            song;
+
+          state.index =
+            state.songs.findIndex(
+              item =>
+                String(item.id) ===
+                String(song.id)
+            );
+
+          if (
+            song.source_type ===
+            'youtube'
+          ) {
+            playYouTube(song);
+          } else {
+            playMp3(song);
+          }
+
+          renderQueue();
+        }
+      );
+    });
+}
+
+async function loadAdminSongs() {
+
+  const status =
+    $('#adminStatus');
+
+  const container =
+    $('#adminSongs');
+
+  if (!state.adminToken) {
+
+    if (status) {
+      status.textContent =
+        'Enter ADMIN_TOKEN';
+    }
+
+    return;
+  }
+
+  try {
+
+    const data =
+      await api(
+        '/api/admin/songs',
+        {
+          headers: {
+            'x-admin-token':
+              state.adminToken
+          }
+        }
+      );
+
+    if (status) {
+      status.textContent =
+        `Connected · ${data.count || 0} songs`;
+    }
+
+    if (container) {
+
+      container.innerHTML =
+        (data.songs || [])
+          .map(song => `
+            <div class="admin-row">
+
+              <span>
+                ${esc(song.title)}
+                <small>
+                  (${esc(song.source_type)})
+                </small>
+              </span>
+
+              <button
+                type="button"
+                data-delete-id="${esc(song.id)}"
+              >
+                Delete
+              </button>
+
+            </div>
+          `)
+          .join('') ||
+        '<small>No database songs.</small>';
+
+      container
+        .querySelectorAll(
+          '[data-delete-id]'
+        )
+        .forEach(button => {
+
+          button.addEventListener(
+            'click',
+            () =>
+              deleteAdminSong(
+                button.dataset.deleteId
+              )
+          );
+        });
+    }
+
+  } catch (error) {
+
+    console.error(
+      'ADMIN LIST ERROR:',
+      error
+    );
+
+    if (status) {
+      status.textContent =
+        error.message;
+    }
+  }
+}
+
+async function deleteAdminSong(id) {
+
+  if (
+    !confirm(
+      'Delete this song?'
+    )
+  ) {
+    return;
+  }
+
+  try {
+
+    await api(
+      `/api/admin/songs/${encodeURIComponent(id)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'x-admin-token':
+            state.adminToken
+        }
+      }
+    );
+
+    toast('Song deleted');
+
+    await load();
+    await loadAdminSongs();
+
+  } catch (error) {
+
+    toast(error.message);
+  }
+}
+
+async function submitYouTube(event) {
+
+  event.preventDefault();
+
+  if (!state.adminToken) {
+    toast(
+      'Connect admin first.'
+    );
+    return;
+  }
+
+  const formData =
+    new FormData(
+      event.target
+    );
+
+  formData.set(
+    'source_type',
+    'youtube'
+  );
+
+  try {
+
+    const data =
+      await api(
+        '/api/admin/songs',
+        {
+          method: 'POST',
+
+          headers: {
+            'x-admin-token':
+              state.adminToken
+          },
+
+          body: formData
+        }
+      );
+
+    toast(
+      `Added ${
+        data.song?.title ||
+        'YouTube song'
+      }`
+    );
+
+    event.target.reset();
+
+    await load();
+    await loadAdminSongs();
+
+  } catch (error) {
+
+    console.error(
+      'ADD YOUTUBE ERROR:',
+      error
+    );
+
+    toast(error.message);
+  }
+}
+
+async function submitMP3(event) {
+
+  event.preventDefault();
+
+  if (!state.adminToken) {
+    toast(
+      'Connect admin first.'
+    );
+    return;
+  }
+
+  const formData =
+    new FormData(
+      event.target
+    );
+
+  formData.set(
+    'source_type',
+    'mp3'
+  );
+
+  try {
+
+    const data =
+      await api(
+        '/api/admin/upload',
+        {
+          method: 'POST',
+
+          headers: {
+            'x-admin-token':
+              state.adminToken
+          },
+
+          body: formData
+        }
+      );
+
+    toast(
+      `Uploaded ${
+        data.song?.title ||
+        'MP3 song'
+      }`
+    );
+
+    event.target.reset();
+
+    await load();
+    await loadAdminSongs();
+
+  } catch (error) {
+
+    console.error(
+      'ADD MP3 ERROR:',
+      error
+    );
+
+    toast(error.message);
+  }
+}
+
+function formatTime(seconds) {
+
+  const value =
+    Number(seconds) || 0;
+
+  return `${Math.floor(value / 60)}:${String(
+    Math.floor(value % 60)
+  ).padStart(2, '0')}`;
+}
+
+/* Navigation */
+
+if ($('#menu')) {
+
+  $('#menu').addEventListener(
+    'click',
+    () =>
+      $('#sidebar')?.classList.toggle(
+        'open'
+      )
+  );
+}
+
+document
+  .querySelectorAll('.nav')
+  .forEach(nav => {
+
+    nav.addEventListener(
+      'click',
+      () =>
+        showView(
+          nav.dataset.view
+        )
+    );
+  });
+
+if ($('#search')) {
+
+  $('#search').addEventListener(
+    'input',
+    event =>
+      searchSongs(
+        event.target.value
+      )
+  );
+}
+
+if ($('#clear')) {
+
+  $('#clear').addEventListener(
+    'click',
+    () => {
+
+      $('#search').value = '';
+
+      searchSongs('');
+    }
+  );
+}
+
+if ($('#refresh')) {
+  $('#refresh').addEventListener(
+    'click',
+    load
+  );
+}
+
+if ($('#showAll')) {
+
+  $('#showAll').addEventListener(
+    'click',
+    () => {
+
+      showView('home');
+      renderAll();
+
+    }
+  );
+}
+
+if ($('#playAll')) {
+
+  $('#playAll').addEventListener(
+    'click',
+    () => {
+
+      if (state.songs.length) {
+        playById(
+          state.songs[0].id
+        );
+      }
+
+    }
+  );
+}
+
+if ($('#shuffleAll')) {
+
+  $('#shuffleAll').addEventListener(
+    'click',
+    () => {
+
+      state.shuffle = true;
+
+      if (!state.queue.length) {
+        state.queue = [
+          ...state.songs
+        ];
+      }
+
+      nextSong();
+
+    }
+  );
+}
+
+/* Player */
+
+if (E.play) {
+  E.play.addEventListener(
+    'click',
+    togglePlay
+  );
+}
+
+if (E.fullPlay) {
+  E.fullPlay.addEventListener(
+    'click',
+    togglePlay
+  );
+}
+
+if (E.prev) {
+  E.prev.addEventListener(
+    'click',
+    previousSong
+  );
+}
+
+if (E.fullPrev) {
+  E.fullPrev.addEventListener(
+    'click',
+    previousSong
+  );
+}
+
+if (E.next) {
+  E.next.addEventListener(
+    'click',
+    nextSong
+  );
+}
+
+if (E.fullNext) {
+  E.fullNext.addEventListener(
+    'click',
+    nextSong
+  );
+}
+
+if (E.like) {
+
+  E.like.addEventListener(
+    'click',
+    () => {
+
+      if (state.current) {
+        toggleFavorite(
+          state.current
+        );
+      }
+
+    }
+  );
+}
+
+if ($('#expand')) {
+
+  $('#expand').addEventListener(
+    'click',
+    () =>
+      E.fullPlayer?.classList.toggle(
+        'open'
+      )
+  );
+}
+
+if (E.musicMode) {
+
+  E.musicMode.addEventListener(
+    'click',
+    () =>
+      setMode('music')
+  );
+}
+
+if (E.videoMode) {
+
+  E.videoMode.addEventListener(
+    'click',
+    () =>
+      setMode('video')
+  );
+}
+
+if ($('#shuffle')) {
+
+  $('#shuffle').addEventListener(
+    'click',
+    () => {
+
+      state.shuffle =
+        !state.shuffle;
+
+      toast(
+        state.shuffle
+          ? 'Shuffle on'
+          : 'Shuffle off'
+      );
+    }
+  );
+}
+
+if ($('#repeat')) {
+
+  $('#repeat').addEventListener(
+    'click',
+    () => {
+
+      state.repeat =
+        (state.repeat + 1) % 3;
+
+      toast(
+        [
+          'Repeat off',
+          'Repeat one',
+          'Repeat all'
+        ][state.repeat]
+      );
+    }
+  );
+}
+
+if ($('#clearQueue')) {
+
+  $('#clearQueue').addEventListener(
+    'click',
+    () => {
+
+      state.queue = [];
+      state.queueIndex = -1;
+
+      renderQueue();
+
+      toast('Queue cleared');
+
+    }
+  );
+}
+
+if (E.volume) {
+
+  E.volume.addEventListener(
+    'input',
+    event => {
+
+      const volume =
+        Number(event.target.value);
+
+      audio.volume = volume;
+
+      if (
+        state.yt?.setVolume
+      ) {
+        state.yt.setVolume(
+          volume * 100
+        );
+      }
+
+    }
+  );
+}
+
+audio.volume = 0.8;
+
+/* MP3 progress */
+
+audio.addEventListener(
+  'timeupdate',
+  () => {
+
+    if (E.cur) {
+      E.cur.textContent =
+        formatTime(
+          audio.currentTime
+        );
+    }
+
+    if (audio.duration) {
+
+      if (E.dur) {
+        E.dur.textContent =
+          formatTime(
+            audio.duration
+          );
+      }
+
+      if (E.seek) {
+        E.seek.value =
+          (
+            audio.currentTime /
+            audio.duration
+          ) * 100;
+      }
+    }
+
+  }
+);
+
+audio.addEventListener(
+  'loadedmetadata',
+  () => {
+
+    if (E.dur) {
+      E.dur.textContent =
+        formatTime(
+          audio.duration
+        );
+    }
+
+  }
+);
+
+audio.addEventListener(
+  'play',
+  () =>
+    setPlaying(true)
+);
+
+audio.addEventListener(
+  'pause',
+  () =>
+    setPlaying(false)
+);
+
+audio.addEventListener(
+  'ended',
+  nextSong
+);
+
+audio.addEventListener(
+  'error',
+  () => {
+
+    if (
+      state.current?.source_type ===
+      'mp3'
+    ) {
+
+      console.error(
+        'Audio error:',
+        audio.error
+      );
+
+      toast(
+        'MP3 could not be loaded. Check the audio file URL.'
+      );
+    }
+
+  }
+);
+
+/* Seek */
+
+if (E.seek) {
+
+  E.seek.addEventListener(
+    'input',
+    event => {
+
+      const percentage =
+        Number(
+          event.target.value
+        );
+
+      if (
+        state.current?.source_type ===
+          'mp3' &&
+        audio.duration
+      ) {
+
+        audio.currentTime =
+          audio.duration *
+          percentage /
+          100;
+
+      } else if (
+        state.current?.source_type ===
+          'youtube' &&
+        state.yt?.getDuration
+      ) {
+
+        state.yt.seekTo(
+          state.yt.getDuration() *
+          percentage /
+          100,
+          true
+        );
+      }
+
+    }
+  );
+}
+
+/* YouTube progress */
+
+setInterval(
+  () => {
+
+    if (
+      state.current?.source_type !==
+      'youtube'
+    ) {
+      return;
+    }
+
+    if (
+      !state.yt?.getCurrentTime
+    ) {
+      return;
+    }
+
+    try {
+
+      const current =
+        state.yt.getCurrentTime();
+
+      const duration =
+        state.yt.getDuration();
+
+      if (E.cur) {
+        E.cur.textContent =
+          formatTime(current);
+      }
+
+      if (E.dur) {
+        E.dur.textContent =
+          formatTime(duration);
+      }
+
+      if (
+        E.seek &&
+        duration
+      ) {
+        E.seek.value =
+          (
+            current /
+            duration
+          ) * 100;
+      }
+
+    } catch (_) {}
+
+  },
+  500
+);
+
+/* Admin */
+
+if ($('#saveToken')) {
+
+  $('#saveToken').addEventListener(
+    'click',
+    () => {
+
+      state.adminToken =
+        $('#adminToken')
+          .value
+          .trim();
+
+      localStorage.setItem(
+        'swaraj-admin-token',
+        state.adminToken
+      );
+
+      loadAdminSongs();
+
+    }
+  );
+}
+
+if ($('#adminToken')) {
+  $('#adminToken').value =
+    state.adminToken;
+}
+
+if ($('#ytForm')) {
+
+  $('#ytForm').addEventListener(
+    'submit',
+    submitYouTube
+  );
+}
+
+if ($('#mp3Form')) {
+
+  $('#mp3Form').addEventListener(
+    'submit',
+    submitMP3
+  );
+}
+
+/* Start */
+
 load();
+","sha":"696e47b57f636d5f72df4a54cc8f63efb33e9af3","branch":"main","message":"Fix SwarAJ song loading and player initialization"}

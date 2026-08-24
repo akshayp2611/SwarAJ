@@ -1,18 +1,20 @@
 const { Pool } = require("pg");
 
-if (!process.env.DATABASE_URL) {
+const databaseUrl = process.env.DATABASE_URL;
+
+let pool = null;
+
+if (databaseUrl) {
+  pool = new Pool({
+    connectionString: databaseUrl,
+    ssl:
+      process.env.NODE_ENV === "production"
+        ? { rejectUnauthorized: false }
+        : false
+  });
+} else {
   console.warn("DATABASE_URL is not configured.");
 }
-
-const pool = process.env.DATABASE_URL
-  ? new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl:
-        process.env.NODE_ENV === "production"
-          ? { rejectUnauthorized: false }
-          : false,
-    })
-  : null;
 
 async function initDatabase() {
   if (!pool) {
@@ -39,20 +41,25 @@ async function initDatabase() {
     )
   `);
 
-  // Fix existing SwarAJ databases
   const columns = [
+    ["title", "VARCHAR(255)"],
+    ["artist", "VARCHAR(255) DEFAULT ''"],
+    ["album", "VARCHAR(255) DEFAULT ''"],
+    ["category", "VARCHAR(100) DEFAULT 'All Songs'"],
+    ["language", "VARCHAR(100) DEFAULT ''"],
+    ["genre", "VARCHAR(100) DEFAULT ''"],
     ["audio_url", "TEXT"],
     ["youtube_url", "TEXT"],
     ["cover_url", "TEXT"],
     ["lyrics", "TEXT DEFAULT ''"],
     ["featured", "BOOLEAN DEFAULT FALSE"],
-    ["published", "BOOLEAN DEFAULT TRUE"],
+    ["published", "BOOLEAN DEFAULT TRUE"]
   ];
 
-  for (const [column, type] of columns) {
+  for (const [name, type] of columns) {
     await pool.query(`
       ALTER TABLE songs
-      ADD COLUMN IF NOT EXISTS ${column} ${type}
+      ADD COLUMN IF NOT EXISTS ${name} ${type}
     `);
   }
 
@@ -61,5 +68,5 @@ async function initDatabase() {
 
 module.exports = {
   pool,
-  initDatabase,
+  initDatabase
 };

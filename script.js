@@ -55,13 +55,14 @@ async function loadSongs() {
       `
       <div class="song">
         ❌ Unable to load songs.
-        <br>
-        ${error.message}
+        <br><br>
+        ${escapeHtml(
+          error.message
+        )}
       </div>
       `;
 
   }
-
 }
 
 async function loadCategories() {
@@ -88,6 +89,8 @@ async function loadCategories() {
 
   } catch (error) {
 
+    console.error(error);
+
     categoryList.innerHTML =
       `
       <div class="category">
@@ -96,14 +99,16 @@ async function loadCategories() {
       `;
 
   }
-
 }
 
 function renderCategories(
   categories
 ) {
 
-  if (!categories.length) {
+  if (
+    !categories ||
+    categories.length === 0
+  ) {
 
     categoryList.innerHTML =
       `
@@ -118,34 +123,41 @@ function renderCategories(
   categoryList.innerHTML =
     categories
       .map(
-        category => `
-        <div
-          class="category"
-          onclick="filterCategory('${escapeHtml(category.category)}')"
-        >
+        (category) => `
+          <div
+            class="category"
+            onclick="filterCategory(${JSON.stringify(
+              category.category
+            )})"
+          >
 
-          <strong>
-            ${escapeHtml(category.category)}
-          </strong>
+            <strong>
+              ${escapeHtml(
+                category.category
+              )}
+            </strong>
 
-          <br>
+            <br>
 
-          <small>
-            ${category.song_count} songs
-          </small>
+            <small>
+              ${category.song_count}
+              songs
+            </small>
 
-        </div>
+          </div>
         `
       )
       .join("");
-
 }
 
 function renderSongs(
   list
 ) {
 
-  if (!list.length) {
+  if (
+    !list ||
+    list.length === 0
+  ) {
 
     songList.innerHTML =
       `
@@ -160,29 +172,29 @@ function renderSongs(
   songList.innerHTML =
     list
       .map(
-        song => {
+        (song) => {
 
           let source =
             "";
 
-          if (song.audio_url) {
-
+          if (
+            song.audio_url
+          ) {
             source =
               "🎵 MP3";
-
           } else if (
             song.youtube_url
           ) {
-
             source =
               "▶ YouTube";
-
           }
 
           return `
             <div
               class="song"
-              onclick="playSong(${song.id})"
+              onclick="playSong(${Number(
+                song.id
+              )})"
             >
 
               <div class="song-info">
@@ -208,18 +220,16 @@ function renderSongs(
 
             </div>
           `;
-
         }
       )
       .join("");
-
 }
 
 function playSong(id) {
 
   const song =
     songs.find(
-      item =>
+      (item) =>
         Number(item.id) ===
         Number(id)
     );
@@ -235,23 +245,34 @@ function playSong(id) {
     song.artist ||
     "SwarAJ";
 
-  // MP3
-  if (song.audio_url) {
-
-    audioPlayer.src =
-      song.audio_url;
+  if (
+    song.audio_url
+  ) {
 
     audioPlayer.style.display =
       "block";
 
+    audioPlayer.src =
+      song.audio_url;
+
+    audioPlayer.load();
+
     audioPlayer.play()
-      .catch(() => {});
+      .catch(
+        (error) => {
+          console.warn(
+            "Autoplay blocked:",
+            error.message
+          );
+        }
+      );
 
     return;
   }
 
-  // YouTube
-  if (song.youtube_url) {
+  if (
+    song.youtube_url
+  ) {
 
     audioPlayer.pause();
 
@@ -259,18 +280,19 @@ function playSong(id) {
       "src"
     );
 
+    audioPlayer.load();
+
     audioPlayer.style.display =
       "none";
 
     window.open(
       song.youtube_url,
       "_blank",
-      "noopener"
+      "noopener,noreferrer"
     );
 
     return;
   }
-
 }
 
 function filterCategory(
@@ -279,7 +301,7 @@ function filterCategory(
 
   const filtered =
     songs.filter(
-      song =>
+      (song) =>
         song.category ===
         category
     );
@@ -288,17 +310,25 @@ function filterCategory(
     filtered
   );
 
-  document
-    .getElementById("songs")
-    .scrollIntoView();
+  const songsSection =
+    document.getElementById(
+      "songs"
+    );
 
+  if (songsSection) {
+    songsSection.scrollIntoView({
+      behavior: "smooth"
+    });
+  }
 }
 
 function escapeHtml(
   value
 ) {
 
-  return String(value || "")
+  return String(
+    value || ""
+  )
     .replace(
       /&/g,
       "&amp;"
@@ -319,7 +349,6 @@ function escapeHtml(
       /'/g,
       "&#039;"
     );
-
 }
 
 loadSongs();

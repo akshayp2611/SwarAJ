@@ -4,8 +4,8 @@
 
 :root {
   --bg: #050509;
-  --panel: rgba(255,255,255,.07);
-  --border: rgba(255,255,255,.13);
+  --panel: rgba(255,255,255,.065);
+  --panel-border: rgba(255,255,255,.12);
   --text: #fff;
   --muted: #9292a3;
   --purple: #8b5cf6;
@@ -21,25 +21,25 @@ body {
   margin: 0;
   min-height: 100vh;
 
-  color: var(--text);
-
   background:
     radial-gradient(
-      circle at 15% 10%,
-      rgba(139,92,246,.22),
+      circle at 20% 10%,
+      rgba(139,92,246,.20),
       transparent 28%
     ),
     radial-gradient(
       circle at 85% 25%,
-      rgba(34,211,238,.14),
+      rgba(34,211,238,.12),
       transparent 28%
     ),
     radial-gradient(
       circle at 50% 90%,
-      rgba(236,72,153,.13),
+      rgba(236,72,153,.10),
       transparent 30%
     ),
     var(--bg);
+
+  color: var(--text);
 
   font-family:
     Inter,
@@ -49,63 +49,55 @@ body {
     sans-serif;
 
   overflow-x: hidden;
-
-  padding-bottom: 110px;
+  padding-bottom: 100px;
 }
 
 
 /* =====================================================
-   LIQUID BACKGROUND
+   AMBIENT LIQUID LIGHT
 ===================================================== */
 
 .ambient {
   position: fixed;
 
-  width: 360px;
-  height: 360px;
+  width: 350px;
+  height: 350px;
 
   border-radius: 50%;
 
-  filter: blur(100px);
+  filter: blur(90px);
 
-  opacity: .2;
+  opacity: .22;
 
   pointer-events: none;
 
   z-index: -1;
 
   animation:
-    liquidMove 12s ease-in-out infinite
-    alternate;
+    liquidMove 12s ease-in-out infinite alternate;
 }
 
 .ambient-one {
   background: var(--purple);
-
-  top: 5%;
-  left: -150px;
+  top: 10%;
+  left: -120px;
 }
 
 .ambient-two {
   background: var(--cyan);
-
-  right: -150px;
+  right: -140px;
   top: 35%;
-
   animation-delay: -4s;
 }
 
 .ambient-three {
   background: var(--pink);
-
   left: 35%;
   bottom: -180px;
-
-  animation-delay: -8s;
+  animation-delay: -7s;
 }
 
 @keyframes liquidMove {
-
   from {
     transform:
       translate3d(0,0,0)
@@ -114,7 +106,7 @@ body {
 
   to {
     transform:
-      translate3d(80px,-60px,0)
+      translate3d(80px,-50px,0)
       scale(1.25);
   }
 }
@@ -128,25 +120,24 @@ body {
   background:
     linear-gradient(
       135deg,
-      rgba(255,255,255,.10),
+      rgba(255,255,255,.095),
       rgba(255,255,255,.025)
     );
 
   border:
-    1px solid var(--border);
+    1px solid var(--panel-border);
 
   backdrop-filter:
-    blur(25px)
+    blur(24px)
     saturate(150%);
 
   -webkit-backdrop-filter:
-    blur(25px)
+    blur(24px)
     saturate(150%);
 
   box-shadow:
-    0 25px 80px rgba(0,0,0,.35),
-    inset 0 1px 0
-      rgba(255,255,255,.08);
+    0 20px 80px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.08);
 }
 
 
@@ -161,50 +152,42 @@ body {
 
   z-index: 100;
 
-  width: min(1250px,94%);
+  width: min(1200px,92%);
 
   margin: 12px auto;
 
-  padding: 13px 18px;
+  padding: 15px 20px;
 
-  border-radius: 22px;
+  border-radius: 20px;
 
   display: flex;
 
-  align-items: center;
-
   justify-content: space-between;
 
-  gap: 20px;
+  align-items: center;
 }
 
 .brand {
-  color: white;
-
-  text-decoration: none;
-
   display: flex;
 
   align-items: center;
 
   gap: 10px;
 
-  flex-shrink: 0;
+  font-size: 21px;
+
+  font-weight: 900;
 }
 
-.brand-logo {
-  width: 46px;
-  height: 46px;
+.brand-symbol {
+  display: grid;
 
-  border-radius: 15px;
+  place-items: center;
 
-  display: flex;
+  width: 35px;
+  height: 35px;
 
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 1px;
+  border-radius: 12px;
 
   background:
     linear-gradient(
@@ -214,69 +197,27 @@ body {
     );
 
   box-shadow:
-    0 0 35px
-      rgba(139,92,246,.5);
-
-  font-weight: 900;
-
-  transform:
-    perspective(400px)
-    rotateY(-8deg);
+    0 0 25px
+    rgba(139,92,246,.45);
 }
 
-.brand-marathi {
-  font-size: 14px;
-}
-
-.brand-aj {
-  font-size: 13px;
-}
-
-.brand-full {
-  font-size: 22px;
-  font-weight: 900;
-}
-
-.main-nav {
+nav {
   display: flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  overflow-x: auto;
+  gap: 22px;
 }
 
-.nav-tab,
-.nav-link {
-  border: 0;
-
-  background: transparent;
-
+nav a {
   color: var(--muted);
 
   text-decoration: none;
 
-  white-space: nowrap;
-
-  padding: 9px 12px;
-
-  border-radius: 12px;
-
-  font-size: 13px;
-
-  cursor: pointer;
+  font-size: 14px;
 
   transition: .2s;
 }
 
-.nav-tab:hover,
-.nav-tab.active,
-.nav-link:hover {
+nav a:hover {
   color: white;
-
-  background:
-    rgba(139,92,246,.17);
 }
 
 
@@ -289,6 +230,11 @@ main {
 
   margin: auto;
 }
+
+
+/* =====================================================
+   HERO
+===================================================== */
 
 .hero {
   min-height: 620px;
@@ -304,6 +250,8 @@ main {
 }
 
 .hero-content {
+  position: relative;
+
   padding: 55px;
 
   border-radius: 35px;
@@ -313,7 +261,8 @@ main {
     rotateX(2deg)
     rotateY(-3deg);
 
-  transition: .5s;
+  transition:
+    transform .5s ease;
 }
 
 .hero-content:hover {
@@ -347,8 +296,6 @@ h1 {
 }
 
 h1 span {
-  color: transparent;
-
   background:
     linear-gradient(
       90deg,
@@ -359,10 +306,12 @@ h1 span {
 
   -webkit-background-clip: text;
   background-clip: text;
+
+  color: transparent;
 }
 
 .hero-content p {
-  max-width: 600px;
+  max-width: 550px;
 
   color: var(--muted);
 
@@ -395,7 +344,7 @@ h1 span {
 
   box-shadow:
     0 15px 40px
-      rgba(139,92,246,.3);
+    rgba(139,92,246,.3);
 
   transition: .25s;
 }
@@ -408,7 +357,7 @@ h1 span {
 
 
 /* =====================================================
-   3D LOGO ORB
+   3D ORB
 ===================================================== */
 
 .hero-orb {
@@ -448,14 +397,10 @@ h1 span {
 
   border-radius: 50%;
 
-  display: grid;
-
-  place-items: center;
-
   background:
     radial-gradient(
       circle at 30% 25%,
-      white,
+      #fff,
       var(--purple) 8%,
       #12121b 55%,
       #030305
@@ -463,35 +408,12 @@ h1 span {
 
   box-shadow:
     inset 30px 20px 60px
-      rgba(255,255,255,.12);
-}
-
-.orb-logo {
-  display: flex;
-
-  gap: 2px;
-
-  font-size: 34px;
-
-  font-weight: 900;
-
-  text-shadow:
-    0 0 25px
-      rgba(255,255,255,.35);
-}
-
-.orb-logo span {
-  color: white;
-}
-
-.orb-logo b {
-  color: #e9d5ff;
+    rgba(255,255,255,.12);
 }
 
 @keyframes orbRotate {
   to {
-    transform:
-      rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
@@ -500,16 +422,16 @@ h1 span {
    SECTIONS
 ===================================================== */
 
-.section {
+section {
   margin: 80px 0;
 }
 
 .section-heading {
   display: flex;
 
-  align-items: end;
-
   justify-content: space-between;
+
+  align-items: end;
 
   margin-bottom: 25px;
 }
@@ -554,7 +476,9 @@ h2 {
 
   cursor: pointer;
 
-  transition: .25s;
+  transition:
+    transform .25s,
+    border-color .25s;
 }
 
 .category-card:hover {
@@ -591,6 +515,8 @@ h2 {
 }
 
 .song-card {
+  position: relative;
+
   display: flex;
 
   align-items: center;
@@ -605,7 +531,9 @@ h2 {
 
   overflow: hidden;
 
-  transition: .25s;
+  transition:
+    transform .25s,
+    border-color .25s;
 }
 
 .song-card:hover {
@@ -617,18 +545,16 @@ h2 {
 }
 
 .song-art {
-  width: 60px;
-  height: 60px;
+  width: 58px;
+  height: 58px;
 
   flex-shrink: 0;
+
+  border-radius: 15px;
 
   display: grid;
 
   place-items: center;
-
-  border-radius: 16px;
-
-  overflow: hidden;
 
   font-size: 23px;
 
@@ -638,6 +564,8 @@ h2 {
       var(--purple),
       var(--pink)
     );
+
+  overflow: hidden;
 }
 
 .song-art img {
@@ -653,8 +581,7 @@ h2 {
   flex: 1;
 }
 
-.song-details strong,
-.song-details small {
+.song-details strong {
   display: block;
 
   overflow: hidden;
@@ -665,9 +592,17 @@ h2 {
 }
 
 .song-details small {
+  display: block;
+
   margin-top: 5px;
 
   color: var(--muted);
+
+  overflow: hidden;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
 }
 
 .song-badge {
@@ -684,12 +619,20 @@ h2 {
 
   border:
     1px solid
-      rgba(139,92,246,.2);
+    rgba(139,92,246,.2);
+}
+
+.loading-card {
+  padding: 30px;
+
+  border-radius: 20px;
+
+  color: var(--muted);
 }
 
 
 /* =====================================================
-   YOUTUBE
+   YOUTUBE PLAYER
 ===================================================== */
 
 .youtube-player {
@@ -718,7 +661,7 @@ h2 {
   inset: 0;
 
   background:
-    rgba(0,0,0,.8);
+    rgba(0,0,0,.78);
 
   backdrop-filter:
     blur(18px);
@@ -727,13 +670,17 @@ h2 {
 .youtube-window {
   position: relative;
 
-  z-index: 2;
-
   width: min(1000px,100%);
 
   border-radius: 28px;
 
   overflow: hidden;
+
+  z-index: 2;
+
+  box-shadow:
+    0 40px 120px
+    rgba(0,0,0,.7);
 }
 
 .youtube-toolbar {
@@ -772,8 +719,6 @@ h2 {
 
   border-radius: 13px;
 
-  overflow: hidden;
-
   background:
     linear-gradient(
       135deg,
@@ -782,21 +727,10 @@ h2 {
     );
 }
 
-.player-cover img {
-  width: 100%;
-  height: 100%;
-
-  object-fit: cover;
-}
-
-.now-copy {
-  min-width: 0;
-}
-
-.now-copy strong {
+.now-playing strong {
   display: block;
 
-  max-width: 320px;
+  max-width: 300px;
 
   overflow: hidden;
 
@@ -805,7 +739,7 @@ h2 {
   white-space: nowrap;
 }
 
-.now-copy small {
+.now-playing small {
   color: var(--muted);
 }
 
@@ -819,9 +753,8 @@ h2 {
 
 .mode-button,
 .icon-button {
-  border:
-    1px solid
-      rgba(255,255,255,.1);
+  border: 1px solid
+    rgba(255,255,255,.1);
 
   color: #aaa;
 
@@ -861,14 +794,21 @@ h2 {
   font-size: 19px;
 }
 
+.icon-button:hover {
+  color: white;
+
+  background:
+    rgba(139,92,246,.3);
+}
+
 .video-container {
+  position: relative;
+
   width: 100%;
 
   aspect-ratio: 16/9;
 
-  background: #000;
-
-  transition: .25s;
+  background: black;
 }
 
 .video-container iframe {
@@ -878,35 +818,6 @@ h2 {
   border: 0;
 }
 
-/*
- * MUSIC MODE:
- * Keep iframe alive so YouTube continues playing,
- * but visually reduce the video area.
- */
-
-.youtube-player.music-only
-  .video-container {
-  height: 3px;
-
-  aspect-ratio: auto;
-
-  overflow: hidden;
-
-  opacity: .18;
-}
-
-.youtube-player.music-only
-  .video-container iframe {
-  width: 100%;
-  height: 100%;
-
-  transform:
-    scale(.01);
-
-  transform-origin:
-    center;
-}
-
 .player-bottom {
   padding: 12px 18px 16px;
 }
@@ -914,9 +825,9 @@ h2 {
 .player-track {
   height: 3px;
 
-  overflow: hidden;
-
   border-radius: 10px;
+
+  overflow: hidden;
 
   background:
     rgba(255,255,255,.1);
@@ -939,15 +850,12 @@ h2 {
 }
 
 @keyframes trackMove {
-
   from {
-    transform:
-      translateX(-100%);
+    transform: translateX(-100%);
   }
 
   to {
-    transform:
-      translateX(230%);
+    transform: translateX(230%);
   }
 }
 
@@ -965,127 +873,7 @@ h2 {
 
 
 /* =====================================================
-   MP3 PLAYER
-===================================================== */
-
-.audio-bar {
-  position: fixed;
-
-  left: 50%;
-
-  bottom: 16px;
-
-  z-index: 1050;
-
-  width: min(850px,94%);
-
-  min-height: 72px;
-
-  padding: 9px 12px;
-
-  display: none;
-
-  align-items: center;
-
-  gap: 12px;
-
-  border-radius: 20px;
-
-  transform:
-    translateX(-50%);
-}
-
-.audio-bar.active {
-  display: flex;
-}
-
-.audio-cover {
-  width: 52px;
-  height: 52px;
-
-  flex-shrink: 0;
-
-  display: grid;
-
-  place-items: center;
-
-  border-radius: 15px;
-
-  overflow: hidden;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--purple),
-      var(--pink)
-    );
-}
-
-.audio-cover img {
-  width: 100%;
-  height: 100%;
-
-  object-fit: cover;
-}
-
-.audio-info {
-  width: 190px;
-
-  min-width: 0;
-}
-
-.audio-info strong,
-.audio-info small {
-  display: block;
-
-  overflow: hidden;
-
-  white-space: nowrap;
-
-  text-overflow: ellipsis;
-}
-
-.audio-info small {
-  margin-top: 4px;
-
-  color: var(--muted);
-}
-
-.audio-progress {
-  flex: 1;
-
-  min-width: 80px;
-
-  accent-color:
-    var(--purple);
-}
-
-.audio-control {
-  width: 40px;
-  height: 40px;
-
-  flex-shrink: 0;
-
-  border: 0;
-
-  border-radius: 50%;
-
-  color: white;
-
-  background:
-    rgba(255,255,255,.08);
-
-  cursor: pointer;
-}
-
-.audio-control:hover {
-  background:
-    rgba(139,92,246,.3);
-}
-
-
-/* =====================================================
-   MINI YOUTUBE PLAYER
+   MINI PLAYER
 ===================================================== */
 
 .mini-player {
@@ -1093,15 +881,15 @@ h2 {
 
   left: 50%;
 
-  bottom: 16px;
+  bottom: 20px;
 
-  z-index: 1050;
+  z-index: 1100;
 
-  width: min(650px,94%);
+  width: min(600px,92%);
 
   padding: 10px;
 
-  border-radius: 19px;
+  border-radius: 18px;
 
   display: none;
 
@@ -1111,6 +899,10 @@ h2 {
 
   transform:
     translateX(-50%);
+
+  box-shadow:
+    0 20px 70px
+    rgba(0,0,0,.55);
 }
 
 .mini-player.active {
@@ -1121,13 +913,13 @@ h2 {
   width: 48px;
   height: 48px;
 
+  flex-shrink: 0;
+
   display: grid;
 
   place-items: center;
 
-  flex-shrink: 0;
-
-  border-radius: 14px;
+  border-radius: 13px;
 
   background:
     linear-gradient(
@@ -1138,13 +930,12 @@ h2 {
 }
 
 .mini-info {
-  flex: 1;
-
   min-width: 0;
+
+  flex: 1;
 }
 
-.mini-info strong,
-.mini-info small {
+.mini-info strong {
   display: block;
 
   overflow: hidden;
@@ -1155,6 +946,8 @@ h2 {
 }
 
 .mini-info small {
+  display: block;
+
   margin-top: 3px;
 
   color: var(--muted);
@@ -1182,6 +975,11 @@ h2 {
   cursor: pointer;
 }
 
+.mini-actions button:hover {
+  background:
+    rgba(139,92,246,.35);
+}
+
 
 /* =====================================================
    MOBILE
@@ -1190,25 +988,31 @@ h2 {
 @media (max-width: 750px) {
 
   body {
-    padding-bottom: 95px;
+    padding-bottom: 90px;
   }
 
   .topbar {
-    align-items: flex-start;
-
     flex-direction: column;
+
+    align-items: flex-start;
   }
 
-  .main-nav {
+  nav {
     width: 100%;
+
+    overflow-x: auto;
+
+    gap: 16px;
+
+    padding-bottom: 3px;
   }
 
   .hero {
     min-height: auto;
 
-    padding-top: 35px;
-
     grid-template-columns: 1fr;
+
+    padding-top: 35px;
   }
 
   .hero-content {
@@ -1228,6 +1032,10 @@ h2 {
     height: 230px;
   }
 
+  section {
+    margin: 60px 0;
+  }
+
   .youtube-player {
     padding: 0;
 
@@ -1243,6 +1051,8 @@ h2 {
 
   .youtube-toolbar {
     flex-wrap: wrap;
+
+    padding: 10px;
   }
 
   .player-actions {
@@ -1255,25 +1065,55 @@ h2 {
     flex: 1;
   }
 
-  .audio-bar {
-    width: 96%;
-
-    bottom: 10px;
-  }
-
-  .audio-info {
-    width: 120px;
-  }
-
-  .audio-progress {
+  .youtube-player.music-only
+    .video-container {
     display: none;
   }
 
-  .brand-full {
-    display: none;
+  .mini-player {
+    bottom: 12px;
   }
 
-  .song-badge {
-    display: none;
+}
+
+
+/* =====================================================
+   MUSIC ONLY
+===================================================== */
+
+.youtube-player.music-only
+  .video-container {
+  height: 0;
+
+  aspect-ratio: auto;
+
+  overflow: hidden;
+}
+
+.youtube-player.music-only
+  .youtube-window {
+  width: min(650px,100%);
+}
+
+.youtube-player.music-only
+  .youtube-backdrop {
+  background:
+    rgba(0,0,0,.55);
+}
+
+
+/* =====================================================
+   REDUCED MOTION
+===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
   }
+
 }

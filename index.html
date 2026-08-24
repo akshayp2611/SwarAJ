@@ -1,491 +1,480 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
   <meta
     name="theme-color"
-    content="#06060c"
+    content="#07070b"
   >
 
-  <title>
-    स्वरAJ — Premium Music
-  </title>
+  <meta
+    name="description"
+    content="स्वरAJ — Premium Music Experience"
+  >
+
+  <title>स्वरAJ — Premium Music</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
 
   <link
     rel="stylesheet"
-    href="/styles.css"
+    href="styles.css"
   >
-
 </head>
 
 <body>
 
-<div class="ambient ambient-one"></div>
-<div class="ambient ambient-two"></div>
-<div class="ambient ambient-three"></div>
+<div class="app-shell">
 
+  <aside class="sidebar" id="sidebar">
 
-<!-- =====================================================
-     HEADER
-===================================================== -->
+    <div class="brand">
+      <div class="brand-icon">स्व</div>
 
-<header class="topbar glass">
+      <div>
+        <div class="brand-name">स्वरAJ</div>
+        <div class="brand-subtitle">MUSIC</div>
+      </div>
+    </div>
 
-  <a
-    href="/"
-    class="brand"
-  >
+    <nav class="navigation">
 
-    <span class="brand-logo">
-      <span class="brand-marathi">
-        स्वर
-      </span>
+      <button class="nav-item active" data-action="home">
+        <span>⌂</span>
+        <span>Home</span>
+      </button>
 
-      <span class="brand-aj">
-        AJ
-      </span>
-    </span>
+      <button class="nav-item" data-action="library">
+        <span>♫</span>
+        <span>Library</span>
+      </button>
 
-    <span class="brand-full">
-      स्वरAJ
-    </span>
+      <button class="nav-item" data-action="favorites">
+        <span>♡</span>
+        <span>Liked Songs</span>
+      </button>
 
-  </a>
+      <button class="nav-item" data-action="categories">
+        <span>◈</span>
+        <span>Categories</span>
+      </button>
 
+    </nav>
 
-  <nav class="main-nav">
+    <div class="sidebar-title">
+      YOUR MUSIC
+    </div>
 
-    <button
-      class="nav-tab active"
-      data-tab="all"
-    >
-      Home
-    </button>
+    <div id="sidebarCategories" class="sidebar-categories">
+      <div class="sidebar-loading">
+        Loading...
+      </div>
+    </div>
 
-    <button
-      class="nav-tab"
-      data-tab="mp3"
-    >
-      🎵 MP3
-    </button>
+    <div class="sidebar-bottom">
 
-    <button
-      class="nav-tab"
-      data-tab="youtube"
-    >
-      ▶ YouTube
-    </button>
+      <div class="server-status">
+        <span class="status-dot"></span>
+        <span>Music Server Online</span>
+      </div>
 
-    <button
-      class="nav-tab"
-      data-tab="categories"
-    >
-      Categories
-    </button>
-
-    <a
-      href="/admin"
-      class="nav-link"
-    >
-      Admin
-    </a>
-
-  </nav>
-
-</header>
-
-
-<main>
-
-
-<!-- =====================================================
-     HERO
-===================================================== -->
-
-<section class="hero">
-
-  <div class="hero-content glass">
-
-    <span class="eyebrow">
-      PREMIUM MUSIC EXPERIENCE
-    </span>
-
-    <h1>
-      Music that feels
-      <span>alive.</span>
-    </h1>
-
-    <p>
-      Your MP3 collection and YouTube
-      music, beautifully brought together
-      inside SwarAJ.
-    </p>
-
-    <a
-      href="#songs"
-      class="primary-button"
-    >
-      Explore Music
-      <span>→</span>
-    </a>
-
-  </div>
-
-
-  <div class="hero-orb">
-
-    <div class="orb-inner">
-
-      <div class="orb-logo">
-        <span>स्वर</span>
-        <b>AJ</b>
+      <div class="copyright">
+        © 2026 स्वरAJ
       </div>
 
     </div>
 
-  </div>
+  </aside>
 
-</section>
+  <main class="main">
 
+    <header class="topbar">
 
-<!-- =====================================================
-     CATEGORIES
-===================================================== -->
-
-<section
-  id="categories"
-  class="section categories-section"
->
-
-  <div class="section-heading">
-
-    <div>
-
-      <span class="section-kicker">
-        DISCOVER
-      </span>
-
-      <h2>
-        Browse your mood
-      </h2>
-
-    </div>
-
-  </div>
-
-
-  <div
-    id="categoryList"
-    class="category-grid"
-  ></div>
-
-</section>
-
-
-<!-- =====================================================
-     SONGS
-===================================================== -->
-
-<section
-  id="songs"
-  class="section"
->
-
-  <div class="section-heading">
-
-    <div>
-
-      <span
-        id="libraryKicker"
-        class="section-kicker"
+      <button
+        class="mobile-menu"
+        id="mobileMenu"
+        aria-label="Menu"
       >
-        YOUR LIBRARY
-      </span>
+        ☰
+      </button>
 
-      <h2 id="libraryTitle">
-        All Songs
-      </h2>
+      <div class="search-wrapper">
 
-    </div>
+        <span class="search-icon">⌕</span>
 
-
-    <span
-      id="songCount"
-      class="song-count"
-    >
-      0 songs
-    </span>
-
-  </div>
-
-
-  <div
-    id="songList"
-    class="song-grid"
-  ></div>
-
-</section>
-
-</main>
-
-
-<!-- =====================================================
-     YOUTUBE PLAYER
-===================================================== -->
-
-<div
-  id="youtubePlayer"
-  class="youtube-player"
->
-
-  <div class="youtube-backdrop"></div>
-
-
-  <div class="youtube-window glass">
-
-
-    <div class="youtube-toolbar">
-
-
-      <div class="now-playing">
-
-        <div
-          id="playerCover"
-          class="player-cover"
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search songs, artists, categories..."
+          autocomplete="off"
         >
-          ♪
-        </div>
-
-
-        <div class="now-copy">
-
-          <strong id="playerTitle">
-            Select a song
-          </strong>
-
-          <small id="playerArtist">
-            स्वरAJ
-          </small>
-
-        </div>
-
-      </div>
-
-
-      <div class="player-actions">
-
 
         <button
-          id="musicModeButton"
-          class="mode-button active"
-          type="button"
-        >
-          🎧 Music
-        </button>
-
-
-        <button
-          id="videoModeButton"
-          class="mode-button"
-          type="button"
-        >
-          🎬 Video
-        </button>
-
-
-        <button
-          id="minimizeButton"
-          class="icon-button"
-          type="button"
-        >
-          ↓
-        </button>
-
-
-        <button
-          id="closeButton"
-          class="icon-button"
-          type="button"
+          class="clear-search"
+          id="clearSearch"
+          hidden
         >
           ×
         </button>
 
       </div>
 
-    </div>
+      <div class="top-actions">
 
+        <button
+          class="icon-button"
+          id="refreshButton"
+          title="Refresh music"
+        >
+          ↻
+        </button>
 
-    <div
-      id="videoContainer"
-      class="video-container"
-    >
-
-      <iframe
-        id="youtubeFrame"
-        src="about:blank"
-        title="SwarAJ YouTube Player"
-        allow="
-          autoplay;
-          encrypted-media;
-          picture-in-picture;
-          fullscreen
-        "
-        allowfullscreen
-      ></iframe>
-
-    </div>
-
-
-    <div class="player-bottom">
-
-      <div class="player-track">
-
-        <div class="track-glow"></div>
+        <button
+          class="profile-button"
+          title="Profile"
+        >
+          AJ
+        </button>
 
       </div>
 
+    </header>
 
-      <div class="player-status">
+    <section class="content">
+
+      <section class="hero">
+
+        <div class="hero-background"></div>
+
+        <div class="hero-content">
+
+          <div class="hero-badge">
+            <span class="pulse"></span>
+            YOUR PREMIUM MUSIC SPACE
+          </div>
+
+          <h1>
+            Your music.
+            <br>
+            <span>Every moment.</span>
+          </h1>
+
+          <p>
+            Discover your personal collection,
+            beautifully organized in one premium
+            music experience.
+          </p>
+
+          <div class="hero-actions">
+
+            <button
+              class="primary-button"
+              id="playAllButton"
+            >
+              <span>▶</span>
+              Play All
+            </button>
+
+            <button
+              class="secondary-button"
+              id="shuffleButton"
+            >
+              <span>⤨</span>
+              Shuffle
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="hero-decoration">
+
+          <div class="disc">
+            <div class="disc-center">स्व</div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="stats">
+
+        <div class="stat-card">
+          <div class="stat-icon">♫</div>
+          <div>
+            <strong id="songCount">0</strong>
+            <span>Songs</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">◈</div>
+          <div>
+            <strong id="categoryCount">0</strong>
+            <span>Categories</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">♡</div>
+          <div>
+            <strong id="likedCount">0</strong>
+            <span>Liked</span>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="section">
+
+        <div class="section-heading">
+
+          <div>
+            <div class="eyebrow">DISCOVER</div>
+            <h2>Browse your music</h2>
+          </div>
+
+          <button
+            class="text-button"
+            id="showAllButton"
+          >
+            Show all →
+          </button>
+
+        </div>
+
+        <div
+          id="categoryGrid"
+          class="category-grid"
+        ></div>
+
+      </section>
+
+      <section class="section">
+
+        <div class="section-heading">
+
+          <div>
+            <div class="eyebrow">YOUR COLLECTION</div>
+            <h2 id="songSectionTitle">
+              All Songs
+            </h2>
+          </div>
+
+          <div class="library-tools">
+
+            <select id="sortSelect">
+              <option value="title">Title</option>
+              <option value="category">Category</option>
+              <option value="recent">Recently Added</option>
+            </select>
+
+          </div>
+
+        </div>
+
+        <div
+          id="songList"
+          class="song-list"
+        >
+
+          <div class="loading-state">
+            <div class="loader"></div>
+            <span>Loading your music...</span>
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="section youtube-section">
+
+        <div class="section-heading">
+
+          <div>
+            <div class="eyebrow">DISCOVER MORE</div>
+            <h2>YouTube Music</h2>
+          </div>
+
+        </div>
+
+        <div class="youtube-card">
+
+          <div class="youtube-logo">
+            ▶
+          </div>
+
+          <div class="youtube-info">
+
+            <h3>Find music on YouTube</h3>
+
+            <p>
+              Search YouTube for songs and open them
+              directly from स्वरAJ.
+            </p>
+
+            <div class="youtube-search">
+
+              <input
+                id="youtubeSearch"
+                type="text"
+                placeholder="Search YouTube..."
+              >
+
+              <button id="youtubeButton">
+                Search
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <footer>
+
+        <div class="footer-brand">
+          <div class="brand-icon">स्व</div>
+          <strong>स्वरAJ</strong>
+        </div>
 
         <span>
-          ●
+          Made for music lovers.
         </span>
 
-        Playing inside स्वरAJ
+      </footer>
 
-      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<!-- Player -->
+
+<div class="player">
+
+  <div class="now-playing">
+
+    <div
+      class="player-cover"
+      id="playerCover"
+    >
+      ♫
+    </div>
+
+    <div class="player-song">
+
+      <strong id="playerTitle">
+        Nothing playing
+      </strong>
+
+      <span id="playerCategory">
+        Select a song
+      </span>
+
+    </div>
+
+    <button
+      class="like-button"
+      id="playerLike"
+    >
+      ♡
+    </button>
+
+  </div>
+
+  <div class="player-main">
+
+    <div class="player-controls">
+
+      <button id="previousButton">
+        ⏮
+      </button>
+
+      <button
+        class="main-play"
+        id="playButton"
+      >
+        ▶
+      </button>
+
+      <button id="nextButton">
+        ⏭
+      </button>
+
+    </div>
+
+    <div class="progress-container">
+
+      <span id="currentTime">
+        0:00
+      </span>
+
+      <input
+        id="progress"
+        type="range"
+        min="0"
+        max="100"
+        value="0"
+      >
+
+      <span id="duration">
+        0:00
+      </span>
 
     </div>
 
   </div>
 
-</div>
+  <div class="player-extra">
 
-
-<!-- =====================================================
-     MP3 PLAYER
-===================================================== -->
-
-<div
-  id="audioBar"
-  class="audio-bar glass"
->
-
-  <div
-    id="audioCover"
-    class="audio-cover"
-  >
-    ♪
-  </div>
-
-
-  <div class="audio-info">
-
-    <strong id="audioTitle">
-      Select a song
-    </strong>
-
-    <small id="audioArtist">
-      स्वरAJ
-    </small>
-
-  </div>
-
-
-  <input
-    id="audioProgress"
-    class="audio-progress"
-    type="range"
-    min="0"
-    max="100"
-    value="0"
-  >
-
-
-  <button
-    id="audioPlayPause"
-    class="audio-control"
-    type="button"
-  >
-    ▶
-  </button>
-
-
-  <button
-    id="audioClose"
-    class="audio-control"
-    type="button"
-  >
-    ×
-  </button>
-
-
-  <audio
-    id="audioPlayer"
-    preload="metadata"
-  ></audio>
-
-</div>
-
-
-<!-- =====================================================
-     MINI YOUTUBE PLAYER
-===================================================== -->
-
-<div
-  id="miniPlayer"
-  class="mini-player glass"
->
-
-  <div class="mini-cover">
-    ♪
-  </div>
-
-
-  <div class="mini-info">
-
-    <strong id="miniTitle">
-      Select a song
-    </strong>
-
-    <small id="miniArtist">
-      स्वरAJ
-    </small>
-
-  </div>
-
-
-  <div class="mini-actions">
-
-    <button
-      id="expandButton"
-      type="button"
-    >
-      ↑
+    <button id="shufflePlayer">
+      ⤨
     </button>
 
-    <button
-      id="miniCloseButton"
-      type="button"
-    >
-      ×
+    <button id="repeatButton">
+      ↻
     </button>
+
+    <button id="volumeButton">
+      🔊
+    </button>
+
+    <input
+      id="volume"
+      type="range"
+      min="0"
+      max="1"
+      step="0.01"
+      value="0.8"
+    >
 
   </div>
 
 </div>
 
+<audio id="audio"></audio>
 
-<script src="/script.js"></script>
+<div
+  class="toast"
+  id="toast"
+></div>
+
+<script src="script.js"></script>
 
 </body>
-
 </html>

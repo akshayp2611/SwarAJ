@@ -1,8 +1,7 @@
 {
-  "name": "swaraj-premium-music",
-  "version": "6.0.0",
-  "private": true,
-  "description": "SwarAJ PostgreSQL music streaming platform",
+  "name": "swaraj-music",
+  "version": "3.0.0",
+  "description": "SwarAJ Music - PostgreSQL music streaming platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

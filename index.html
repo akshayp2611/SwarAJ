@@ -2,297 +2,163 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="theme-color"
-        content="#09090f"
-    >
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#080b14">
 
     <title>SwarAJ Music</title>
 
-    <link
-        rel="stylesheet"
-        href="/styles.css"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link rel="stylesheet" href="/styles.css">
 </head>
 
 <body>
 
-<!-- =====================================================
-     APP
-===================================================== -->
+<div class="app">
 
-<div id="app">
-
-    <!-- =================================================
-         SIDEBAR
-    ================================================== -->
-
-    <aside
-        id="sidebar"
-        class="sidebar"
-    >
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
 
         <div class="brand">
+            <div class="brand-logo">S</div>
 
-            <div class="brand-logo">
-                S
-            </div>
-
-            <div class="brand-text">
+            <div>
                 <strong>SwarAJ</strong>
-                <span>Music</span>
+                <small>Music</small>
             </div>
-
         </div>
 
+        <nav>
 
-        <nav class="main-nav">
-
-            <button
-                class="nav-item active"
-                data-section="home"
-                onclick="showSection('home')"
-            >
+            <button class="nav active"
+                    data-section="home"
+                    onclick="showSection('home')">
                 <span>⌂</span>
-                <span>Home</span>
+                Home
             </button>
 
-            <button
-                class="nav-item"
-                data-section="search"
-                onclick="focusSearch()"
-            >
-                <span>⌕</span>
-                <span>Search</span>
+            <button class="nav"
+                    data-section="songs"
+                    onclick="showSection('songs')">
+                <span>♫</span>
+                All Songs
             </button>
 
-            <button
-                class="nav-item"
-                data-section="library"
-                onclick="showSection('library')"
-            >
+            <button class="nav"
+                    data-section="categories"
+                    onclick="showSection('categories')">
+                <span>◈</span>
+                Categories
+            </button>
+
+            <button class="nav"
+                    data-section="library"
+                    onclick="showSection('library')">
                 <span>▣</span>
-                <span>Your Library</span>
+                Library
+            </button>
+
+            <button class="nav"
+                    data-section="liked"
+                    onclick="showSection('liked')">
+                <span>♥</span>
+                Liked Songs
+            </button>
+
+            <button class="nav"
+                    data-section="queue"
+                    onclick="showSection('queue')">
+                <span>☷</span>
+                Queue
+            </button>
+
+            <div class="nav-divider"></div>
+
+            <button class="nav admin"
+                    data-section="admin"
+                    onclick="showAdmin()">
+                <span>⚙</span>
+                Admin
             </button>
 
         </nav>
 
-
-        <div class="sidebar-section">
-
-            <div class="sidebar-title">
-                YOUR MUSIC
-            </div>
-
-            <button
-                class="nav-item"
-                onclick="showSection('songs')"
-            >
-                <span>♫</span>
-                <span>All Songs</span>
-            </button>
-
-            <button
-                class="nav-item"
-                onclick="showSection('categories')"
-            >
-                <span>◈</span>
-                <span>Categories</span>
-            </button>
-
-            <button
-                class="nav-item"
-                onclick="showSection('liked')"
-            >
-                <span>♥</span>
-                <span>Liked Songs</span>
-            </button>
-
-        </div>
-
-
-        <div class="sidebar-section">
-
-            <div class="sidebar-title">
-                PLAYLIST
-            </div>
-
-            <button
-                class="nav-item"
-                onclick="showSection('queue')"
-            >
-                <span>☷</span>
-                <span>Queue</span>
-            </button>
-
-        </div>
-
-
-        <div class="sidebar-bottom">
-
-            <button
-                class="nav-item admin-nav"
-                onclick="openAdmin()"
-            >
-                <span>⚙</span>
-                <span>Admin</span>
-            </button>
-
-        </div>
-
     </aside>
 
 
-    <!-- =================================================
-         MAIN
-    ================================================== -->
+    <!-- MAIN -->
+    <main class="main">
 
-    <main class="main-content">
-
-        <!-- =============================================
-             HEADER
-        ============================================== -->
-
+        <!-- TOPBAR -->
         <header class="topbar">
 
-            <button
-                id="mobileMenuBtn"
-                class="icon-button mobile-menu"
-                onclick="toggleSidebar()"
-            >
+            <button class="mobile-menu"
+                    onclick="toggleSidebar()">
                 ☰
             </button>
 
-
-            <div class="navigation-buttons">
-
-                <button
-                    class="circle-button"
-                    onclick="history.back()"
-                >
-                    ‹
-                </button>
-
-                <button
-                    class="circle-button"
-                    onclick="history.forward()"
-                >
-                    ›
-                </button>
-
+            <div class="history-buttons">
+                <button onclick="history.back()">‹</button>
+                <button onclick="history.forward()">›</button>
             </div>
 
+            <div class="search-box">
 
-            <div class="search-container">
-
-                <span class="search-icon">
-                    ⌕
-                </span>
+                <span>⌕</span>
 
                 <input
                     id="searchInput"
                     type="search"
-                    placeholder="Search songs, artists, categories..."
-                    autocomplete="off"
-                >
+                    placeholder="Search songs, artists, albums..."
+                    autocomplete="off">
 
                 <button
-                    id="clearSearchBtn"
-                    class="clear-search"
+                    id="clearSearch"
                     onclick="clearSearch()"
-                    hidden
-                >
+                    hidden>
                     ×
                 </button>
 
             </div>
 
-
-            <button
-                class="profile-button"
-                onclick="openAdmin()"
-            >
-                <span class="profile-avatar">
-                    A
-                </span>
-
-                <span class="profile-name">
-                    SwarAJ
-                </span>
-
+            <button class="admin-top"
+                    onclick="showAdmin()">
+                ⚙ Admin
             </button>
 
         </header>
 
 
-        <!-- =============================================
-             HOME
-        ============================================== -->
-
-        <section
-            id="homeSection"
-            class="page-section active"
-        >
-
-            <!-- HERO -->
+        <!-- HOME -->
+        <section id="homeSection"
+                 class="section active">
 
             <div class="hero">
 
                 <div class="hero-content">
 
-                    <span class="hero-label">
-                        YOUR MUSIC EXPERIENCE
-                    </span>
+                    <small>
+                        YOUR PERSONAL MUSIC UNIVERSE
+                    </small>
 
                     <h1>
                         Welcome to
-                        <span>SwarAJ</span>
+                        <em>SwarAJ</em>
                     </h1>
 
                     <p>
-                        Your personal music universe.
-                        Discover, listen and enjoy
-                        your favourite songs.
+                        Listen to your complete music
+                        database with MP3 and YouTube
+                        songs in one playlist.
                     </p>
 
+                    <div class="actions">
 
-                    <div class="hero-buttons">
-
-                        <button
-                            id="heroPlayAllBtn"
-                            class="primary-button"
-                            onclick="playAll()"
-                        >
-                            <span>▶</span>
-                            Play All
+                        <button class="primary"
+                                onclick="playAll()">
+                            ▶ Play All
                         </button>
 
-                        <button
-                            class="secondary-button"
-                            onclick="showSection('songs')"
-                        >
+                        <button class="secondary"
+                                onclick="showSection('songs')">
                             Browse Songs
                         </button>
 
@@ -300,33 +166,18 @@
 
                 </div>
 
-                <div class="hero-decoration">
-
-                    <div class="hero-disc">
-
-                        <div class="disc-center">
-                            S
-                        </div>
-
-                    </div>
-
+                <div class="hero-disc">
+                    S
                 </div>
 
             </div>
 
 
-            <!-- QUICK ACTIONS -->
-
-            <div class="section-header">
+            <div class="section-head">
 
                 <div>
-                    <h2>
-                        Quick Actions
-                    </h2>
-
-                    <p>
-                        Start listening instantly
-                    </p>
+                    <h2>Quick Actions</h2>
+                    <p>Start listening instantly</p>
                 </div>
 
             </div>
@@ -334,690 +185,491 @@
 
             <div class="quick-grid">
 
-                <button
-                    class="quick-card"
-                    onclick="playAll()"
-                >
-                    <span class="quick-icon">
-                        ▶
+                <button onclick="playAll()">
+                    <b>▶</b>
+                    <span>
+                        Play All
+                        <small>Entire database</small>
                     </span>
-
-                    <div>
-                        <strong>
-                            Play All
-                        </strong>
-
-                        <small>
-                            Start your entire library
-                        </small>
-                    </div>
-
                 </button>
 
-
-                <button
-                    class="quick-card"
-                    onclick="showSection('songs')"
-                >
-                    <span class="quick-icon">
-                        ♫
+                <button onclick="showSection('songs')">
+                    <b>♫</b>
+                    <span>
+                        All Songs
+                        <small>Browse music</small>
                     </span>
-
-                    <div>
-                        <strong>
-                            All Songs
-                        </strong>
-
-                        <small>
-                            Browse your music
-                        </small>
-                    </div>
-
                 </button>
 
-
-                <button
-                    class="quick-card"
-                    onclick="showSection('categories')"
-                >
-                    <span class="quick-icon">
-                        ◈
+                <button onclick="showSection('categories')">
+                    <b>◈</b>
+                    <span>
+                        Categories
+                        <small>Browse by mood</small>
                     </span>
-
-                    <div>
-                        <strong>
-                            Categories
-                        </strong>
-
-                        <small>
-                            Explore by mood
-                        </small>
-                    </div>
-
                 </button>
 
-
-                <button
-                    class="quick-card"
-                    onclick="showSection('liked')"
-                >
-                    <span class="quick-icon">
-                        ♥
+                <button onclick="showSection('liked')">
+                    <b>♥</b>
+                    <span>
+                        Liked
+                        <small>Your favourites</small>
                     </span>
-
-                    <div>
-                        <strong>
-                            Liked Songs
-                        </strong>
-
-                        <small>
-                            Your favourites
-                        </small>
-                    </div>
-
                 </button>
 
             </div>
 
 
-            <!-- RECENT / SONGS -->
-
-            <div class="section-header">
+            <div class="section-head">
 
                 <div>
-                    <h2>
-                        Your Music
-                    </h2>
-
-                    <p>
-                        All songs from your SwarAJ library
+                    <h2>Your Music</h2>
+                    <p id="homeCount">
+                        Loading...
                     </p>
                 </div>
 
-                <button
-                    class="text-button"
-                    onclick="showSection('songs')"
-                >
+                <button class="link"
+                        onclick="showSection('songs')">
                     Show All
                 </button>
 
             </div>
 
 
-            <div
-                id="homeSongs"
-                class="song-grid"
-            >
-
-                <div class="loading-state">
-                    <div class="spinner"></div>
-                    <p>
-                        Loading songs...
-                    </p>
-                </div>
-
+            <div id="homeSongs"
+                 class="song-grid">
             </div>
 
 
-            <!-- CATEGORIES -->
-
-            <div class="section-header">
-
+            <div class="section-head">
                 <div>
-                    <h2>
-                        Browse Categories
-                    </h2>
-
-                    <p>
-                        Find music by category
-                    </p>
+                    <h2>Categories</h2>
                 </div>
-
             </div>
 
-
-            <div
-                id="homeCategories"
-                class="category-grid"
-            >
-
-                <div class="loading-state">
-                    <div class="spinner"></div>
-                    <p>
-                        Loading categories...
-                    </p>
-                </div>
-
+            <div id="homeCategories"
+                 class="category-grid">
             </div>
 
         </section>
 
 
-        <!-- =============================================
-             ALL SONGS
-        ============================================== -->
+        <!-- ALL SONGS -->
+        <section id="songsSection"
+                 class="section">
 
-        <section
-            id="songsSection"
-            class="page-section"
-        >
+            <div class="page-title">
 
-            <div class="page-heading">
+                <small>LIBRARY</small>
 
-                <span class="page-eyebrow">
-                    LIBRARY
-                </span>
-
-                <h1>
-                    All Songs
-                </h1>
+                <h1>All Songs</h1>
 
                 <p>
-                    Every song available in your SwarAJ database.
+                    Every song in your SwarAJ database.
                 </p>
 
             </div>
 
+            <div class="actions">
 
-            <div class="library-actions">
-
-                <button
-                    class="primary-button"
-                    onclick="playAll()"
-                >
+                <button class="primary"
+                        onclick="playAll()">
                     ▶ Play All
                 </button>
 
-                <button
-                    class="secondary-button"
-                    onclick="toggleShuffle()"
-                >
+                <button class="secondary"
+                        onclick="toggleShuffle()">
                     🔀 Shuffle
                 </button>
 
             </div>
 
-
-            <div
-                id="allSongs"
-                class="song-list"
-            >
-
-                <div class="loading-state">
-                    <div class="spinner"></div>
-                    <p>
-                        Loading songs...
-                    </p>
-                </div>
-
+            <div id="allSongs"
+                 class="song-list">
             </div>
 
         </section>
 
 
-        <!-- =============================================
-             CATEGORIES
-        ============================================== -->
+        <!-- CATEGORIES -->
+        <section id="categoriesSection"
+                 class="section">
 
-        <section
-            id="categoriesSection"
-            class="page-section"
-        >
+            <div class="page-title">
 
-            <div class="page-heading">
+                <small>DISCOVER</small>
 
-                <span class="page-eyebrow">
-                    DISCOVER
-                </span>
-
-                <h1>
-                    Categories
-                </h1>
+                <h1>Categories</h1>
 
                 <p>
-                    Browse your music collection by category.
+                    Browse your music collection.
                 </p>
 
             </div>
 
-
-            <div
-                id="categoriesGrid"
-                class="category-grid large"
-            >
-
-                <div class="loading-state">
-                    <div class="spinner"></div>
-                    <p>
-                        Loading categories...
-                    </p>
-                </div>
-
+            <div id="categoriesGrid"
+                 class="category-grid large">
             </div>
 
 
-            <div
-                id="categorySongs"
-                class="category-song-container"
-                hidden
-            >
+            <div id="categoryView"
+                 hidden>
 
-                <div class="section-header">
+                <div class="section-head">
 
                     <div>
-                        <h2 id="categoryTitle">
-                            Category
-                        </h2>
-
-                        <p id="categoryCount">
-                            0 songs
-                        </p>
-
+                        <h2 id="categoryTitle"></h2>
+                        <p id="categoryCount"></p>
                     </div>
 
-                    <button
-                        class="secondary-button"
-                        onclick="closeCategorySongs()"
-                    >
+                    <button class="secondary"
+                            onclick="closeCategory()">
                         Back
                     </button>
 
                 </div>
 
-
-                <div
-                    id="categorySongList"
-                    class="song-list"
-                ></div>
+                <div id="categorySongs"
+                     class="song-list">
+                </div>
 
             </div>
 
         </section>
 
 
-        <!-- =============================================
-             LIBRARY
-        ============================================== -->
+        <!-- LIBRARY -->
+        <section id="librarySection"
+                 class="section">
 
-        <section
-            id="librarySection"
-            class="page-section"
-        >
+            <div class="page-title">
 
-            <div class="page-heading">
+                <small>COLLECTION</small>
 
-                <span class="page-eyebrow">
-                    COLLECTION
-                </span>
-
-                <h1>
-                    Your Library
-                </h1>
+                <h1>Your Library</h1>
 
                 <p>
-                    Your complete SwarAJ music collection.
+                    Your complete SwarAJ collection.
                 </p>
 
             </div>
 
 
-            <div class="library-stat-grid">
-
-                <div class="stat-card">
-
-                    <span class="stat-icon">
-                        ♫
-                    </span>
-
-                    <strong id="librarySongCount">
-                        0
-                    </strong>
-
-                    <span>
-                        Songs
-                    </span>
-
-                </div>
-
-
-                <div class="stat-card">
-
-                    <span class="stat-icon">
-                        ◈
-                    </span>
-
-                    <strong id="libraryCategoryCount">
-                        0
-                    </strong>
-
-                    <span>
-                        Categories
-                    </span>
-
-                </div>
-
-
-                <div class="stat-card">
-
-                    <span class="stat-icon">
-                        ♥
-                    </span>
-
-                    <strong id="libraryLikedCount">
-                        0
-                    </strong>
-
-                    <span>
-                        Liked
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="section-header">
+            <div class="stats">
 
                 <div>
-                    <h2>
-                        Recently Available
-                    </h2>
+                    <b id="statSongs">0</b>
+                    <span>Songs</span>
                 </div>
 
-                <button
-                    class="primary-button"
-                    onclick="playAll()"
-                >
+                <div>
+                    <b id="statCats">0</b>
+                    <span>Categories</span>
+                </div>
+
+                <div>
+                    <b id="statLiked">0</b>
+                    <span>Liked</span>
+                </div>
+
+            </div>
+
+
+            <div class="section-head">
+
+                <h2>All Music</h2>
+
+                <button class="primary"
+                        onclick="playAll()">
                     ▶ Play All
                 </button>
 
             </div>
 
-
-            <div
-                id="librarySongs"
-                class="song-list"
-            ></div>
-
-        </section>
-
-
-        <!-- =============================================
-             LIKED
-        ============================================== -->
-
-        <section
-            id="likedSection"
-            class="page-section"
-        >
-
-            <div class="page-heading">
-
-                <span class="page-eyebrow">
-                    FAVOURITES
-                </span>
-
-                <h1>
-                    Liked Songs
-                </h1>
-
-                <p>
-                    Songs you marked as favourites.
-                </p>
-
-            </div>
-
-
-            <div
-                id="likedSongs"
-                class="song-list"
-            >
-
-                <div class="empty-state">
-
-                    <div class="empty-icon">
-                        ♥
-                    </div>
-
-                    <h3>
-                        No liked songs yet
-                    </h3>
-
-                    <p>
-                        Tap the heart button on a song
-                        to add it here.
-                    </p>
-
-                </div>
-
+            <div id="librarySongs"
+                 class="song-list">
             </div>
 
         </section>
 
 
-        <!-- =============================================
-             QUEUE
-        ============================================== -->
+        <!-- LIKED -->
+        <section id="likedSection"
+                 class="section">
 
-        <section
-            id="queueSection"
-            class="page-section"
-        >
+            <div class="page-title">
 
-            <div class="page-heading">
+                <small>FAVOURITES</small>
 
-                <span class="page-eyebrow">
-                    NOW PLAYING
-                </span>
-
-                <h1>
-                    Queue
-                </h1>
+                <h1>Liked Songs</h1>
 
                 <p>
-                    Songs waiting to play.
+                    Your saved favourites.
                 </p>
 
             </div>
 
+            <div id="likedSongs"
+                 class="song-list">
+            </div>
 
-            <div class="queue-actions">
+        </section>
 
-                <button
-                    class="primary-button"
-                    onclick="playAll()"
-                >
+
+        <!-- QUEUE -->
+        <section id="queueSection"
+                 class="section">
+
+            <div class="page-title">
+
+                <small>PLAYBACK</small>
+
+                <h1>Queue</h1>
+
+                <p>
+                    Current playlist order.
+                </p>
+
+            </div>
+
+            <div class="actions">
+
+                <button class="primary"
+                        onclick="playAll()">
                     ▶ Play All
                 </button>
 
-                <button
-                    class="secondary-button"
-                    onclick="clearQueue()"
-                >
-                    Clear Queue
+                <button class="secondary"
+                        onclick="clearQueue()">
+                    Clear
                 </button>
 
             </div>
 
+            <div id="queueList"
+                 class="song-list">
+            </div>
 
-            <div
-                id="queueList"
-                class="song-list"
-            >
+        </section>
 
-                <div class="empty-state">
 
-                    <div class="empty-icon">
-                        ☷
+        <!-- ADMIN -->
+        <section id="adminSection"
+                 class="section">
+
+            <div class="page-title">
+
+                <small>CONTROL CENTER</small>
+
+                <h1>Admin</h1>
+
+                <p>
+                    Manage your SwarAJ music database.
+                </p>
+
+            </div>
+
+
+            <div id="adminLoginBox"
+                 class="admin-card">
+
+                <h2>Admin Login</h2>
+
+                <p>
+                    Enter your Render ADMIN_KEY.
+                </p>
+
+                <form onsubmit="adminLogin(event)">
+
+                    <input
+                        id="adminKeyInput"
+                        type="password"
+                        placeholder="Admin key"
+                        required>
+
+                    <button class="primary"
+                            type="submit">
+                        Login
+                    </button>
+
+                </form>
+
+                <div id="adminMessage"
+                     class="message">
+                </div>
+
+            </div>
+
+
+            <div id="adminPanel"
+                 hidden>
+
+                <div class="admin-card">
+
+                    <div class="section-head">
+
+                        <div>
+                            <h2>Upload MP3</h2>
+
+                            <p>
+                                Maximum 100 MB.
+                            </p>
+                        </div>
+
                     </div>
 
-                    <h3>
-                        Queue is empty
-                    </h3>
 
-                    <p>
-                        Press Play All to start your music.
-                    </p>
+                    <form id="uploadForm"
+                          class="form-grid"
+                          onsubmit="uploadMP3(event)">
+
+                        <input
+                            name="title"
+                            placeholder="Title"
+                            required>
+
+                        <input
+                            name="artist"
+                            placeholder="Artist"
+                            value="SwarAJ">
+
+                        <input
+                            name="album"
+                            placeholder="Album"
+                            value="Singles">
+
+                        <input
+                            name="category"
+                            placeholder="Category"
+                            value="Other">
+
+                        <input
+                            name="coverUrl"
+                            placeholder="Cover URL (optional)">
+
+                        <input
+                            name="file"
+                            type="file"
+                            accept="audio/*,.mp3"
+                            required>
+
+                        <button
+                            class="primary"
+                            type="submit">
+                            Upload MP3
+                        </button>
+
+                    </form>
+
+                    <div id="uploadMessage"
+                         class="message">
+                    </div>
+
+                </div>
+
+
+                <div class="admin-card">
+
+                    <div class="section-head">
+
+                        <h2>Database Songs</h2>
+
+                        <button class="secondary"
+                                onclick="loadAdminSongs()">
+                            Refresh
+                        </button>
+
+                    </div>
+
+                    <div id="adminSongs"
+                         class="song-list">
+                    </div>
 
                 </div>
 
             </div>
 
         </section>
-
 
     </main>
 
 </div>
 
 
-<!-- =====================================================
-     DESKTOP / MOBILE MUSIC PLAYER
-====================================================== -->
+<!-- PLAYER -->
+<div id="player"
+     class="player">
 
-<div
-    id="musicPlayer"
-    class="music-player"
->
+    <div class="now-playing">
 
-    <!-- SONG INFORMATION -->
+        <img id="playerCover"
+             src="/images/ganpati.jpg">
 
-    <div class="player-song">
+        <div>
 
-        <div class="player-cover-wrapper">
+            <b id="playerTitle">
+                Nothing playing
+            </b>
 
-            <img
-                id="playerCover"
-                class="player-cover"
-                src="/images/ganpati.jpg"
-                alt="Now Playing"
-            >
-
-            <div
-                id="playerLoading"
-                class="player-loading"
-                hidden
-            >
-                <div class="mini-spinner"></div>
-            </div>
-
-        </div>
-
-
-        <div class="player-song-info">
-
-            <strong
-                id="playerTitle"
-            >
-                Select a song
-            </strong>
-
-            <span
-                id="playerArtist"
-            >
+            <small id="playerArtist">
                 SwarAJ
-            </span>
+            </small>
 
         </div>
 
-
-        <button
-            id="playerLikeBtn"
-            class="player-like"
-            title="Like"
-            onclick="toggleCurrentLike()"
-        >
+        <button id="likeCurrent"
+                onclick="toggleCurrentLike()">
             ♡
         </button>
 
     </div>
 
 
-    <!-- CENTER CONTROLS -->
-
     <div class="player-center">
 
-        <div class="player-controls">
+        <div class="controls">
 
-            <button
-                id="shuffleBtn"
-                class="player-control"
-                title="Shuffle"
-                onclick="toggleShuffle()"
-            >
+            <button id="shuffleBtn"
+                    onclick="toggleShuffle()">
                 🔀
             </button>
 
-
-            <button
-                id="previousBtn"
-                class="player-control"
-                title="Previous"
-                onclick="playPrevious()"
-            >
+            <button onclick="playPrevious()">
                 ⏮
             </button>
 
-
-            <button
-                id="playPauseBtn"
-                class="player-play"
-                title="Play / Pause"
-                onclick="togglePlay()"
-            >
+            <button id="playBtn"
+                    class="play-button"
+                    onclick="togglePlay()">
                 ▶
             </button>
 
-
-            <button
-                id="nextBtn"
-                class="player-control"
-                title="Next"
-                onclick="playNext()"
-            >
+            <button onclick="playNext()">
                 ⏭
             </button>
 
-
-            <button
-                id="repeatBtn"
-                class="player-control"
-                title="Repeat"
-                onclick="toggleRepeat()"
-            >
+            <button id="repeatBtn"
+                    onclick="toggleRepeat()">
                 🔁
             </button>
 
         </div>
 
 
-        <!-- PROGRESS -->
+        <div class="progress">
 
-        <div class="progress-container">
-
-            <span
-                id="currentTime"
-                class="time"
-            >
+            <span id="currentTime">
                 0:00
             </span>
 
+            <input id="progress"
+                   type="range"
+                   min="0"
+                   max="100"
+                   value="0">
 
-            <input
-                id="progressBar"
-                class="progress-bar"
-                type="range"
-                min="0"
-                max="100"
-                value="0"
-                step="0.1"
-            >
-
-
-            <span
-                id="duration"
-                class="time"
-            >
+            <span id="duration">
                 0:00
             </span>
 
@@ -1026,1050 +678,58 @@
     </div>
 
 
-    <!-- VOLUME -->
+    <div class="volume">
 
-    <div class="player-volume">
-
-        <button
-            id="volumeButton"
-            class="player-control"
-            onclick="toggleMute()"
-            title="Mute"
-        >
+        <button id="muteBtn"
+                onclick="toggleMute()">
             🔊
         </button>
 
-
-        <input
-            id="volumeBar"
-            class="volume-bar"
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value="1"
-        >
+        <input id="volume"
+               type="range"
+               min="0"
+               max="1"
+               step="0.01"
+               value="1">
 
     </div>
 
 </div>
 
 
-<!-- =====================================================
-     YOUTUBE PLAYER
-====================================================== -->
+<!-- YOUTUBE -->
+<div id="ytWrap"
+     class="youtube-wrapper"
+     hidden>
 
-<div
-    id="youtubePlayerModal"
-    class="youtube-modal"
-    hidden
->
+    <div class="youtube-box">
 
-    <div class="youtube-modal-content">
-
-        <button
-            class="youtube-close"
-            onclick="closeYouTubePlayer()"
-        >
+        <button class="youtube-close"
+                onclick="closeYouTube()">
             ×
         </button>
 
-
-        <div
-            id="youtubePlayer"
-            class="youtube-player"
-        ></div>
+        <div id="youtubePlayer"></div>
 
     </div>
 
 </div>
 
 
-<!-- =====================================================
-     MOBILE MINI PLAYER
-====================================================== -->
-
-<div
-    id="mobileMiniPlayer"
-    class="mobile-mini-player"
-    hidden
-    onclick="toggleMobilePlayer()"
->
-
-    <img
-        id="mobilePlayerCover"
-        src="/images/ganpati.jpg"
-        alt="Now Playing"
-    >
-
-    <div class="mobile-mini-info">
-
-        <strong
-            id="mobilePlayerTitle"
-        >
-            Select a song
-        </strong>
-
-        <span
-            id="mobilePlayerArtist"
-        >
-            SwarAJ
-        </span>
-
-    </div>
+<!-- AUDIO -->
+<audio id="audio"
+       preload="metadata">
+</audio>
 
 
-    <button
-        onclick="event.stopPropagation(); playPrevious()"
-    >
-        ⏮
-    </button>
-
-
-    <button
-        id="mobilePlayBtn"
-        onclick="event.stopPropagation(); togglePlay()"
-    >
-        ▶
-    </button>
-
-
-    <button
-        onclick="event.stopPropagation(); playNext()"
-    >
-        ⏭
-    </button>
-
+<!-- TOAST -->
+<div id="toast"
+     class="toast">
 </div>
 
 
-<!-- =====================================================
-     ADMIN MODAL
-====================================================== -->
-
-<div
-    id="adminModal"
-    class="modal"
-    hidden
->
-
-    <div class="modal-box">
-
-        <button
-            class="modal-close"
-            onclick="closeAdmin()"
-        >
-            ×
-        </button>
-
-
-        <div class="modal-icon">
-            ⚙
-        </div>
-
-
-        <h2>
-            SwarAJ Admin
-        </h2>
-
-        <p>
-            Enter your administrator key.
-        </p>
-
-
-        <form
-            id="adminForm"
-            onsubmit="submitAdmin(event)"
-        >
-
-            <label>
-                Admin Key
-            </label>
-
-
-            <input
-                id="adminKey"
-                type="password"
-                placeholder="Enter admin key"
-                autocomplete="off"
-                required
-            >
-
-
-            <div
-                id="adminError"
-                class="form-error"
-                hidden
-            ></div>
-
-
-            <button
-                type="submit"
-                class="primary-button full-width"
-            >
-                Continue
-            </button>
-
-        </form>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     TOAST
-====================================================== -->
-
-<div
-    id="toastContainer"
-    class="toast-container"
-></div>
-
-
-<!-- =====================================================
-     LOADING OVERLAY
-====================================================== -->
-
-<div
-    id="globalLoading"
-    class="global-loading"
-    hidden
->
-
-    <div class="loading-box">
-
-        <div class="spinner"></div>
-
-        <span>
-            Loading...
-        </span>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     HIDDEN HTML5 AUDIO
-====================================================== -->
-
-<audio
-    id="audioPlayer"
-    preload="metadata"
-></audio>
-
-
-<!-- =====================================================
-     YOUTUBE API
-====================================================== -->
-
-<script
-    src="https://www.youtube.com/iframe_api"
-></script>
-
-
-<!-- =====================================================
-     APPLICATION SCRIPT
-====================================================== -->
-
+<script src="https://www.youtube.com/iframe_api"></script>
 <script src="/script.js"></script>
-
-
-<!-- =====================================================
-     SEARCH
-====================================================== -->
-
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        const searchInput =
-            document.getElementById(
-                "searchInput"
-            );
-
-        const clearButton =
-            document.getElementById(
-                "clearSearchBtn"
-            );
-
-
-        if (!searchInput) {
-            return;
-        }
-
-
-        searchInput.addEventListener(
-            "input",
-            event => {
-
-                const value =
-                    event.target.value
-                        .trim()
-                        .toLowerCase();
-
-
-                if (clearButton) {
-                    clearButton.hidden =
-                        !value;
-                }
-
-
-                if (
-                    typeof window
-                        .searchSongs ===
-                    "function"
-                ) {
-
-                    window.searchSongs(
-                        value
-                    );
-
-                } else {
-
-                    filterVisibleSongs(
-                        value
-                    );
-
-                }
-
-            }
-        );
-
-    }
-);
-
-
-/* =========================================
-   SEARCH FALLBACK
-========================================= */
-
-function filterVisibleSongs(
-    query
-) {
-
-    const items =
-        document.querySelectorAll(
-            "[data-song-title]"
-        );
-
-
-    items.forEach(
-        item => {
-
-            const title =
-                (
-                    item.dataset
-                        .songTitle ||
-                    ""
-                ).toLowerCase();
-
-
-            const artist =
-                (
-                    item.dataset
-                        .songArtist ||
-                    ""
-                ).toLowerCase();
-
-
-            item.style.display =
-                !query ||
-                title.includes(query) ||
-                artist.includes(query)
-                    ? ""
-                    : "none";
-
-        }
-    );
-}
-
-
-/* =========================================
-   CLEAR SEARCH
-========================================= */
-
-function clearSearch() {
-
-    const input =
-        document.getElementById(
-            "searchInput"
-        );
-
-    const button =
-        document.getElementById(
-            "clearSearchBtn"
-        );
-
-
-    if (input) {
-        input.value = "";
-        input.focus();
-    }
-
-
-    if (button) {
-        button.hidden = true;
-    }
-
-
-    if (
-        typeof window
-            .searchSongs ===
-        "function"
-    ) {
-
-        window.searchSongs("");
-
-    } else {
-
-        filterVisibleSongs("");
-
-    }
-
-}
-
-
-/* =========================================
-   FOCUS SEARCH
-========================================= */
-
-function focusSearch() {
-
-    showSection("home");
-
-    const input =
-        document.getElementById(
-            "searchInput"
-        );
-
-    if (input) {
-        input.focus();
-    }
-
-}
-
-
-/* =========================================
-   SIDEBAR
-========================================= */
-
-function toggleSidebar() {
-
-    const sidebar =
-        document.getElementById(
-            "sidebar"
-        );
-
-    if (sidebar) {
-        sidebar.classList.toggle(
-            "open"
-        );
-    }
-
-}
-
-
-/* =========================================
-   SECTIONS
-========================================= */
-
-function showSection(
-    section
-) {
-
-    const sections = {
-
-        home:
-            "homeSection",
-
-        songs:
-            "songsSection",
-
-        categories:
-            "categoriesSection",
-
-        library:
-            "librarySection",
-
-        liked:
-            "likedSection",
-
-        queue:
-            "queueSection"
-
-    };
-
-
-    Object.values(sections)
-        .forEach(
-            id => {
-
-                const element =
-                    document.getElementById(
-                        id
-                    );
-
-                if (element) {
-                    element.classList.remove(
-                        "active"
-                    );
-                }
-
-            }
-        );
-
-
-    const target =
-        document.getElementById(
-            sections[section] ||
-            sections.home
-        );
-
-
-    if (target) {
-        target.classList.add(
-            "active"
-        );
-    }
-
-
-    document
-        .querySelectorAll(
-            ".nav-item"
-        )
-        .forEach(
-            item => {
-
-                item.classList.remove(
-                    "active"
-                );
-
-            }
-        );
-
-
-    const nav =
-        document.querySelector(
-            `.nav-item[data-section="${section}"]`
-        );
-
-
-    if (nav) {
-        nav.classList.add(
-            "active"
-        );
-    }
-
-
-    const sidebar =
-        document.getElementById(
-            "sidebar"
-        );
-
-    if (
-        sidebar &&
-        window.innerWidth < 900
-    ) {
-        sidebar.classList.remove(
-            "open"
-        );
-    }
-
-}
-
-
-/* =========================================
-   MOBILE PLAYER
-========================================= */
-
-function toggleMobilePlayer() {
-
-    const player =
-        document.getElementById(
-            "musicPlayer"
-        );
-
-    if (!player) {
-        return;
-    }
-
-
-    player.classList.toggle(
-        "mobile-expanded"
-    );
-
-}
-
-
-/* =========================================
-   ADMIN
-========================================= */
-
-function openAdmin() {
-
-    const modal =
-        document.getElementById(
-            "adminModal"
-        );
-
-    if (modal) {
-        modal.hidden = false;
-    }
-
-}
-
-
-function closeAdmin() {
-
-    const modal =
-        document.getElementById(
-            "adminModal"
-        );
-
-    if (modal) {
-        modal.hidden = true;
-    }
-
-}
-
-
-/* =========================================
-   ADMIN SUBMIT
-========================================= */
-
-async function submitAdmin(
-    event
-) {
-
-    event.preventDefault();
-
-
-    const input =
-        document.getElementById(
-            "adminKey"
-        );
-
-    const error =
-        document.getElementById(
-            "adminError"
-        );
-
-
-    const key =
-        input?.value.trim();
-
-
-    if (!key) {
-        return;
-    }
-
-
-    try {
-
-        const response =
-            await fetch(
-                "/api/admin/login",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body:
-                        JSON.stringify({
-                            key
-                        })
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if (
-            response.ok &&
-            data.success
-        ) {
-
-            closeAdmin();
-
-            showToast(
-                "Admin login successful",
-                "success"
-            );
-
-
-            if (
-                data.redirect
-            ) {
-
-                window.location.href =
-                    data.redirect;
-
-            }
-
-            return;
-        }
-
-
-        if (error) {
-
-            error.textContent =
-                data.message ||
-                "Invalid admin key";
-
-            error.hidden = false;
-
-        }
-
-    } catch (err) {
-
-        console.error(err);
-
-        if (error) {
-
-            error.textContent =
-                "Unable to connect to server";
-
-            error.hidden = false;
-
-        }
-
-    }
-
-}
-
-
-/* =========================================
-   CATEGORY SONGS
-========================================= */
-
-function closeCategorySongs() {
-
-    const container =
-        document.getElementById(
-            "categorySongs"
-        );
-
-    if (container) {
-        container.hidden = true;
-    }
-
-}
-
-
-/* =========================================
-   QUEUE
-========================================= */
-
-function clearQueue() {
-
-    if (
-        window.playerState &&
-        Array.isArray(
-            window.playerState.queue
-        )
-    ) {
-
-        window.playerState.queue =
-            [];
-
-        window.playerState.index =
-            -1;
-
-    }
-
-
-    const queue =
-        document.getElementById(
-            "queueList"
-        );
-
-
-    if (queue) {
-
-        queue.innerHTML = `
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    ☷
-                </div>
-
-                <h3>
-                    Queue is empty
-                </h3>
-
-                <p>
-                    Press Play All to start your music.
-                </p>
-
-            </div>
-        `;
-
-    }
-
-
-    showToast(
-        "Queue cleared",
-        "success"
-    );
-
-}
-
-
-/* =========================================
-   CURRENT LIKE
-========================================= */
-
-function toggleCurrentLike() {
-
-    if (
-        typeof window
-            .toggleCurrentLikeFromPlayer ===
-        "function"
-    ) {
-
-        window.toggleCurrentLikeFromPlayer();
-
-    }
-
-}
-
-
-/* =========================================
-   TOAST
-========================================= */
-
-function showToast(
-    message,
-    type = "info"
-) {
-
-    const container =
-        document.getElementById(
-            "toastContainer"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    const toast =
-        document.createElement(
-            "div"
-        );
-
-
-    toast.className =
-        `toast toast-${type}`;
-
-
-    toast.innerHTML = `
-        <span>${escapeHtml(
-            message
-        )}</span>
-    `;
-
-
-    container.appendChild(
-        toast
-    );
-
-
-    setTimeout(
-        () => {
-
-            toast.classList.add(
-                "hide"
-            );
-
-            setTimeout(
-                () => toast.remove(),
-                300
-            );
-
-        },
-        3000
-    );
-
-}
-
-
-/* =========================================
-   ESCAPE HTML
-========================================= */
-
-function escapeHtml(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-/* =========================================
-   MODAL CLOSE
-========================================= */
-
-document.addEventListener(
-    "click",
-    event => {
-
-        const modal =
-            document.getElementById(
-                "adminModal"
-            );
-
-
-        if (
-            modal &&
-            event.target === modal
-        ) {
-            closeAdmin();
-        }
-
-    }
-);
-
-
-/* =========================================
-   ESC KEY
-========================================= */
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key ===
-            "Escape"
-        ) {
-
-            closeAdmin();
-
-            closeYouTubePlayer();
-
-        }
-
-    }
-);
-
-
-/* =========================================
-   YOUTUBE MODAL
-========================================= */
-
-function closeYouTubePlayer() {
-
-    const modal =
-        document.getElementById(
-            "youtubePlayerModal"
-        );
-
-
-    const player =
-        document.getElementById(
-            "youtubePlayer"
-        );
-
-
-    if (player) {
-        player.innerHTML = "";
-    }
-
-
-    if (modal) {
-        modal.hidden = true;
-    }
-
-}
-
-
-/* =========================================
-   MUTE
-========================================= */
-
-function toggleMute() {
-
-    const audio =
-        document.getElementById(
-            "audioPlayer"
-        );
-
-
-    if (!audio) {
-        return;
-    }
-
-
-    audio.muted =
-        !audio.muted;
-
-
-    const button =
-        document.getElementById(
-            "volumeButton"
-        );
-
-
-    if (button) {
-
-        button.textContent =
-            audio.muted
-                ? "🔇"
-                : "🔊";
-
-    }
-
-}
-
-
-/* =========================================
-   INITIAL PAGE
-========================================= */
-
-window.addEventListener(
-    "load",
-    () => {
-
-        showSection("home");
-
-    }
-);
-
-</script>
 
 </body>
 </html>

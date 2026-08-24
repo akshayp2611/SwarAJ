@@ -2,100 +2,332 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#08070d">
-  <title>स्वरAJ — Music for Every Mood</title>
-  <link rel="stylesheet" href="/styles.css">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#08070d"
+  >
+
+  <meta
+    name="description"
+    content="SwarAJ Premium Music"
+  >
+
+  <title>स्वरAJ — Premium Music</title>
+
+  <link
+    rel="stylesheet"
+    href="/styles.css"
+  >
 </head>
+
 <body>
-  <div class="app">
-    <aside class="sidebar" id="sidebar">
-      <div class="brand"><span>स्वर</span><b>AJ</b></div>
-      <button class="nav active" data-view="home">⌂ <span>Home</span></button>
-      <button class="nav" data-view="songs">♫ <span>All Songs</span></button>
-      <button class="nav" data-view="liked">♡ <span>Liked Songs</span></button>
-      <div class="side-title">Categories</div>
-      <div id="sideCategories"></div>
-    </aside>
 
-    <main class="main">
-      <header class="topbar">
-        <button class="hamburger" id="menuBtn">☰</button>
-        <div class="mobile-brand"><span>स्वर</span><b>AJ</b></div>
-        <div class="search-wrap">
-          <span>⌕</span>
-          <input id="search" placeholder="Search songs, artists or albums">
+<div class="app">
+
+  <aside
+    class="sidebar"
+    id="sidebar"
+  >
+
+    <div class="brand">
+      <span>स्वर</span><b>AJ</b>
+    </div>
+
+    <button
+      class="nav active"
+      data-view="home"
+    >
+      <span>⌂</span>
+      <span>Home</span>
+    </button>
+
+    <button
+      class="nav"
+      data-view="songs"
+    >
+      <span>♫</span>
+      <span>All Songs</span>
+    </button>
+
+    <button
+      class="nav"
+      data-view="liked"
+    >
+      <span>♡</span>
+      <span>Liked Songs</span>
+    </button>
+
+    <div class="side-title">
+      Categories
+    </div>
+
+    <div id="sideCategories"></div>
+
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+
+      <button
+        class="hamburger"
+        id="menuBtn"
+      >
+        ☰
+      </button>
+
+      <div class="mobile-brand">
+        <span>स्वर</span><b>AJ</b>
+      </div>
+
+      <div class="search-wrap">
+
+        <span>⌕</span>
+
+        <input
+          id="search"
+          type="search"
+          autocomplete="off"
+          placeholder="Search songs, artists or albums"
+        >
+
+      </div>
+
+      <div class="avatar">
+        A
+      </div>
+
+    </header>
+
+    <section id="content">
+
+      <section class="hero">
+
+        <div class="hero-copy">
+
+          <p class="eyebrow">
+            WELCOME TO स्वरAJ
+          </p>
+
+          <h1>
+            Music for<br>
+            <strong>Every Mood</strong>
+          </h1>
+
+          <p class="hero-text">
+            Your personal premium music library.
+            Discover, play and enjoy your music
+            anytime, anywhere.
+          </p>
+
+          <button
+            class="primary"
+            id="exploreBtn"
+          >
+            Explore Now
+            <span>→</span>
+          </button>
+
         </div>
-        <div class="avatar">A</div>
-      </header>
 
-      <section id="content">
-        <section class="hero">
-          <div class="hero-copy">
-            <p class="eyebrow">WELCOME TO स्वरAJ</p>
-            <h1>Music for<br><strong>Every Mood</strong></h1>
-            <p class="hero-text">Discover, play and enjoy your favorite music anytime, anywhere.</p>
-            <button class="primary" id="exploreBtn">Explore Now <span>→</span></button>
-          </div>
-          <div class="hero-art">
-            <div class="vinyl"></div>
-            <div class="phone-note">♫</div>
-            <div class="count-card"><strong id="songCount">0</strong><span>Songs<br>Available</span></div>
-          </div>
-        </section>
+        <div class="hero-art">
 
-        <section class="section">
-          <div class="section-head">
-            <div><h2>Categories</h2><p>Browse your music</p></div>
-            <button class="text-btn" id="viewAll">View all →</button>
-          </div>
-          <div class="category-grid" id="categories"></div>
-        </section>
+          <div class="vinyl"></div>
 
-        <section class="section" id="songsSection">
-          <div class="section-head">
-            <div><h2 id="songsTitle">All Songs</h2><p id="songsSubtitle">Your complete music library</p></div>
+          <div class="phone-note">
+            ♫
           </div>
-          <div id="songList" class="song-list"></div>
-        </section>
+
+          <div class="count-card">
+
+            <strong id="songCount">
+              0
+            </strong>
+
+            <span>
+              Songs<br>
+              Available
+            </span>
+
+          </div>
+
+        </div>
+
       </section>
-    </main>
+
+      <section class="section">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Categories</h2>
+            <p>Browse your music</p>
+          </div>
+
+          <button
+            class="text-btn"
+            id="viewAll"
+          >
+            View all →
+          </button>
+
+        </div>
+
+        <div
+          class="category-grid"
+          id="categories"
+        ></div>
+
+      </section>
+
+      <section
+        class="section"
+        id="songsSection"
+      >
+
+        <div class="section-head">
+
+          <div>
+            <h2 id="songsTitle">
+              All Songs
+            </h2>
+
+            <p id="songsSubtitle">
+              Your complete music library
+            </p>
+          </div>
+
+        </div>
+
+        <div
+          id="songList"
+          class="song-list"
+        ></div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+</div>
+
+<div
+  class="overlay"
+  id="overlay"
+></div>
+
+<footer class="player">
+
+  <div class="now">
+
+    <img
+      id="cover"
+      src="/images/default-cover.svg"
+      alt=""
+    >
+
+    <div class="now-text">
+
+      <b id="nowTitle">
+        Select a song to play
+      </b>
+
+      <span id="nowArtist">
+        स्वरAJ
+      </span>
+
+    </div>
+
+    <button
+      class="like-player"
+      id="likeBtn"
+    >
+      ♡
+    </button>
+
   </div>
 
-  <div class="overlay" id="overlay"></div>
+  <div class="controls">
 
-  <footer class="player">
-    <div class="now">
-      <img id="cover" src="/images/default-cover.svg" alt="">
-      <div class="now-text">
-        <b id="nowTitle">Select a song to play</b>
-        <span id="nowArtist">स्वरAJ</span>
-      </div>
-      <button class="like-player" id="likeBtn">♡</button>
+    <div class="control-row">
+
+      <button id="shuffleBtn">
+        🔀
+      </button>
+
+      <button id="prevBtn">
+        |◀
+      </button>
+
+      <button
+        class="play"
+        id="playBtn"
+      >
+        ▶
+      </button>
+
+      <button id="nextBtn">
+        ▶|
+      </button>
+
+      <button id="repeatBtn">
+        ↻
+      </button>
+
     </div>
 
-    <div class="controls">
-      <div class="control-row">
-        <button id="shuffleBtn" title="Shuffle">🔀</button>
-        <button id="prevBtn" title="Previous">|◀</button>
-        <button class="play" id="playBtn">▶</button>
-        <button id="nextBtn" title="Next">▶|</button>
-        <button id="repeatBtn" title="Repeat">↻</button>
-      </div>
-      <div class="progress-row">
-        <span id="currentTime">0:00</span>
-        <input id="progress" type="range" min="0" max="100" value="0">
-        <span id="duration">0:00</span>
-      </div>
+    <div class="progress-row">
+
+      <span id="currentTime">
+        0:00
+      </span>
+
+      <input
+        id="progress"
+        type="range"
+        min="0"
+        max="100"
+        value="0"
+      >
+
+      <span id="duration">
+        0:00
+      </span>
+
     </div>
 
-    <div class="volume">
-      <span>🔊</span>
-      <input id="volume" type="range" min="0" max="1" step="0.01" value="0.9">
-    </div>
-  </footer>
+  </div>
 
-  <audio id="audio" preload="metadata"></audio>
-  <script src="/script.js"></script>
+  <div class="volume">
+
+    <span>🔊</span>
+
+    <input
+      id="volume"
+      type="range"
+      min="0"
+      max="1"
+      step="0.01"
+      value="0.9"
+    >
+
+  </div>
+
+</footer>
+
+<audio
+  id="audio"
+  preload="metadata"
+></audio>
+
+<script src="/script.js"></script>
+
 </body>
 </html>

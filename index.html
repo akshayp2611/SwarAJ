@@ -1,368 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080b14">
-  <title>SwarAJ Music</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
+<div class="music-player">
 
-<header class="topbar">
-  <div class="brand">
-    <div class="brand-logo">S</div>
-    <div>
-      <h1>SwarAJ</h1>
-      <span>Music</span>
-    </div>
-  </div>
+    <div class="player-song">
 
-  <div class="search-box">
-    <span>⌕</span>
-    <input id="searchInput"
-           type="search"
-           placeholder="Search songs, artists, albums..."
-           autocomplete="off">
-  </div>
+        <img
+            id="playerCover"
+            src="/images/ganpati.jpg"
+            alt="Now Playing"
+        >
 
-  <button id="openAdmin" class="admin-top-btn" type="button">
-    ⚙ Admin
-  </button>
-</header>
-
-<nav class="navigation">
-  <button class="nav-btn active" data-target="home" type="button">Home</button>
-  <button class="nav-btn" data-target="songs" type="button">Songs</button>
-  <button class="nav-btn" data-target="categories" type="button">Categories</button>
-  <button class="nav-btn" data-target="admin" type="button">Admin</button>
-</nav>
-
-<main>
-
-<section id="home" class="page-section active">
-  <div class="hero">
-    <div class="hero-content">
-      <span class="eyebrow">SWARAJ MUSIC</span>
-      <h2>Your music.<br>Your way.</h2>
-      <p>
-        Search and play MP3 files, direct MP3 URLs and
-        YouTube songs stored in your PostgreSQL database.
-      </p>
-      <button class="primary-btn" id="exploreMusicBtn" type="button">
-        Explore Music
-      </button>
-    </div>
-    <div class="hero-glow"></div>
-  </div>
-
-  <div class="section-header">
-    <div>
-      <span class="eyebrow">QUICK PICKS</span>
-      <h2>Featured Songs</h2>
-    </div>
-    <span id="songCount" class="song-count">0 songs</span>
-  </div>
-
-  <div id="featuredList" class="featured-grid"></div>
-</section>
-
-<section id="songs" class="page-section">
-  <div class="section-header">
-    <div>
-      <span class="eyebrow">LIBRARY</span>
-      <h2>All Songs</h2>
-    </div>
-    <button class="secondary-btn" id="refreshSongsBtn" type="button">
-      ↻ Refresh
-    </button>
-  </div>
-
-  <div id="songList" class="song-grid">
-    <div class="loading">Loading songs...</div>
-  </div>
-</section>
-
-<section id="categories" class="page-section">
-  <div class="section-header">
-    <div>
-      <span class="eyebrow">BROWSE</span>
-      <h2>Categories</h2>
-    </div>
-  </div>
-
-  <div id="categoryList" class="category-grid"></div>
-</section>
-
-<section id="admin" class="page-section">
-  <div class="section-header">
-    <div>
-      <span class="eyebrow">MANAGEMENT</span>
-      <h2>Admin Panel</h2>
-    </div>
-  </div>
-
-  <div id="adminLoginPanel" class="admin-card">
-    <div class="admin-icon">🔐</div>
-    <h3>Admin Login</h3>
-    <p>Enter the <code>ADMIN_KEY</code> configured on Render.</p>
-
-    <div class="admin-login-row">
-      <input id="adminKey"
-             type="password"
-             placeholder="Admin key"
-             autocomplete="current-password">
-
-      <button id="adminLoginBtn"
-              class="primary-btn"
-              type="button">
-        Login
-      </button>
-    </div>
-  </div>
-
-  <div id="adminDashboard" class="hidden">
-
-    <div class="admin-actions">
-      <button id="adminLogoutBtn" class="secondary-btn" type="button">
-        Logout
-      </button>
-      <button id="refreshAdminSongs" class="secondary-btn" type="button">
-        ↻ Refresh
-      </button>
-    </div>
-
-    <div class="admin-card">
-      <div class="card-heading">
-        <span class="card-icon">⬆</span>
         <div>
-          <h3>Upload MP3 File</h3>
-          <p>The audio file is stored in PostgreSQL BYTEA.</p>
-        </div>
-      </div>
+            <strong id="playerTitle">
+                Select a song
+            </strong>
 
-      <form id="uploadForm" enctype="multipart/form-data">
-        <div class="form-grid">
-          <label>
-            Title *
-            <input name="title" required placeholder="Song title">
-          </label>
-
-          <label>
-            Artist
-            <input name="artist" value="SwarAJ">
-          </label>
-
-          <label>
-            Album
-            <input name="album" value="Singles">
-          </label>
-
-          <label>
-            Category
-            <input name="category" value="Bhakti">
-          </label>
-
-          <label class="full">
-            Cover URL
-            <input name="coverUrl" type="url" placeholder="https://...">
-          </label>
-
-          <label class="full">
-            MP3 / Audio File *
-            <input name="file"
-                   type="file"
-                   accept=".mp3,.m4a,.wav,.ogg,.aac,audio/*"
-                   required>
-          </label>
+            <span id="playerArtist">
+                SwarAJ
+            </span>
         </div>
 
-        <button class="primary-btn" type="submit">
-          Upload Song
+    </div>
+
+    <div class="player-controls">
+
+        <button
+            id="shuffleBtn"
+            title="Shuffle"
+        >
+            🔀
         </button>
-      </form>
-    </div>
 
-    <div class="admin-card">
-      <div class="card-heading">
-        <span class="card-icon">🔗</span>
-        <div>
-          <h3>Add MP3 URL</h3>
-          <p>Store a direct MP3/audio URL in PostgreSQL.</p>
-        </div>
-      </div>
-
-      <form id="mp3UrlForm">
-        <div class="form-grid">
-          <label>
-            Title *
-            <input name="title" required placeholder="Song title">
-          </label>
-
-          <label>
-            Artist
-            <input name="artist" value="SwarAJ">
-          </label>
-
-          <label>
-            Album
-            <input name="album" value="Singles">
-          </label>
-
-          <label>
-            Category
-            <input name="category" value="Other">
-          </label>
-
-          <label class="full">
-            MP3 / Audio URL *
-            <input name="audioUrl"
-                   type="url"
-                   required
-                   placeholder="https://example.com/song.mp3">
-          </label>
-
-          <label class="full">
-            Cover URL
-            <input name="coverUrl" type="url" placeholder="https://...">
-          </label>
-        </div>
-
-        <button class="primary-btn" type="submit">
-          Add MP3 URL
+        <button
+            id="previousBtn"
+            title="Previous"
+        >
+            ⏮
         </button>
-      </form>
-    </div>
 
-    <div class="admin-card">
-      <div class="card-heading">
-        <span class="card-icon">▶</span>
-        <div>
-          <h3>Add YouTube Song</h3>
-          <p>Store the YouTube URL and video ID in PostgreSQL.</p>
-        </div>
-      </div>
-
-      <form id="youtubeForm">
-        <div class="form-grid">
-          <label>
-            Title *
-            <input name="title" required placeholder="Song title">
-          </label>
-
-          <label>
-            Artist
-            <input name="artist" value="SwarAJ">
-          </label>
-
-          <label>
-            Album
-            <input name="album" value="Singles">
-          </label>
-
-          <label>
-            Category
-            <input name="category" value="Other">
-          </label>
-
-          <label class="full">
-            YouTube URL *
-            <input name="youtubeUrl"
-                   type="url"
-                   required
-                   placeholder="https://www.youtube.com/watch?v=...">
-          </label>
-
-          <label class="full">
-            Cover URL
-            <input name="coverUrl"
-                   type="url"
-                   placeholder="Optional custom cover">
-          </label>
-        </div>
-
-        <button class="primary-btn" type="submit">
-          Add YouTube Song
+        <button
+            id="playPauseBtn"
+            class="main-play"
+            title="Play / Pause"
+        >
+            ▶
         </button>
-      </form>
+
+        <button
+            id="nextBtn"
+            title="Next"
+        >
+            ⏭
+        </button>
+
+        <button
+            id="repeatBtn"
+            title="Repeat"
+        >
+            🔁
+        </button>
+
     </div>
 
-    <div class="admin-card">
-      <div class="card-heading">
-        <div>
-          <h3>Database Songs</h3>
-          <p>Delete uploaded/database entries only.</p>
-        </div>
-      </div>
-
-      <div id="adminSongList" class="admin-song-list">
-        Login to load songs.
-      </div>
-    </div>
-
-  </div>
-</section>
-
-</main>
-
-<!-- Official YouTube IFrame API player.
-     It is kept tiny; the separate Video button opens the full video. -->
-<div id="youtubePlayer" class="youtube-player"></div>
-
-<div id="videoModal" class="modal">
-  <div class="modal-content">
-    <button class="modal-close" id="closeVideoBtn" type="button">×</button>
-    <iframe id="videoFrame"
-            title="YouTube Video"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen></iframe>
-  </div>
 </div>
 
-<div id="musicPlayer" class="music-player">
-  <img id="playerCover" src="/images/ganpati.jpg" alt="">
-
-  <div class="player-info">
-    <strong id="playerTitle">Nothing playing</strong>
-    <span id="playerArtist">SwarAJ</span>
-    <small id="playerSource">—</small>
-  </div>
-
-  <div class="player-controls">
-    <button id="previousBtn" type="button">|◀</button>
-    <button id="playPause" class="main-play" type="button">▶</button>
-    <button id="nextBtn" type="button">▶|</button>
-  </div>
-
-  <div class="progress-area">
-    <span id="currentTime">0:00</span>
-    <input id="progressBar" type="range" min="0" max="100" value="0">
-    <span id="duration">0:00</span>
-  </div>
-
-  <div class="volume">
-    🔊
-    <input id="volumeBar" type="range" min="0" max="100" value="100">
-  </div>
-</div>
-
-<div id="toastContainer" class="toast-container"></div>
-
-<script>
-  document.getElementById('exploreMusicBtn')?.addEventListener('click', () => {
-    showSection('songs');
-  });
-
-  document.getElementById('refreshSongsBtn')?.addEventListener('click', () => {
-    loadSongs();
-  });
-
-  document.getElementById('closeVideoBtn')?.addEventListener('click', () => {
-    closeVideoModal();
-  });
-</script>
-
-<script src="/script.js"></script>
-
-</body>
-</html>
+<div
+    id="youtubePlayer"
+    class="youtube-player"
+></div>

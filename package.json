@@ -1,8 +1,7 @@
 {
   "name": "swaraj-music",
   "version": "3.0.0",
-  "description": "स्वरAJ Premium Music Platform",
-  "private": true,
+  "description": "स्वरAJ premium music streaming platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -12,6 +11,8 @@
   },
   "dependencies": {
     "cloudinary": "^2.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "multer": "^2.0.2",
     "pg": "^8.16.3"

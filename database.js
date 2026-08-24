@@ -48,7 +48,10 @@ pool.on("connect", () => {
 });
 
 pool.on("error", (error) => {
-  console.error("❌ PostgreSQL pool error:", error.message);
+  console.error(
+    "❌ PostgreSQL pool error:",
+    error.message
+  );
 });
 
 async function query(text, params = []) {

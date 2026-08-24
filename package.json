@@ -1,13 +1,17 @@
 {
   "name": "swaraj-premium-music",
   "version": "5.0.0",
-  "description": "स्वरAJ — Premium MP3 + YouTube music platform",
+  "private": true,
+  "description": "SwarAJ MP3 and YouTube music streaming platform",
   "main": "server.js",
-  "scripts": {"start":"node server.js","dev":"node server.js"},
-  "engines": {"node": ">=20"},
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
-    "cloudinary": "^2.7.0",
-    "express": "^4.21.2",
+    "express": "^5.1.0",
     "multer": "^2.0.2",
     "pg": "^8.16.3"
   }

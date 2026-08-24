@@ -1,48 +1,24 @@
 CREATE TABLE IF NOT EXISTS categories (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(150) NOT NULL UNIQUE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    name VARCHAR(150) UNIQUE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS songs (
     id BIGSERIAL PRIMARY KEY,
-
     title VARCHAR(500) NOT NULL,
-
-    artist VARCHAR(300)
-        DEFAULT 'Unknown Artist',
-
-    album VARCHAR(300)
-        DEFAULT '',
-
-    category_id BIGINT
-        REFERENCES categories(id)
-        ON DELETE SET NULL,
-
+    artist VARCHAR(300) DEFAULT 'SwarAJ',
+    album VARCHAR(300),
+    category_id BIGINT REFERENCES categories(id) ON DELETE SET NULL,
     filename VARCHAR(1000) NOT NULL,
-
-    storage_path VARCHAR(2000)
-        NOT NULL UNIQUE,
-
-    mime_type VARCHAR(150)
-        DEFAULT 'audio/mpeg',
-
-    file_size BIGINT
-        NOT NULL DEFAULT 0,
-
-    duration DOUBLE PRECISION
-        NOT NULL DEFAULT 0,
-
+    storage_path VARCHAR(2000) UNIQUE NOT NULL,
+    mime_type VARCHAR(150) DEFAULT 'audio/mpeg',
+    file_size BIGINT DEFAULT 0,
+    duration DOUBLE PRECISION DEFAULT 0,
     cover_path VARCHAR(2000),
-
-    play_count BIGINT
-        NOT NULL DEFAULT 0,
-
-    created_at TIMESTAMPTZ
-        NOT NULL DEFAULT NOW(),
-
-    updated_at TIMESTAMPTZ
-        NOT NULL DEFAULT NOW()
+    play_count BIGINT DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_songs_title
@@ -51,114 +27,53 @@ ON songs(title);
 CREATE INDEX IF NOT EXISTS idx_songs_artist
 ON songs(artist);
 
-CREATE INDEX IF NOT EXISTS idx_songs_album
-ON songs(album);
-
 CREATE INDEX IF NOT EXISTS idx_songs_category
 ON songs(category_id);
 
-CREATE INDEX IF NOT EXISTS idx_songs_created
-ON songs(created_at DESC);
-
-
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
-
-    username VARCHAR(100)
-        NOT NULL UNIQUE,
-
-    email VARCHAR(255)
-        UNIQUE,
-
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE,
     password_hash TEXT,
-
-    created_at TIMESTAMPTZ
-        NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 
 CREATE TABLE IF NOT EXISTS playlists (
     id BIGSERIAL PRIMARY KEY,
-
-    user_id BIGINT
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-    name VARCHAR(200)
-        NOT NULL,
-
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(200) NOT NULL,
     description TEXT,
-
-    created_at TIMESTAMPTZ
-        NOT NULL DEFAULT NOW(),
-
-    updated_at TIMESTAMPTZ
-        NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 
 CREATE TABLE IF NOT EXISTS playlist_songs (
-    playlist_id BIGINT
-        REFERENCES playlists(id)
-        ON DELETE CASCADE,
-
-    song_id BIGINT
-        REFERENCES songs(id)
-        ON DELETE CASCADE,
-
-    position INTEGER
-        NOT NULL DEFAULT 0,
-
-    added_at TIMESTAMPTZ
-        NOT NULL DEFAULT NOW(),
-
-    PRIMARY KEY (
-        playlist_id,
-        song_id
-    )
+    playlist_id BIGINT REFERENCES playlists(id) ON DELETE CASCADE,
+    song_id BIGINT REFERENCES songs(id) ON DELETE CASCADE,
+    position INTEGER DEFAULT 0,
+    added_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (playlist_id, song_id)
 );
-
 
 CREATE TABLE IF NOT EXISTS favorites (
-    user_id BIGINT
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-    song_id BIGINT
-        REFERENCES songs(id)
-        ON DELETE CASCADE,
-
-    created_at TIMESTAMPTZ
-        NOT NULL DEFAULT NOW(),
-
-    PRIMARY KEY (
-        user_id,
-        song_id
-    )
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    song_id BIGINT REFERENCES songs(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (user_id, song_id)
 );
-
 
 CREATE TABLE IF NOT EXISTS play_history (
     id BIGSERIAL PRIMARY KEY,
-
-    user_id BIGINT
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-    song_id BIGINT
-        REFERENCES songs(id)
-        ON DELETE CASCADE,
-
-    played_at TIMESTAMPTZ
-        NOT NULL DEFAULT NOW()
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    song_id BIGINT REFERENCES songs(id) ON DELETE CASCADE,
+    played_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-
-CREATE INDEX IF NOT EXISTS idx_history_user
+CREATE INDEX IF NOT EXISTS idx_play_history_user
 ON play_history(user_id);
 
-CREATE INDEX IF NOT EXISTS idx_history_song
+CREATE INDEX IF NOT EXISTS idx_play_history_song
 ON play_history(song_id);
 
-CREATE INDEX IF NOT EXISTS idx_history_date
+CREATE INDEX IF NOT EXISTS idx_play_history_date
 ON play_history(played_at DESC);

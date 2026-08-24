@@ -1,3 +1,11 @@
+const state = {
+  songs: [],
+  filteredSongs: [],
+  currentIndex: -1,
+  shuffle: false,
+  repeat: false
+};
+
 const audio =
   document.getElementById("audio");
 
@@ -7,8 +15,17 @@ const songsContainer =
 const categoriesContainer =
   document.getElementById("categories");
 
+const searchInput =
+  document.getElementById("searchInput");
+
 const songCount =
   document.getElementById("songCount");
+
+const categoryCount =
+  document.getElementById("categoryCount");
+
+const status =
+  document.getElementById("songStatus");
 
 const playerTitle =
   document.getElementById("playerTitle");
@@ -19,20 +36,8 @@ const playerArtist =
 const playerCover =
   document.getElementById("playerCover");
 
-const playBtn =
-  document.getElementById("playBtn");
-
-const previousBtn =
-  document.getElementById("previousBtn");
-
-const nextBtn =
-  document.getElementById("nextBtn");
-
-const shuffleBtn =
-  document.getElementById("shuffleBtn");
-
-const repeatBtn =
-  document.getElementById("repeatBtn");
+const playButton =
+  document.getElementById("playButton");
 
 const progress =
   document.getElementById("progress");
@@ -46,32 +51,49 @@ const duration =
 const volume =
   document.getElementById("volume");
 
-const searchInput =
-  document.getElementById("searchInput");
+const shuffleButton =
+  document.getElementById("shuffleButton");
 
-const menuBtn =
-  document.getElementById("menuBtn");
+const repeatButton =
+  document.getElementById("repeatButton");
 
-let songs = [];
+function escapeHtml(value) {
 
-let currentIndex = -1;
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
-let shuffled = false;
+function formatTime(seconds) {
 
-let repeat = false;
+  if (!Number.isFinite(seconds)) {
+    return "0:00";
+  }
 
-let liked =
-  JSON.parse(
-    localStorage.getItem(
-      "swaraj-liked"
-    ) || "[]"
-  );
+  const mins =
+    Math.floor(seconds / 60);
 
-// =====================================================
-// LOAD SONGS
-// =====================================================
+  const secs =
+    Math.floor(seconds % 60)
+      .toString()
+      .padStart(2, "0");
+
+  return `${mins}:${secs}`;
+}
+
+function cover(song) {
+
+  return song.cover_url ||
+    "https://placehold.co/500x500/15151d/ffffff?text=स्वरAJ";
+}
 
 async function loadSongs() {
+
+  status.textContent =
+    "Loading...";
 
   try {
 
@@ -87,31 +109,43 @@ async function loadSongs() {
     const data =
       await response.json();
 
-    songs =
+    state.songs =
       data.songs || [];
 
-    renderSongs(songs);
+    state.filteredSongs =
+      [...state.songs];
 
     songCount.textContent =
-      `${songs.length} Songs`;
+      state.songs.length;
+
+    status.textContent =
+      `${state.songs.length} songs`;
+
+    renderSongs();
+
+    loadCategories();
 
   } catch (error) {
 
     console.error(error);
 
+    status.textContent =
+      "Unable to load songs";
+
     songsContainer.innerHTML = `
-      <div class="loading">
-        Unable to load songs.<br>
-        ${error.message}
+      <div class="song-card">
+        <div class="song-info">
+          <strong>
+            Unable to load songs.
+          </strong>
+          <span>
+            ${escapeHtml(error.message)}
+          </span>
+        </div>
       </div>
     `;
-
   }
 }
-
-// =====================================================
-// LOAD CATEGORIES
-// =====================================================
 
 async function loadCategories() {
 
@@ -121,103 +155,88 @@ async function loadCategories() {
       await fetch("/api/categories");
 
     if (!response.ok) {
-      throw new Error(
-        `Categories API returned ${response.status}`
-      );
+      throw new Error("Categories API failed");
     }
 
     const data =
       await response.json();
 
-    renderCategories(
-      data.categories || []
-    );
+    const categories =
+      data.categories || [];
+
+    categoryCount.textContent =
+      categories.length;
+
+    renderCategories(categories);
 
   } catch (error) {
 
     console.error(error);
 
-    categoriesContainer.innerHTML = `
-      <div class="loading">
-        Unable to load categories.
-      </div>
-    `;
-
+    categoriesContainer.innerHTML =
+      `<div class="category-card">
+        Unable to load categories
+      </div>`;
   }
 }
-
-// =====================================================
-// RENDER CATEGORIES
-// =====================================================
 
 function renderCategories(categories) {
 
   if (!categories.length) {
 
-    categoriesContainer.innerHTML = `
-      <div class="loading">
-        No categories yet.<br>
-        Upload your first song from Admin.
-      </div>
-    `;
+    categoriesContainer.innerHTML =
+      `<div class="category-card">
+        <strong>No categories yet</strong>
+        <span>Add songs from Admin</span>
+      </div>`;
 
     return;
   }
 
   categoriesContainer.innerHTML =
-    categories.map(
-      (item) => {
+    categories.map(category => `
 
-        const name =
-          item.category;
+      <div
+        class="category-card"
+        data-category="${escapeHtml(category.category)}"
+      >
 
-        const count =
-          item.song_count || 0;
+        <strong>
+          ${escapeHtml(category.category)}
+        </strong>
 
-        return `
-          <div
-            class="category"
-            data-category="${escapeHtml(name)}"
-          >
+        <span>
+          ${category.song_count} songs
+        </span>
 
-            <div class="category-icon">
-              ${getCategoryIcon(name)}
-            </div>
+      </div>
 
-            <strong>
-              ${escapeHtml(name)}
-            </strong>
-
-            <small>
-              ${count} songs
-            </small>
-
-          </div>
-        `;
-
-      }
-    ).join("");
+    `).join("");
 
   document
-    .querySelectorAll(".category")
-    .forEach((element) => {
+    .querySelectorAll(".category-card")
+    .forEach(card => {
 
-      element.addEventListener(
+      card.addEventListener(
         "click",
         () => {
 
           const category =
-            element.dataset.category;
+            card.dataset.category;
 
-          const filtered =
-            songs.filter(
-              (song) =>
-                song.category
-                  ?.toLowerCase() ===
-                category.toLowerCase()
+          state.filteredSongs =
+            state.songs.filter(
+              song =>
+                song.category === category
             );
 
-          renderSongs(filtered);
+          renderSongs();
+
+          document
+            .getElementById("songs")
+            .scrollIntoView({
+              behavior: "smooth"
+            });
 
         }
       );
@@ -225,85 +244,79 @@ function renderCategories(categories) {
     });
 }
 
-// =====================================================
-// RENDER SONGS
-// =====================================================
+function renderSongs() {
 
-function renderSongs(list) {
+  if (!state.filteredSongs.length) {
 
-  if (!list.length) {
-
-    songsContainer.innerHTML = `
-      <div class="loading">
-        No songs found.
-      </div>
-    `;
+    songsContainer.innerHTML =
+      `<div class="song-card">
+        <div class="song-info">
+          <strong>No songs found</strong>
+          <span>
+            Add your first song from Admin.
+          </span>
+        </div>
+      </div>`;
 
     return;
   }
 
   songsContainer.innerHTML =
-    list.map(
-      (song) => {
+    state.filteredSongs
+      .map((song, index) => `
 
-        const originalIndex =
-          songs.findIndex(
-            (item) =>
-              item.id === song.id
-          );
+        <article class="song-card">
 
-        return `
-          <div
-            class="song"
-            data-index="${originalIndex}"
+          <img
+            class="song-cover"
+            src="${escapeHtml(cover(song))}"
+            alt=""
           >
 
-            <div class="song-cover">
-              ${song.cover_url
-                ? `<img
-                    src="${escapeHtml(song.cover_url)}"
-                    style="width:100%;height:100%;object-fit:cover;border-radius:10px"
-                  >`
-                : "♫"
-              }
-            </div>
+          <div class="song-info">
 
-            <div>
+            <strong>
+              ${escapeHtml(song.title)}
+            </strong>
 
-              <div class="song-title">
-                ${escapeHtml(song.title)}
-              </div>
+            <span>
+              ${escapeHtml(
+                song.artist ||
+                "Unknown Artist"
+              )}
+            </span>
 
-              <div class="song-meta">
-                ${escapeHtml(song.artist || "Unknown Artist")}
-                ·
-                ${escapeHtml(song.album || "Unknown Album")}
-              </div>
-
-            </div>
-
-            <div class="song-category">
-              ${escapeHtml(song.category || "Other")}
-            </div>
+            <span class="song-category">
+              ${escapeHtml(
+                song.category ||
+                "Other"
+              )}
+            </span>
 
           </div>
-        `;
 
-      }
-    ).join("");
+          <button
+            class="song-play"
+            data-index="${index}"
+          >
+            ▶
+          </button>
+
+        </article>
+
+      `)
+      .join("");
 
   document
-    .querySelectorAll(".song")
-    .forEach((element) => {
+    .querySelectorAll(".song-play")
+    .forEach(button => {
 
-      element.addEventListener(
+      button.addEventListener(
         "click",
         () => {
 
           const index =
-            Number(
-              element.dataset.index
-            );
+            Number(button.dataset.index);
 
           playSong(index);
 
@@ -313,31 +326,18 @@ function renderSongs(list) {
     });
 }
 
-// =====================================================
-// PLAY SONG
-// =====================================================
-
 function playSong(index) {
 
-  if (
-    index < 0 ||
-    index >= songs.length
-  ) {
-    return;
-  }
-
-  currentIndex = index;
-
   const song =
-    songs[currentIndex];
+    state.filteredSongs[index];
+
+  if (!song) return;
+
+  state.currentIndex =
+    index;
 
   audio.src =
     song.audio_url;
-
-  audio.play()
-    .catch(
-      console.error
-    );
 
   playerTitle.textContent =
     song.title;
@@ -346,41 +346,84 @@ function playSong(index) {
     song.artist ||
     "Unknown Artist";
 
-  if (song.cover_url) {
+  playerCover.src =
+    cover(song);
 
-    playerCover.innerHTML = `
-      <img
-        src="${escapeHtml(song.cover_url)}"
-        style="
-          width:100%;
-          height:100%;
-          object-fit:cover;
-          border-radius:10px
-        "
-      >
-    `;
+  audio.play()
+    .then(() => {
+
+      playButton.textContent =
+        "❚❚";
+
+    })
+    .catch(error => {
+
+      console.error(
+        "Audio playback error:",
+        error
+      );
+
+      alert(
+        "This MP3 URL cannot be played. Make sure it is a public direct audio URL."
+      );
+
+    });
+}
+
+function nextSong() {
+
+  if (!state.filteredSongs.length) {
+    return;
+  }
+
+  if (state.shuffle) {
+
+    state.currentIndex =
+      Math.floor(
+        Math.random() *
+        state.filteredSongs.length
+      );
 
   } else {
 
-    playerCover.textContent =
-      "♫";
+    state.currentIndex =
+      state.currentIndex + 1;
+
+    if (
+      state.currentIndex >=
+      state.filteredSongs.length
+    ) {
+      state.currentIndex = 0;
+    }
 
   }
 
-  updatePlayButton();
+  playSong(state.currentIndex);
 }
 
-// =====================================================
-// PLAY / PAUSE
-// =====================================================
+function previousSong() {
 
-playBtn.addEventListener(
+  if (!state.filteredSongs.length) {
+    return;
+  }
+
+  state.currentIndex--;
+
+  if (state.currentIndex < 0) {
+    state.currentIndex =
+      state.filteredSongs.length - 1;
+  }
+
+  playSong(state.currentIndex);
+}
+
+playButton.addEventListener(
   "click",
   () => {
 
     if (!audio.src) {
 
-      if (songs.length) {
+      if (state.filteredSongs.length) {
         playSong(0);
       }
 
@@ -400,188 +443,79 @@ playBtn.addEventListener(
   }
 );
 
+document
+  .getElementById("nextButton")
+  .addEventListener(
+    "click",
+    nextSong
+  );
+
+document
+  .getElementById("previousButton")
+  .addEventListener(
+    "click",
+    previousSong
+  );
+
+shuffleButton.addEventListener(
+  "click",
+  () => {
+
+    state.shuffle =
+      !state.shuffle;
+
+    shuffleButton.style.color =
+      state.shuffle
+        ? "#c084fc"
+        : "";
+
+  }
+);
+
+repeatButton.addEventListener(
+  "click",
+  () => {
+
+    state.repeat =
+      !state.repeat;
+
+    repeatButton.style.color =
+      state.repeat
+        ? "#c084fc"
+        : "";
+
+  }
+);
+
 audio.addEventListener(
   "play",
-  updatePlayButton
+  () => {
+    playButton.textContent = "❚❚";
+  }
 );
 
 audio.addEventListener(
   "pause",
-  updatePlayButton
-);
-
-function updatePlayButton() {
-
-  playBtn.textContent =
-    audio.paused
-      ? "▶"
-      : "Ⅱ";
-
-}
-
-// =====================================================
-// NEXT
-// =====================================================
-
-nextBtn.addEventListener(
-  "click",
-  nextSong
-);
-
-function nextSong() {
-
-  if (!songs.length) {
-    return;
-  }
-
-  if (shuffled) {
-
-    let next =
-      Math.floor(
-        Math.random() *
-        songs.length
-      );
-
-    if (songs.length > 1) {
-
-      while (
-        next === currentIndex
-      ) {
-
-        next =
-          Math.floor(
-            Math.random() *
-            songs.length
-          );
-
-      }
-
-    }
-
-    playSong(next);
-
-    return;
-  }
-
-  let next =
-    currentIndex + 1;
-
-  if (
-    next >= songs.length
-  ) {
-    next = 0;
-  }
-
-  playSong(next);
-}
-
-// =====================================================
-// PREVIOUS
-// =====================================================
-
-previousBtn.addEventListener(
-  "click",
   () => {
-
-    if (!songs.length) {
-      return;
-    }
-
-    let previous =
-      currentIndex - 1;
-
-    if (previous < 0) {
-      previous =
-        songs.length - 1;
-    }
-
-    playSong(previous);
-
+    playButton.textContent = "▶";
   }
 );
-
-// =====================================================
-// SHUFFLE
-// =====================================================
-
-shuffleBtn.addEventListener(
-  "click",
-  () => {
-
-    shuffled =
-      !shuffled;
-
-    shuffleBtn.style.opacity =
-      shuffled ? "1" : ".5";
-
-  }
-);
-
-// =====================================================
-// REPEAT
-// =====================================================
-
-repeatBtn.addEventListener(
-  "click",
-  () => {
-
-    repeat =
-      !repeat;
-
-    repeatBtn.style.opacity =
-      repeat ? "1" : ".5";
-
-  }
-);
-
-audio.addEventListener(
-  "ended",
-  () => {
-
-    if (repeat) {
-
-      audio.currentTime = 0;
-
-      audio.play();
-
-    } else {
-
-      nextSong();
-
-    }
-
-  }
-);
-
-// =====================================================
-// PROGRESS
-// =====================================================
 
 audio.addEventListener(
   "timeupdate",
   () => {
 
-    if (!audio.duration) {
-      return;
-    }
+    if (!audio.duration) return;
 
     progress.value =
-      (
-        audio.currentTime /
-        audio.duration
-      ) * 100;
+      (audio.currentTime /
+        audio.duration) *
+      100;
 
     currentTime.textContent =
       formatTime(
         audio.currentTime
       );
-
-  }
-);
-
-audio.addEventListener(
-  "loadedmetadata",
-  () => {
 
     duration.textContent =
       formatTime(
@@ -595,24 +529,17 @@ progress.addEventListener(
   "input",
   () => {
 
-    if (!audio.duration) {
-      return;
-    }
+    if (!audio.duration) return;
 
     audio.currentTime =
       (
-        progress.value / 100
-      ) * audio.duration;
+        Number(progress.value) /
+        100
+      ) *
+      audio.duration;
 
   }
 );
-
-// =====================================================
-// VOLUME
-// =====================================================
-
-audio.volume =
-  Number(volume.value);
 
 volume.addEventListener(
   "input",
@@ -624,9 +551,25 @@ volume.addEventListener(
   }
 );
 
-// =====================================================
-// SEARCH
-// =====================================================
+audio.volume = .8;
+
+audio.addEventListener(
+  "ended",
+  () => {
+
+    if (state.repeat) {
+
+      audio.currentTime = 0;
+      audio.play();
+
+    } else {
+
+      nextSong();
+
+    }
+
+  }
+);
 
 searchInput.addEventListener(
   "input",
@@ -634,164 +577,50 @@ searchInput.addEventListener(
 
     const query =
       searchInput.value
-        .toLowerCase()
-        .trim();
+        .trim()
+        .toLowerCase();
 
-    if (!query) {
+    state.filteredSongs =
+      state.songs.filter(song => {
 
-      renderSongs(songs);
-
-      return;
-
-    }
-
-    const filtered =
-      songs.filter(
-        (song) =>
-          String(song.title)
+        return (
+          String(song.title || "")
             .toLowerCase()
             .includes(query) ||
 
-          String(song.artist)
+          String(song.artist || "")
             .toLowerCase()
             .includes(query) ||
 
-          String(song.album)
+          String(song.album || "")
             .toLowerCase()
             .includes(query) ||
 
-          String(song.category)
+          String(song.category || "")
             .toLowerCase()
             .includes(query)
-      );
+        );
 
-    renderSongs(filtered);
+      });
 
-  }
-);
-
-// =====================================================
-// MENU
-// =====================================================
-
-menuBtn.addEventListener(
-  "click",
-  () => {
-
-    document
-      .querySelector(".sidebar")
-      .classList.toggle(
-        "open"
-      );
+    renderSongs();
 
   }
 );
-
-// =====================================================
-// EXPLORE
-// =====================================================
 
 document
-  .getElementById("exploreBtn")
+  .getElementById("exploreButton")
   .addEventListener(
     "click",
     () => {
 
       document
         .querySelector(".section")
-        ?.scrollIntoView({
+        .scrollIntoView({
           behavior: "smooth"
         });
 
     }
   );
 
-// =====================================================
-// UTILITIES
-// =====================================================
-
-function formatTime(seconds) {
-
-  if (
-    !seconds ||
-    !Number.isFinite(seconds)
-  ) {
-    return "0:00";
-  }
-
-  const minutes =
-    Math.floor(
-      seconds / 60
-    );
-
-  const secs =
-    Math.floor(
-      seconds % 60
-    )
-      .toString()
-      .padStart(2, "0");
-
-  return `${minutes}:${secs}`;
-
-}
-
-function escapeHtml(value) {
-
-  return String(value ?? "")
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-
-}
-
-function getCategoryIcon(
-  category
-) {
-
-  const name =
-    String(category)
-      .toLowerCase();
-
-  if (name.includes("bhakti"))
-    return "🪔";
-
-  if (name.includes("love"))
-    return "♡";
-
-  if (name.includes("marathi"))
-    return "🎵";
-
-  if (name.includes("energetic"))
-    return "⚡";
-
-  if (name.includes("emotional"))
-    return "💜";
-
-  return "♫";
-
-}
-
-// =====================================================
-// INITIALIZE
-// =====================================================
-
 loadSongs();
-
-loadCategories();

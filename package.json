@@ -1,7 +1,8 @@
 {
   "name": "swaraj-music",
-  "version": "2.0.0",
-  "description": "स्वरAJ Premium Music Streaming Platform",
+  "version": "3.0.0",
+  "description": "स्वरAJ Premium Music Platform",
+  "private": true,
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -10,7 +11,9 @@
     "node": ">=20"
   },
   "dependencies": {
+    "cloudinary": "^2.7.0",
     "express": "^5.1.0",
+    "multer": "^2.0.2",
     "pg": "^8.16.3"
   }
 }

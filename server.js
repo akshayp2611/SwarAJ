@@ -1,741 +1,295 @@
+require("dotenv").config();
+
 const express = require("express");
+const cors = require("cors");
 const path = require("path");
-const multer = require("multer");
-const cloudinary = require("cloudinary").v2;
 
 const {
   pool,
-  initializeDatabase
+  initDatabase,
+  getSongs,
+  getCategories,
+  createSong,
+  deleteSong,
+  toggleLike
 } = require("./database");
 
 const app = express();
 
-const PORT = Number(process.env.PORT) || 10000;
-const HOST = "0.0.0.0";
+const PORT = process.env.PORT || 10000;
 
-// ======================================================
-// CLOUDINARY
-// ======================================================
+const ROOT = __dirname;
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+app.use(cors());
 
-  api_key: process.env.CLOUDINARY_API_KEY,
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
 
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+// --------------------------------------------------
+// Static files
+// --------------------------------------------------
 
-// ======================================================
-// MIDDLEWARE
-// ======================================================
+app.use(express.static(ROOT, {
+  extensions: ["html"]
+}));
 
-app.use(express.json());
-
-app.use(
-  express.urlencoded({
-    extended: true
-  })
-);
-
-// Serve frontend
-app.use(
-  express.static(__dirname)
-);
-
-// ======================================================
-// MULTER
-// ======================================================
-
-// Files are temporarily stored in memory.
-// They are NOT saved to Render filesystem.
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-
-  limits: {
-    fileSize: 100 * 1024 * 1024
-  },
-
-  fileFilter: (req, file, callback) => {
-    const allowed = [
-      "audio/mpeg",
-      "audio/mp3",
-      "audio/wav",
-      "audio/x-wav",
-      "audio/flac",
-      "audio/mp4",
-      "audio/aac"
-    ];
-
-    const extension = path
-      .extname(file.originalname)
-      .toLowerCase();
-
-    const validExtension = [
-      ".mp3",
-      ".wav",
-      ".flac",
-      ".m4a",
-      ".aac"
-    ].includes(extension);
-
-    if (
-      allowed.includes(file.mimetype) ||
-      validExtension
-    ) {
-      callback(null, true);
-    } else {
-      callback(
-        new Error(
-          "Only audio files are allowed."
-        )
-      );
-    }
-  }
-});
-
-// ======================================================
-// CLOUDINARY BUFFER UPLOAD
-// ======================================================
-
-function uploadAudioToCloudinary(
-  buffer,
-  originalName,
-  category
-) {
-  return new Promise((resolve, reject) => {
-    const safeCategory =
-      String(category || "Other")
-        .replace(/[^a-zA-Z0-9_-]/g, "_");
-
-    const baseName =
-      path
-        .basename(
-          originalName,
-          path.extname(originalName)
-        )
-        .replace(/[^a-zA-Z0-9_-]/g, "_");
-
-    const publicId =
-      `swaraj/${safeCategory}/${Date.now()}_${baseName}`;
-
-    const stream =
-      cloudinary.uploader.upload_stream(
-        {
-          resource_type: "video",
-
-          public_id: publicId,
-
-          folder: `swaraj/${safeCategory}`,
-
-          overwrite: false
-        },
-
-        (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result);
-          }
-        }
-      );
-
-    stream.end(buffer);
-  });
-}
-
-// ======================================================
-// HEALTH
-// ======================================================
+// --------------------------------------------------
+// Health
+// --------------------------------------------------
 
 app.get("/api/health", async (req, res) => {
-  try {
-    await pool.query("SELECT 1");
+  let database = "not-configured";
 
-    const countResult = await pool.query(`
-      SELECT COUNT(*)::int AS count
-      FROM songs
-    `);
-
-    res.json({
-      status: "ok",
-
-      service: "स्वरAJ Music",
-
-      database: "connected",
-
-      songCount:
-        countResult.rows[0].count,
-
-      cloudinary:
-        process.env.CLOUDINARY_CLOUD_NAME
-          ? "configured"
-          : "not_configured",
-
-      nodeVersion: process.version,
-
-      environment:
-        process.env.NODE_ENV || "production",
-
-      timestamp:
-        new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      status: "error",
-
-      database: "disconnected",
-
-      message:
-        "Database connection failed"
-    });
+  if (pool) {
+    try {
+      await pool.query("SELECT 1");
+      database = "connected";
+    } catch (error) {
+      database = "error";
+    }
   }
-});
 
-// ======================================================
-// API ROOT
-// ======================================================
-
-app.get("/api", (req, res) => {
   res.json({
     status: "ok",
-
-    service:
-      "स्वरAJ Music API",
-
-    endpoints: [
-      "/api/health",
-      "/api/categories",
-      "/api/songs",
-      "/api/upload"
-    ]
+    service: "स्वरAJ Music",
+    nodeVersion: process.version,
+    environment: process.env.NODE_ENV || "development",
+    database,
+    timestamp: new Date().toISOString()
   });
 });
 
-// ======================================================
-// GET ALL SONGS
-// ======================================================
+// --------------------------------------------------
+// Songs
+// --------------------------------------------------
 
 app.get("/api/songs", async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT
-        id,
-        title,
-        artist,
-        album,
-        category,
-        audio_url,
-        cover_url,
-        duration,
-        created_at
-      FROM songs
-      ORDER BY created_at DESC
-    `);
+    const songs = await getSongs();
 
     res.json({
-      status: "ok",
-
-      count: result.rows.length,
-
-      songs: result.rows
+      success: true,
+      count: songs.length,
+      songs
     });
-
   } catch (error) {
-    console.error(
-      "Songs API error:",
-      error
-    );
+    console.error("GET /api/songs:", error);
 
     res.status(500).json({
-      status: "error",
-
-      message:
-        "Unable to load songs"
+      success: false,
+      error: "Unable to load songs"
     });
   }
 });
 
-// ======================================================
-// GET CATEGORIES
-// ======================================================
+// --------------------------------------------------
+// Categories
+// --------------------------------------------------
 
-app.get(
-  "/api/categories",
-  async (req, res) => {
-    try {
-      const result =
-        await pool.query(`
-          SELECT
-            category,
-            COUNT(*)::int AS song_count
-          FROM songs
-          WHERE
-            category IS NOT NULL
-            AND TRIM(category) <> ''
-          GROUP BY category
-          ORDER BY category ASC
-        `);
+app.get("/api/categories", async (req, res) => {
+  try {
+    const categories = await getCategories();
 
-      res.json({
-        status: "ok",
+    res.json({
+      success: true,
+      count: categories.length,
+      categories
+    });
+  } catch (error) {
+    console.error("GET /api/categories:", error);
 
-        categories:
-          result.rows
-      });
+    res.status(500).json({
+      success: false,
+      error: "Unable to load categories"
+    });
+  }
+});
 
-    } catch (error) {
-      console.error(
-        "Categories error:",
-        error
-      );
+// --------------------------------------------------
+// Add song
+// --------------------------------------------------
 
-      res.status(500).json({
-        status: "error",
+app.post("/api/admin/songs", async (req, res) => {
+  try {
+    const {
+      title,
+      artist,
+      album,
+      category,
+      audio_url,
+      cover_url,
+      duration
+    } = req.body;
 
-        message:
-          "Unable to load categories"
+    if (!title) {
+      return res.status(400).json({
+        success: false,
+        error: "Song title is required"
       });
     }
-  }
-);
 
-// ======================================================
-// SONGS BY CATEGORY
-// ======================================================
-
-app.get(
-  "/api/categories/:category/songs",
-  async (req, res) => {
-    try {
-      const result =
-        await pool.query(
-          `
-          SELECT
-            id,
-            title,
-            artist,
-            album,
-            category,
-            audio_url,
-            cover_url,
-            duration
-          FROM songs
-          WHERE LOWER(category)
-                = LOWER($1)
-          ORDER BY title ASC
-          `,
-          [req.params.category]
-        );
-
-      res.json({
-        status: "ok",
-
-        category:
-          req.params.category,
-
-        count:
-          result.rows.length,
-
-        songs:
-          result.rows
-      });
-
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        status: "error",
-
-        message:
-          "Unable to load category"
+    if (!audio_url) {
+      return res.status(400).json({
+        success: false,
+        error: "Audio URL is required"
       });
     }
+
+    const song = await createSong({
+      title,
+      artist,
+      album,
+      category,
+      audio_url,
+      cover_url,
+      duration
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Song added successfully",
+      song
+    });
+
+  } catch (error) {
+    console.error("POST /api/admin/songs:", error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
-);
+});
 
-// ======================================================
-// SEARCH
-// ======================================================
+// --------------------------------------------------
+// Delete song
+// --------------------------------------------------
 
-app.get(
-  "/api/search",
-  async (req, res) => {
-    try {
-      const q =
-        String(req.query.q || "")
-          .trim();
+app.delete("/api/admin/songs/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
 
-      if (!q) {
-        return res.json({
-          status: "ok",
-          songs: []
-        });
-      }
-
-      const result =
-        await pool.query(
-          `
-          SELECT
-            id,
-            title,
-            artist,
-            album,
-            category,
-            audio_url,
-            cover_url,
-            duration
-          FROM songs
-          WHERE
-            title ILIKE $1
-            OR artist ILIKE $1
-            OR album ILIKE $1
-            OR category ILIKE $1
-          ORDER BY title ASC
-          LIMIT 100
-          `,
-          [`%${q}%`]
-        );
-
-      res.json({
-        status: "ok",
-
-        count:
-          result.rows.length,
-
-        songs:
-          result.rows
-      });
-
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        status: "error",
-
-        message:
-          "Search failed"
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid song ID"
       });
     }
+
+    await deleteSong(id);
+
+    res.json({
+      success: true,
+      message: "Song deleted"
+    });
+
+  } catch (error) {
+    console.error("DELETE /api/admin/songs:", error);
+
+    res.status(500).json({
+      success: false,
+      error: "Unable to delete song"
+    });
   }
-);
+});
 
-// ======================================================
-// UPLOAD SONG
-// ======================================================
+// --------------------------------------------------
+// Like song
+// --------------------------------------------------
 
-app.post(
-  "/api/upload",
-  upload.single("song"),
+app.post("/api/songs/:id/like", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
 
-  async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({
-          status: "error",
+    const song = await toggleLike(id);
 
-          message:
-            "Please select an audio file."
-        });
-      }
-
-      if (
-        !process.env.CLOUDINARY_CLOUD_NAME ||
-        !process.env.CLOUDINARY_API_KEY ||
-        !process.env.CLOUDINARY_API_SECRET
-      ) {
-        return res.status(500).json({
-          status: "error",
-
-          message:
-            "Cloudinary is not configured."
-        });
-      }
-
-      const title =
-        String(
-          req.body.title ||
-          path.basename(
-            req.file.originalname,
-            path.extname(
-              req.file.originalname
-            )
-          )
-        ).trim();
-
-      const artist =
-        String(
-          req.body.artist ||
-          "Unknown Artist"
-        ).trim();
-
-      const album =
-        String(
-          req.body.album ||
-          "Unknown Album"
-        ).trim();
-
-      const category =
-        String(
-          req.body.category ||
-          "Other"
-        ).trim();
-
-      console.log(
-        `Uploading ${req.file.originalname}`
-      );
-
-      const cloud =
-        await uploadAudioToCloudinary(
-          req.file.buffer,
-
-          req.file.originalname,
-
-          category
-        );
-
-      const result =
-        await pool.query(
-          `
-          INSERT INTO songs
-          (
-            title,
-            artist,
-            album,
-            category,
-            audio_url,
-            cloudinary_public_id
-          )
-          VALUES
-          ($1,$2,$3,$4,$5,$6)
-          ON CONFLICT (audio_url)
-          DO UPDATE SET
-            title = EXCLUDED.title,
-            artist = EXCLUDED.artist,
-            album = EXCLUDED.album,
-            category = EXCLUDED.category
-          RETURNING *
-          `,
-          [
-            title,
-
-            artist,
-
-            album,
-
-            category,
-
-            cloud.secure_url,
-
-            cloud.public_id
-          ]
-        );
-
-      res.json({
-        status: "ok",
-
-        message:
-          "Song uploaded successfully",
-
-        song:
-          result.rows[0]
-      });
-
-    } catch (error) {
-      console.error(
-        "Upload error:",
-        error
-      );
-
-      res.status(500).json({
-        status: "error",
-
-        message:
-          error.message ||
-          "Upload failed"
+    if (!song) {
+      return res.status(404).json({
+        success: false,
+        error: "Song not found"
       });
     }
+
+    res.json({
+      success: true,
+      song
+    });
+
+  } catch (error) {
+    console.error("LIKE:", error);
+
+    res.status(500).json({
+      success: false,
+      error: "Unable to update like"
+    });
   }
-);
+});
 
-// ======================================================
-// DELETE SONG
-// ======================================================
+// --------------------------------------------------
+// Admin page
+// --------------------------------------------------
 
-app.delete(
-  "/api/songs/:id",
-  async (req, res) => {
-    try {
-      const result =
-        await pool.query(
-          `
-          SELECT
-            cloudinary_public_id
-          FROM songs
-          WHERE id = $1
-          `,
-          [req.params.id]
-        );
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(ROOT, "admin.html"));
+});
 
-      if (
-        result.rows.length === 0
-      ) {
-        return res.status(404).json({
-          status: "error",
+// --------------------------------------------------
+// SPA fallback
+// IMPORTANT: Express 5 does NOT accept "*"
+// --------------------------------------------------
 
-          message:
-            "Song not found"
-        });
-      }
-
-      const publicId =
-        result.rows[0]
-          .cloudinary_public_id;
-
-      if (publicId) {
-        try {
-          await cloudinary.uploader.destroy(
-            publicId,
-            {
-              resource_type: "video"
-            }
-          );
-        } catch (cloudError) {
-          console.error(
-            "Cloudinary delete error:",
-            cloudError
-          );
-        }
-      }
-
-      await pool.query(
-        `
-        DELETE FROM songs
-        WHERE id = $1
-        `,
-        [req.params.id]
-      );
-
-      res.json({
-        status: "ok",
-
-        message:
-          "Song deleted successfully"
-      });
-
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        status: "error",
-
-        message:
-          "Unable to delete song"
-      });
-    }
+app.use((req, res, next) => {
+  if (
+    req.method === "GET" &&
+    !req.path.startsWith("/api/")
+  ) {
+    return res.sendFile(
+      path.join(ROOT, "index.html")
+    );
   }
-);
 
-// ======================================================
-// API 404
-// ======================================================
+  next();
+});
 
-app.use("/api", (req, res) => {
+// --------------------------------------------------
+// 404
+// --------------------------------------------------
+
+app.use((req, res) => {
   res.status(404).json({
-    status: "error",
-
-    message:
-      "API endpoint not found",
-
-    path:
-      req.originalUrl
+    success: false,
+    error: "Not found",
+    path: req.originalUrl
   });
 });
 
-// ======================================================
-// FRONTEND
-// ======================================================
+// --------------------------------------------------
+// Start
+// --------------------------------------------------
 
-app.get("/", (req, res) => {
-  res.sendFile(
-    path.join(
-      __dirname,
-      "index.html"
-    )
-  );
-});
-
-// ======================================================
-// ERROR HANDLER
-// ======================================================
-
-app.use(
-  (error, req, res, next) => {
-    console.error(error);
-
-    res.status(500).json({
-      status: "error",
-
-      message:
-        error.message ||
-        "Server error"
-    });
-  }
-);
-
-// ======================================================
-// START
-// ======================================================
-
-async function start() {
+async function startServer() {
   try {
-    await initializeDatabase();
-
-    app.listen(
-      PORT,
-      HOST,
-      () => {
-        console.log(
-          "=========================================="
-        );
-
-        console.log(
-          "स्वरAJ Music Server"
-        );
-
-        console.log(
-          "=========================================="
-        );
-
-        console.log(
-          `Server: http://${HOST}:${PORT}`
-        );
-
-        console.log(
-          "Database: configured"
-        );
-
-        console.log(
-          "External audio: Cloudinary"
-        );
-
-        console.log(
-          "=========================================="
-        );
-      }
-    );
-
+    await initDatabase();
   } catch (error) {
     console.error(
-      "Startup error:",
-      error
+      "Database initialization error:",
+      error.message
     );
-
-    process.exit(1);
   }
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log("==========================================");
+    console.log("स्वरAJ Music Server");
+    console.log("==========================================");
+    console.log(`Server: http://0.0.0.0:${PORT}`);
+    console.log(
+      `Environment: ${process.env.NODE_ENV || "development"}`
+    );
+    console.log(
+      `Database: ${pool ? "configured" : "NOT CONFIGURED"}`
+    );
+    console.log("==========================================");
+  });
 }
 
-start();
+startServer();

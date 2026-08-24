@@ -1,29 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <title>स्वरAJ — Premium Music</title>
 
-  <meta
-    name="theme-color"
-    content="#06060c"
-  >
-
-  <title>
-    स्वरAJ — Premium Music
-  </title>
-
-  <link
-    rel="stylesheet"
-    href="/styles.css"
-  >
-
+  <link rel="stylesheet" href="/styles.css">
 </head>
 
 <body>
@@ -32,72 +15,18 @@
 <div class="ambient ambient-two"></div>
 <div class="ambient ambient-three"></div>
 
-
-<!-- =====================================================
-     HEADER
-===================================================== -->
-
 <header class="topbar glass">
 
-  <a
-    href="/"
-    class="brand"
-  >
+  <div class="brand">
+    <span class="brand-symbol">◉</span>
+    <span>स्वरAJ</span>
+  </div>
 
-    <span class="brand-logo">
-      <span class="brand-marathi">
-        स्वर
-      </span>
-
-      <span class="brand-aj">
-        AJ
-      </span>
-    </span>
-
-    <span class="brand-full">
-      स्वरAJ
-    </span>
-
-  </a>
-
-
-  <nav class="main-nav">
-
-    <button
-      class="nav-tab active"
-      data-tab="all"
-    >
-      Home
-    </button>
-
-    <button
-      class="nav-tab"
-      data-tab="mp3"
-    >
-      🎵 MP3
-    </button>
-
-    <button
-      class="nav-tab"
-      data-tab="youtube"
-    >
-      ▶ YouTube
-    </button>
-
-    <button
-      class="nav-tab"
-      data-tab="categories"
-    >
-      Categories
-    </button>
-
-    <a
-      href="/admin"
-      class="nav-link"
-    >
-      Admin
-    </a>
-
+  <nav>
+    <a href="/">Home</a>
+    <a href="#categories">Categories</a>
+    <a href="#songs">Songs</a>
+    <a href="/admin">Admin</a>
   </nav>
 
 </header>
@@ -105,134 +34,78 @@
 
 <main>
 
+  <section class="hero">
 
-<!-- =====================================================
-     HERO
-===================================================== -->
+    <div class="hero-content glass">
 
-<section class="hero">
+      <span class="eyebrow">
+        PREMIUM MUSIC EXPERIENCE
+      </span>
 
-  <div class="hero-content glass">
+      <h1>
+        Music that feels
+        <span>alive.</span>
+      </h1>
 
-    <span class="eyebrow">
-      PREMIUM MUSIC EXPERIENCE
-    </span>
+      <p>
+        Discover your music in a futuristic
+        liquid-glass experience.
+      </p>
 
-    <h1>
-      Music that feels
-      <span>alive.</span>
-    </h1>
+      <a class="primary-button" href="#songs">
+        Explore Music
+        <span>→</span>
+      </a>
 
-    <p>
-      Your MP3 collection and YouTube
-      music, beautifully brought together
-      inside SwarAJ.
-    </p>
+    </div>
 
-    <a
-      href="#songs"
-      class="primary-button"
-    >
-      Explore Music
-      <span>→</span>
-    </a>
+    <div class="hero-orb">
+      <div class="orb-inner"></div>
+    </div>
 
-  </div>
+  </section>
 
 
-  <div class="hero-orb">
+  <section id="categories">
 
-    <div class="orb-inner">
+    <div class="section-heading">
+      <div>
+        <span class="section-kicker">DISCOVER</span>
+        <h2>Browse your mood</h2>
+      </div>
+    </div>
 
-      <div class="orb-logo">
-        <span>स्वर</span>
-        <b>AJ</b>
+    <div id="categoryList" class="category-grid">
+      <div class="loading-card glass">
+        Loading categories...
+      </div>
+    </div>
+
+  </section>
+
+
+  <section id="songs">
+
+    <div class="section-heading">
+
+      <div>
+        <span class="section-kicker">YOUR LIBRARY</span>
+        <h2>All Songs</h2>
       </div>
 
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =====================================================
-     CATEGORIES
-===================================================== -->
-
-<section
-  id="categories"
-  class="section categories-section"
->
-
-  <div class="section-heading">
-
-    <div>
-
-      <span class="section-kicker">
-        DISCOVER
+      <span id="songCount" class="song-count">
+        0 songs
       </span>
 
-      <h2>
-        Browse your mood
-      </h2>
-
     </div>
 
-  </div>
-
-
-  <div
-    id="categoryList"
-    class="category-grid"
-  ></div>
-
-</section>
-
-
-<!-- =====================================================
-     SONGS
-===================================================== -->
-
-<section
-  id="songs"
-  class="section"
->
-
-  <div class="section-heading">
-
-    <div>
-
-      <span
-        id="libraryKicker"
-        class="section-kicker"
-      >
-        YOUR LIBRARY
-      </span>
-
-      <h2 id="libraryTitle">
-        All Songs
-      </h2>
-
+    <div id="songList" class="song-grid">
+      <div class="loading-card glass">
+        Loading songs...
+      </div>
     </div>
 
-
-    <span
-      id="songCount"
-      class="song-count"
-    >
-      0 songs
-    </span>
-
-  </div>
-
-
-  <div
-    id="songList"
-    class="song-grid"
-  ></div>
-
-</section>
+  </section>
 
 </main>
 
@@ -241,32 +114,21 @@
      YOUTUBE PLAYER
 ===================================================== -->
 
-<div
-  id="youtubePlayer"
-  class="youtube-player"
->
+<div id="youtubePlayer" class="youtube-player">
 
   <div class="youtube-backdrop"></div>
 
-
   <div class="youtube-window glass">
-
 
     <div class="youtube-toolbar">
 
-
       <div class="now-playing">
 
-        <div
-          id="playerCover"
-          class="player-cover"
-        >
+        <div id="playerCover" class="player-cover">
           ♪
         </div>
 
-
-        <div class="now-copy">
-
+        <div>
           <strong id="playerTitle">
             Select a song
           </strong>
@@ -274,7 +136,6 @@
           <small id="playerArtist">
             स्वरAJ
           </small>
-
         </div>
 
       </div>
@@ -282,38 +143,36 @@
 
       <div class="player-actions">
 
-
         <button
           id="musicModeButton"
-          class="mode-button active"
+          class="mode-button"
           type="button"
         >
           🎧 Music
         </button>
 
-
         <button
           id="videoModeButton"
-          class="mode-button"
+          class="mode-button active"
           type="button"
         >
           🎬 Video
         </button>
 
-
         <button
           id="minimizeButton"
           class="icon-button"
           type="button"
+          aria-label="Minimize"
         >
           ↓
         </button>
-
 
         <button
           id="closeButton"
           class="icon-button"
           type="button"
+          aria-label="Close"
         >
           ×
         </button>
@@ -323,10 +182,7 @@
     </div>
 
 
-    <div
-      id="videoContainer"
-      class="video-container"
-    >
+    <div id="videoContainer" class="video-container">
 
       <iframe
         id="youtubeFrame"
@@ -339,6 +195,7 @@
           fullscreen
         "
         allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
       ></iframe>
 
     </div>
@@ -352,15 +209,9 @@
 
       </div>
 
-
       <div class="player-status">
-
-        <span>
-          ●
-        </span>
-
+        <span>●</span>
         Playing inside स्वरAJ
-
       </div>
 
     </div>
@@ -371,84 +222,14 @@
 
 
 <!-- =====================================================
-     MP3 PLAYER
+     MINI PLAYER
 ===================================================== -->
 
-<div
-  id="audioBar"
-  class="audio-bar glass"
->
-
-  <div
-    id="audioCover"
-    class="audio-cover"
-  >
-    ♪
-  </div>
-
-
-  <div class="audio-info">
-
-    <strong id="audioTitle">
-      Select a song
-    </strong>
-
-    <small id="audioArtist">
-      स्वरAJ
-    </small>
-
-  </div>
-
-
-  <input
-    id="audioProgress"
-    class="audio-progress"
-    type="range"
-    min="0"
-    max="100"
-    value="0"
-  >
-
-
-  <button
-    id="audioPlayPause"
-    class="audio-control"
-    type="button"
-  >
-    ▶
-  </button>
-
-
-  <button
-    id="audioClose"
-    class="audio-control"
-    type="button"
-  >
-    ×
-  </button>
-
-
-  <audio
-    id="audioPlayer"
-    preload="metadata"
-  ></audio>
-
-</div>
-
-
-<!-- =====================================================
-     MINI YOUTUBE PLAYER
-===================================================== -->
-
-<div
-  id="miniPlayer"
-  class="mini-player glass"
->
+<div id="miniPlayer" class="mini-player glass">
 
   <div class="mini-cover">
     ♪
   </div>
-
 
   <div class="mini-info">
 
@@ -462,12 +243,12 @@
 
   </div>
 
-
   <div class="mini-actions">
 
     <button
       id="expandButton"
       type="button"
+      aria-label="Expand"
     >
       ↑
     </button>
@@ -475,6 +256,7 @@
     <button
       id="miniCloseButton"
       type="button"
+      aria-label="Close"
     >
       ×
     </button>
@@ -484,8 +266,17 @@
 </div>
 
 
+<!-- =====================================================
+     AUDIO PLAYER FOR MP3
+===================================================== -->
+
+<audio
+  id="audioPlayer"
+  preload="metadata"
+></audio>
+
+
 <script src="/script.js"></script>
 
 </body>
-
 </html>

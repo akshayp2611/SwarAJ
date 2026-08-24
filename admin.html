@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>स्वरAJ Admin</title>
+
+  <link
+    rel="stylesheet"
+    href="/styles.css"
+  >
+
+</head>
+
+<body>
+
+<div class="admin-wrapper">
+
+  <header class="admin-topbar">
+
+    <a
+      href="/"
+      class="back-button"
+    >
+      ← स्वरAJ
+    </a>
+
+    <div>
+      <strong>Admin Studio</strong>
+      <span>Music Library Management</span>
+    </div>
+
+  </header>
+
+  <main class="admin-main">
+
+    <section class="admin-hero">
+
+      <span>CONTROL CENTER</span>
+
+      <h1>
+        Add Music to
+        <em>स्वरAJ</em>
+      </h1>
+
+      <p>
+        Add your external MP3 URL and cover image.
+        Song information is stored permanently in PostgreSQL.
+      </p>
+
+    </section>
+
+    <section class="admin-grid">
+
+      <!-- FORM -->
+
+      <div class="upload-card">
+
+        <div class="card-title">
+          <span>♫</span>
+
+          <div>
+            <h2>Add New Song</h2>
+            <p>Enter song information</p>
+          </div>
+        </div>
+
+        <form id="songForm">
+
+          <label>
+            Song Title
+          </label>
+
+          <input
+            id="title"
+            required
+            placeholder="e.g. Ganpati Aarti"
+          >
+
+          <label>
+            Artist
+          </label>
+
+          <input
+            id="artist"
+            placeholder="e.g. Traditional"
+          >
+
+          <label>
+            Album
+          </label>
+
+          <input
+            id="album"
+            placeholder="e.g. Ganpati Special"
+          >
+
+          <label>
+            Category
+          </label>
+
+          <select id="category">
+
+            <option value="Bhakti">
+              Bhakti
+            </option>
+
+            <option value="Marathi">
+              Marathi
+            </option>
+
+            <option value="Love">
+              Love
+            </option>
+
+            <option value="Energetic">
+              Energetic
+            </option>
+
+            <option value="Emotional">
+              Emotional
+            </option>
+
+            <option value="Bollywood">
+              Bollywood
+            </option>
+
+            <option value="Devotional">
+              Devotional
+            </option>
+
+            <option value="Other">
+              Other
+            </option>
+
+          </select>
+
+          <label>
+            MP3 URL
+          </label>
+
+          <input
+            id="audioUrl"
+            type="url"
+            required
+            placeholder="https://storage.example.com/song.mp3"
+          >
+
+          <small>
+            Upload the MP3 to your external storage first,
+            then paste the public/direct MP3 URL here.
+          </small>
+
+          <label>
+            Cover Image URL
+          </label>
+
+          <input
+            id="coverUrl"
+            type="url"
+            placeholder="https://res.cloudinary.com/..."
+          >
+
+          <small>
+            Upload your cover to Cloudinary and paste
+            the image URL here.
+          </small>
+
+          <button
+            type="submit"
+            class="upload-button"
+          >
+            <span>＋</span>
+            Add Song
+          </button>
+
+        </form>
+
+        <div
+          id="message"
+          class="message"
+        ></div>
+
+      </div>
+
+      <!-- INSTRUCTIONS -->
+
+      <aside class="info-card">
+
+        <div class="info-icon">
+          ☁
+        </div>
+
+        <h2>How to add a song</h2>
+
+        <div class="step">
+
+          <b>01</b>
+
+          <div>
+            <strong>Upload MP3</strong>
+            <p>
+              Upload your legally owned/licensed
+              audio file to your external storage.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="step">
+
+          <b>02</b>
+
+          <div>
+            <strong>Upload Cover</strong>
+            <p>
+              Upload the album artwork to Cloudinary.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="step">
+
+          <b>03</b>
+
+          <div>
+            <strong>Copy URLs</strong>
+            <p>
+              Copy the direct MP3 URL and cover URL.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="step">
+
+          <b>04</b>
+
+          <div>
+            <strong>Save Song</strong>
+            <p>
+              Enter the information and press
+              Add Song.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="notice">
+          <strong>Storage architecture</strong>
+          <p>
+            PostgreSQL stores metadata.
+            External storage stores MP3 files.
+            Cloudinary stores artwork.
+          </p>
+        </div>
+
+      </aside>
+
+    </section>
+
+    <!-- SONG MANAGEMENT -->
+
+    <section class="management-card">
+
+      <div class="management-header">
+
+        <div>
+          <span>LIBRARY</span>
+          <h2>Uploaded Songs</h2>
+        </div>
+
+        <button
+          id="refreshButton"
+          class="secondary-button"
+        >
+          ↻ Refresh
+        </button>
+
+      </div>
+
+      <div
+        id="adminSongs"
+        class="admin-songs"
+      ></div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script>
+
+const form =
+  document.getElementById("songForm");
+
+const message =
+  document.getElementById("message");
+
+const adminSongs =
+  document.getElementById("adminSongs");
+
+async function loadAdminSongs() {
+
+  adminSongs.innerHTML =
+    "<p>Loading songs...</p>";
+
+  try {
+
+    const response =
+      await fetch("/api/songs");
+
+    const data =
+      await response.json();
+
+    const songs =
+      data.songs || [];
+
+    if (!songs.length) {
+
+      adminSongs.innerHTML =
+        "<p>No songs added yet.</p>";
+
+      return;
+    }
+
+    adminSongs.innerHTML =
+      songs.map(song => `
+
+        <div class="admin-song">
+
+          <img
+            src="${escapeHtml(
+              song.cover_url ||
+              "https://placehold.co/100x100"
+            )}"
+            alt=""
+          >
+
+          <div class="admin-song-info">
+
+            <strong>
+              ${escapeHtml(song.title)}
+            </strong>
+
+            <span>
+              ${escapeHtml(song.artist || "")}
+            </span>
+
+            <small>
+              ${escapeHtml(song.category || "Other")}
+            </small>
+
+          </div>
+
+          <button
+            onclick="deleteSong(${song.id})"
+            class="delete-button"
+          >
+            Delete
+          </button>
+
+        </div>
+
+      `).join("");
+
+  } catch (error) {
+
+    adminSongs.innerHTML =
+      "<p>Unable to load songs.</p>";
+
+  }
+}
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+form.addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+    message.className =
+      "message loading";
+
+    message.textContent =
+      "Saving song...";
+
+    const payload = {
+
+      title:
+        document
+          .getElementById("title")
+          .value
+          .trim(),
+
+      artist:
+        document
+          .getElementById("artist")
+          .value
+          .trim(),
+
+      album:
+        document
+          .getElementById("album")
+          .value
+          .trim(),
+
+      category:
+        document
+          .getElementById("category")
+          .value,
+
+      audio_url:
+        document
+          .getElementById("audioUrl")
+          .value
+          .trim(),
+
+      cover_url:
+        document
+          .getElementById("coverUrl")
+          .value
+          .trim()
+    };
+
+    try {
+
+      const response =
+        await fetch(
+          "/api/admin/songs",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify(payload)
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          "Unable to add song"
+        );
+      }
+
+      message.className =
+        "message success";
+
+      message.textContent =
+        "✓ Song added successfully!";
+
+      form.reset();
+
+      loadAdminSongs();
+
+    } catch (error) {
+
+      message.className =
+        "message error";
+
+      message.textContent =
+        "✕ " + error.message;
+    }
+
+  }
+);
+
+async function deleteSong(id) {
+
+  if (
+    !confirm(
+      "Delete this song?"
+    )
+  ) {
+    return;
+  }
+
+  try {
+
+    const response =
+      await fetch(
+        `/api/admin/songs/${id}`,
+        {
+          method: "DELETE"
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Delete failed"
+      );
+    }
+
+    loadAdminSongs();
+
+  } catch (error) {
+
+    alert(error.message);
+
+  }
+}
+
+document
+  .getElementById("refreshButton")
+  .addEventListener(
+    "click",
+    loadAdminSongs
+  );
+
+loadAdminSongs();
+
+</script>
+
+</body>
+</html>

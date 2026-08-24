@@ -1,1 +1,1308 @@
-:root{--bg:#070712;--panel:rgba(18,18,34,.68);--line:rgba(255,255,255,.09);--text:#f7f7fb;--muted:#9b9bb1;--accent:#9b7cff;--accent2:#38e8cf;--danger:#ff5e83;--shadow:0 25px 70px rgba(0,0,0,.38)}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 15% 10%,#1c1640 0,transparent 32%),radial-gradient(circle at 90% 80%,#083d45 0,transparent 28%),var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}body{overflow-x:hidden}.orb{position:fixed;width:280px;height:280px;border-radius:50%;filter:blur(80px);opacity:.18;pointer-events:none}.orb-a{background:#8c6bff;left:-120px;top:20%}.orb-b{background:#23e0cb;right:-100px;bottom:15%}.app{display:flex;min-height:100vh}.sidebar{width:250px;position:fixed;inset:0 auto 0 0;padding:28px 18px;background:rgba(6,7,16,.75);backdrop-filter:blur(28px);border-right:1px solid var(--line);z-index:20}.brand{display:flex;align-items:center;gap:12px;padding:0 10px 28px}.brand-mark{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-weight:800;font-size:23px;background:linear-gradient(135deg,#b49cff,#45e9d3);color:#08080f;box-shadow:0 10px 35px rgba(120,100,255,.28)}.brand-name{font:800 25px Outfit}.brand-name span{color:var(--accent2)}.brand small{color:#77778d;font-size:9px;letter-spacing:2px}.nav{width:100%;border:0;background:transparent;color:#a6a6ba;text-align:left;padding:13px 14px;border-radius:13px;margin:2px 0;font-size:15px;cursor:pointer}.nav span{margin-left:12px}.nav:hover,.nav.active{color:white;background:linear-gradient(90deg,rgba(155,124,255,.2),rgba(56,232,207,.04));box-shadow:inset 2px 0 var(--accent)}.side-label{font-size:10px;color:#67677c;letter-spacing:2px;margin:28px 12px 10px}.side-cats{display:grid;gap:3px;max-height:45vh;overflow:auto}.side-cats button{border:0;background:transparent;color:#85859a;text-align:left;padding:8px 12px;border-radius:9px;cursor:pointer}.side-cats button:hover{color:white;background:rgba(255,255,255,.05)}.side-foot{position:absolute;bottom:25px;left:28px;color:#77778d;font-size:11px}.live-dot{display:inline-block;width:7px;height:7px;background:#39e3bf;border-radius:50%;box-shadow:0 0 12px #39e3bf;margin-right:6px}.main{margin-left:250px;width:calc(100% - 250px)}.topbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:14px;padding:18px 30px;background:rgba(7,7,18,.62);backdrop-filter:blur(24px);border-bottom:1px solid var(--line)}.search{flex:1;max-width:720px;margin:auto;display:flex;align-items:center;background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:18px;padding:0 15px}.search span{font-size:25px;color:#7d7d92}.search input{flex:1;border:0;outline:0;background:transparent;color:white;padding:14px;font-size:14px}.search button{border:0;background:none;color:#aaa;font-size:20px}.icon,.avatar,.player-icon,.controls button{border:1px solid var(--line);background:rgba(255,255,255,.05);color:#ddd;border-radius:12px;width:40px;height:40px;cursor:pointer}.avatar{display:grid;place-items:center;font-size:12px;font-weight:800}.mobile-menu{display:none}.content{max-width:1400px;margin:auto;padding:28px 30px 190px}.hero{min-height:360px;padding:50px;display:flex;align-items:center;justify-content:space-between;overflow:hidden;border:1px solid var(--line);border-radius:34px;background:linear-gradient(120deg,rgba(117,87,255,.23),rgba(20,24,42,.65) 55%,rgba(30,214,190,.12));box-shadow:var(--shadow);position:relative}.hero:after{content:"";position:absolute;inset:auto -10% -60% 35%;height:350px;background:rgba(76,220,204,.12);filter:blur(70px);border-radius:50%}.pill{display:inline-flex;padding:8px 12px;border-radius:99px;background:rgba(255,255,255,.08);font-size:10px;letter-spacing:1.5px;color:#c7c4d9}.hero h1{font:800 clamp(42px,6vw,78px)/.95 Outfit;margin:22px 0}.hero h1 em{font-style:normal;background:linear-gradient(90deg,#b79eff,#54ebd5);-webkit-background-clip:text;color:transparent}.hero p{max-width:590px;color:#aaaabe;line-height:1.7}.actions{display:flex;gap:12px;margin-top:28px}.primary,.glass{border:0;border-radius:14px;padding:13px 19px;font-weight:700;cursor:pointer}.primary{background:linear-gradient(135deg,#a888ff,#54e8d2);color:#070710;box-shadow:0 12px 30px rgba(120,100,255,.22)}.glass{background:rgba(255,255,255,.07);border:1px solid var(--line);color:white}.hero-disc{width:260px;height:260px;border-radius:50%;background:repeating-radial-gradient(circle,#141421 0 3px,#28273a 4px 5px);display:grid;place-items:center;box-shadow:0 0 80px rgba(145,112,255,.3),inset 0 0 40px #000;transform:rotate(-12deg);z-index:1}.hero-disc div{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#a889ff,#3edfc9);color:#090910;font:800 23px Outfit}.hero-disc span{color:#222}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 36px}.stats>div{padding:20px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.035);display:flex;flex-direction:column}.stats b{font:800 28px Outfit}.stats span{color:#7e7e94;font-size:12px;margin-top:5px}.section{margin:35px 0}.heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}.heading small{font-size:9px;letter-spacing:2px;color:#77778d}.heading h2{font:800 27px Outfit;margin:6px 0}.link{border:0;background:none;color:#a998ff;cursor:pointer}.categories{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:15px}.category{min-height:150px;padding:20px;border-radius:22px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025));cursor:pointer;transition:.25s;position:relative;overflow:hidden}.category:hover,.song-card:hover{transform:translateY(-4px);border-color:rgba(160,135,255,.35);box-shadow:0 18px 45px rgba(0,0,0,.2)}.category .symbol{font-size:30px}.category h3{margin:20px 0 5px}.category p{color:#77778d;font-size:12px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:15px}.song-card{border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:22px;overflow:hidden;transition:.25s}.art{aspect-ratio:1;background:linear-gradient(135deg,#19182a,#2b2744);position:relative}.art img{width:100%;height:100%;object-fit:cover}.source{position:absolute;top:10px;left:10px;padding:6px 9px;border-radius:9px;background:rgba(0,0,0,.58);font-size:9px;letter-spacing:1px}.song-card .body{padding:14px}.song-card h3{font-size:14px;margin:0 0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.song-card p{margin:0;color:#85859b;font-size:11px}.card-actions{display:flex;gap:7px;margin-top:12px}.card-actions button{flex:1;border:1px solid var(--line);background:rgba(255,255,255,.05);color:white;border-radius:10px;padding:9px;cursor:pointer}.card-actions .play-now{background:linear-gradient(135deg,#9d7cff,#42ddc8);color:#080810}.youtube-section{display:none}.admin-auth{display:flex;gap:10px;align-items:center;padding:15px;margin-bottom:15px}.admin-auth input,.panel input{width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:rgba(0,0,0,.18);color:white;outline:0}.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.panel{padding:20px;border-radius:22px;margin-bottom:15px}.panel h3{margin-top:0;font-family:Outfit}.panel{display:grid;gap:10px}.panel small{color:#77778d;line-height:1.5}.admin-row{display:flex;justify-content:space-between;gap:10px;padding:12px;border-bottom:1px solid var(--line);align-items:center}.admin-row button{border:1px solid var(--line);background:rgba(255,255,255,.05);color:white;border-radius:8px;padding:7px;cursor:pointer}.player-shell{position:fixed;left:250px;right:0;bottom:0;z-index:50;background:rgba(8,8,18,.85);backdrop-filter:blur(25px);border-top:1px solid var(--line)}.mini{height:78px;display:flex;align-items:center;gap:12px;padding:10px 24px}.mini img{width:56px;height:56px;border-radius:12px;object-fit:cover;background:#1b1a2b}.now{min-width:160px;flex:1;display:flex;flex-direction:column}.now b{font-size:13px}.now span{font-size:11px;color:#85859a;margin-top:4px}.play{border:0;background:linear-gradient(135deg,#a88bff,#49e2cc);color:#070710;width:46px;height:46px;border-radius:50%;font-weight:800;cursor:pointer}.full-player{display:none;max-height:calc(100vh - 20px);overflow:auto;padding:25px 30px 40px;border-top:1px solid var(--line)}.full-player.open{display:block}.video-wrap{max-width:900px;margin:0 auto 18px;aspect-ratio:16/9;border-radius:20px;overflow:hidden;background:#000}.video-wrap.hidden{display:none}.video-wrap iframe{width:100%;height:100%;border:0}.mode-row{display:flex;gap:8px;align-items:center;justify-content:center}.mode{border:1px solid var(--line);background:rgba(255,255,255,.05);color:#bbb;border-radius:10px;padding:9px 12px;cursor:pointer}.mode.active{color:white;background:rgba(155,124,255,.18)}#sourceBadge{font-size:9px;color:#77778d;margin-left:5px}.full-art{width:min(330px,80vw);aspect-ratio:1;margin:18px auto;border-radius:28px;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.45)}.full-art img{width:100%;height:100%;object-fit:cover;background:#171626}.full-player h2{text-align:center;font:800 26px Outfit;margin:10px 0 3px}.full-player>p{text-align:center;color:#85859a}.progress{display:flex;align-items:center;gap:10px;max-width:720px;margin:25px auto}.progress span{font-size:10px;color:#85859a}.progress input,.volume input{width:100%;accent-color:#a58bff}.controls{display:flex;justify-content:center;align-items:center;gap:12px}.controls .big{width:58px;height:58px}.volume{display:flex;gap:10px;max-width:260px;margin:18px auto}.queue{max-width:720px;margin:28px auto}.queue .heading h3{margin:0}.queue-row{display:flex;gap:10px;align-items:center;padding:9px;border-bottom:1px solid var(--line);cursor:pointer}.queue-row img{width:40px;height:40px;border-radius:8px;object-fit:cover}.queue-row div{flex:1}.queue-row small{color:#77778d}.toast{position:fixed;left:50%;bottom:105px;transform:translate(-50%,20px);background:#181827;border:1px solid var(--line);padding:12px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.2s;z-index:100}.toast.show{opacity:1;transform:translate(-50%,0)}.hidden{display:none!important}@media(max-width:900px){.sidebar{transform:translateX(-100%);transition:.25s}.sidebar.open{transform:none}.main{margin-left:0;width:100%}.player-shell{left:0}.mobile-menu{display:block}.hero{padding:30px;min-height:400px}.hero-disc{width:170px;height:170px}.stats{grid-template-columns:repeat(2,1fr)}.admin-grid{grid-template-columns:1fr}}@media(max-width:620px){.topbar{padding:12px}.content{padding:18px 14px 150px}.hero{padding:25px;display:block}.hero h1{font-size:44px}.hero-disc{margin:25px auto 0;width:150px;height:150px}.stats{gap:8px}.stats>div{padding:14px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.song-card{border-radius:16px}.song-card .body{padding:10px}.mini{height:70px;padding:8px 10px}.mini img{width:48px;height:48px}.mini .player-icon:nth-of-type(1),.mini .player-icon:nth-of-type(2){display:none}.now{min-width:0}.now b{max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.full-player{padding:16px}.categories{grid-template-columns:repeat(2,1fr)}.search{border-radius:13px}.search input{padding:11px 8px}.avatar{display:none}.source{font-size:8px}.admin-auth{flex-wrap:wrap}}
+const state = {
+  songs: [],
+  queue: [],
+  queueIndex: -1,
+  current: null,
+  index: -1,
+
+  shuffle: false,
+  repeat: "off",
+
+  youtubeReady: false,
+  youtubeLoading: null,
+  youtubePlayer: null,
+
+  favorites: new Set(),
+
+  mode: "music"
+};
+
+const audio =
+  document.getElementById("audio");
+
+const $ = id =>
+  document.getElementById(id);
+
+/* -------------------------------------------------------
+   YOUTUBE API
+------------------------------------------------------- */
+
+function loadYouTubeAPI() {
+  if (
+    state.youtubeReady &&
+    window.YT &&
+    window.YT.Player
+  ) {
+    return Promise.resolve();
+  }
+
+  if (state.youtubeLoading) {
+    return state.youtubeLoading;
+  }
+
+  state.youtubeLoading =
+    new Promise(resolve => {
+
+      const previous =
+        window.onYouTubeIframeAPIReady;
+
+      window.onYouTubeIframeAPIReady =
+        () => {
+
+          state.youtubeReady = true;
+
+          if (
+            typeof previous ===
+            "function"
+          ) {
+            previous();
+          }
+
+          resolve();
+        };
+
+      const existing =
+        document.querySelector(
+          "script[data-youtube-api]"
+        );
+
+      if (!existing) {
+
+        const script =
+          document.createElement(
+            "script"
+          );
+
+        script.src =
+          "https://www.youtube.com/iframe_api";
+
+        script.async = true;
+
+        script.dataset.youtubeApi =
+          "true";
+
+        document.head.appendChild(
+          script
+        );
+      }
+    });
+
+  return state.youtubeLoading;
+}
+
+/* -------------------------------------------------------
+   TOAST
+------------------------------------------------------- */
+
+function toast(message) {
+  const element =
+    $("toast");
+
+  element.textContent =
+    message;
+
+  element.classList.add(
+    "show"
+  );
+
+  clearTimeout(
+    toast.timer
+  );
+
+  toast.timer =
+    setTimeout(() => {
+      element.classList.remove(
+        "show"
+      );
+    }, 2500);
+}
+
+/* -------------------------------------------------------
+   API
+------------------------------------------------------- */
+
+async function loadSongs() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/songs"
+      );
+
+    const data =
+      await response.json();
+
+    if (!data.success) {
+      throw new Error(
+        data.error ||
+        "Unable to load songs"
+      );
+    }
+
+    state.songs =
+      Array.isArray(data.songs)
+        ? data.songs
+        : [];
+
+    state.queue =
+      [...state.songs];
+
+    renderAll();
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast(
+      "Unable to load songs"
+    );
+  }
+}
+
+async function loadYouTubeSongs() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/youtube"
+      );
+
+    const data =
+      await response.json();
+
+    return data.songs || [];
+
+  } catch (error) {
+
+    console.error(
+      "YouTube load error:",
+      error
+    );
+
+    return [];
+  }
+}
+
+/* -------------------------------------------------------
+   RENDER
+------------------------------------------------------- */
+
+function renderAll() {
+
+  renderSongs(
+    $("recentSongs"),
+    state.songs.slice(0, 12)
+  );
+
+  renderSongs(
+    $("musicSongs"),
+    state.songs.filter(
+      song =>
+        song.source_type ===
+        "mp3"
+    )
+  );
+
+  renderSongs(
+    $("youtubeSongs"),
+    state.songs.filter(
+      song =>
+        song.source_type ===
+        "youtube"
+    )
+  );
+
+  renderSongs(
+    $("librarySongs"),
+    state.songs.filter(
+      song =>
+        state.favorites.has(
+          String(song.id)
+        )
+    )
+  );
+
+  renderCategories();
+}
+
+function renderSongs(
+  container,
+  songs
+) {
+
+  if (!container) {
+    return;
+  }
+
+  if (!songs.length) {
+
+    container.innerHTML =
+      `<div class="empty">
+        No songs found
+      </div>`;
+
+    return;
+  }
+
+  container.innerHTML =
+    songs.map(song => {
+
+      const isYouTube =
+        song.source_type ===
+        "youtube";
+
+      const cover =
+        song.cover_url ||
+        "/images/ganpati.jpg";
+
+      return `
+        <article
+          class="song-card"
+          data-id="${escapeHtml(song.id)}"
+        >
+
+          <div class="cover-wrap">
+
+            <img
+              src="${escapeHtml(cover)}"
+              alt=""
+              loading="lazy"
+            >
+
+            <button
+              class="play-button"
+              onclick="playById('${escapeHtml(song.id)}')"
+            >
+              ${isYouTube ? "▶" : "▶"}
+            </button>
+
+          </div>
+
+          <div class="song-details">
+
+            <h3>
+              ${escapeHtml(song.title)}
+            </h3>
+
+            <p>
+              ${escapeHtml(song.artist)}
+            </p>
+
+            <span class="source">
+              ${
+                isYouTube
+                  ? "▶ YouTube"
+                  : "🎵 MP3"
+              }
+            </span>
+
+          </div>
+
+          <button
+            class="favorite"
+            onclick="toggleFavorite('${escapeHtml(song.id)}')"
+          >
+            ${
+              state.favorites.has(
+                String(song.id)
+              )
+                ? "♥"
+                : "♡"
+            }
+          </button>
+
+        </article>
+      `;
+    }).join("");
+}
+
+function renderCategories() {
+
+  const element =
+    $("categories");
+
+  if (!element) {
+    return;
+  }
+
+  const categories =
+    [
+      ...new Set(
+        state.songs
+          .map(
+            song =>
+              song.category
+          )
+          .filter(Boolean)
+      )
+    ];
+
+  element.innerHTML =
+    categories.map(
+      category => `
+        <button
+          onclick="filterCategory('${escapeHtml(category)}')"
+        >
+          ${escapeHtml(category)}
+        </button>
+      `
+    ).join("");
+}
+
+/* -------------------------------------------------------
+   PLAY
+------------------------------------------------------- */
+
+function playById(id) {
+
+  const song =
+    state.songs.find(
+      item =>
+        String(item.id) ===
+        String(id)
+    );
+
+  if (!song) {
+    toast("Song not found");
+    return;
+  }
+
+  state.current =
+    song;
+
+  state.index =
+    state.songs.indexOf(song);
+
+  if (!state.queue.length) {
+    state.queue =
+      [...state.songs];
+  }
+
+  state.queueIndex =
+    state.queue.findIndex(
+      item =>
+        String(item.id) ===
+        String(song.id)
+    );
+
+  if (
+    song.source_type ===
+    "youtube"
+  ) {
+
+    playYouTube(song);
+
+  } else {
+
+    playMP3(song);
+  }
+}
+
+/* -------------------------------------------------------
+   MP3
+------------------------------------------------------- */
+
+function playMP3(song) {
+
+  stopYouTube();
+
+  const url =
+    song.audio_url ||
+    song.file_path;
+
+  if (!url) {
+    toast(
+      "MP3 URL is missing"
+    );
+
+    return;
+  }
+
+  audio.src =
+    url;
+
+  audio.load();
+
+  audio.play()
+    .then(() => {
+      setPlaying(true);
+    })
+    .catch(error => {
+
+      console.error(
+        "MP3 PLAY ERROR:",
+        error
+      );
+
+      toast(
+        "Unable to play MP3"
+      );
+    });
+
+  state.mode =
+    "music";
+
+  $("videoModeButton")
+    ?.classList.add(
+      "hidden"
+    );
+
+  $("musicModeButton")
+    ?.classList.add(
+      "hidden"
+    );
+
+  updatePlayer(song);
+}
+
+/* -------------------------------------------------------
+   YOUTUBE
+------------------------------------------------------- */
+
+async function playYouTube(song) {
+
+  if (!song.youtube_id) {
+
+    toast(
+      "YouTube video ID missing"
+    );
+
+    return;
+  }
+
+  audio.pause();
+
+  try {
+
+    await loadYouTubeAPI();
+
+    if (!state.youtubePlayer) {
+
+      state.youtubePlayer =
+        new YT.Player(
+          "youtubePlayer",
+          {
+            width: "100%",
+            height: "100%",
+
+            videoId:
+              song.youtube_id,
+
+            playerVars: {
+              autoplay: 1,
+              playsinline: 1,
+              controls: 1,
+              rel: 0,
+              modestbranding: 1
+            },
+
+            events: {
+
+              onReady(event) {
+                event.target.playVideo();
+              },
+
+              onStateChange(event) {
+                youtubeStateChange(
+                  event
+                );
+              },
+
+              onError(event) {
+
+                console.error(
+                  "YouTube error:",
+                  event.data
+                );
+
+                toast(
+                  "Unable to play this YouTube video"
+                );
+              }
+            }
+          }
+        );
+
+    } else {
+
+      state.youtubePlayer
+        .loadVideoById(
+          song.youtube_id
+        );
+    }
+
+    state.mode =
+      "music";
+
+    $("videoModeButton")
+      ?.classList.remove(
+        "hidden"
+      );
+
+    $("musicModeButton")
+      ?.classList.add(
+        "hidden"
+      );
+
+    updatePlayer(song);
+
+    setPlaying(true);
+
+  } catch (error) {
+
+    console.error(
+      "YOUTUBE ERROR:",
+      error
+    );
+
+    toast(
+      "Unable to start YouTube"
+    );
+  }
+}
+
+function youtubeStateChange(event) {
+
+  if (!window.YT) {
+    return;
+  }
+
+  if (
+    event.data ===
+    YT.PlayerState.PLAYING
+  ) {
+
+    setPlaying(true);
+  }
+
+  if (
+    event.data ===
+    YT.PlayerState.PAUSED
+  ) {
+
+    setPlaying(false);
+  }
+
+  if (
+    event.data ===
+    YT.PlayerState.ENDED
+  ) {
+
+    setPlaying(false);
+
+    nextSong();
+  }
+}
+
+function stopYouTube() {
+
+  if (
+    state.youtubePlayer &&
+    typeof
+      state.youtubePlayer.pauseVideo ===
+      "function"
+  ) {
+
+    state.youtubePlayer.pauseVideo();
+  }
+}
+
+/* -------------------------------------------------------
+   PLAYER
+------------------------------------------------------- */
+
+function updatePlayer(song) {
+
+  $("playerTitle").textContent =
+    song.title;
+
+  $("playerArtist").textContent =
+    song.artist;
+
+  $("playerCover").src =
+    song.cover_url ||
+    "/images/ganpati.jpg";
+}
+
+function setPlaying(playing) {
+
+  const button =
+    $("playPause");
+
+  if (!button) {
+    return;
+  }
+
+  button.textContent =
+    playing
+      ? "⏸"
+      : "▶";
+}
+
+function togglePlay() {
+
+  if (!state.current) {
+    return;
+  }
+
+  if (
+    state.current.source_type ===
+    "youtube"
+  ) {
+
+    if (
+      !state.youtubePlayer
+    ) {
+      return;
+    }
+
+    const playerState =
+      state.youtubePlayer
+        .getPlayerState();
+
+    if (
+      playerState ===
+      YT.PlayerState.PLAYING
+    ) {
+
+      state.youtubePlayer
+        .pauseVideo();
+
+    } else {
+
+      state.youtubePlayer
+        .playVideo();
+    }
+
+    return;
+  }
+
+  if (audio.paused) {
+
+    audio.play()
+      .then(() => {
+        setPlaying(true);
+      });
+
+  } else {
+
+    audio.pause();
+
+    setPlaying(false);
+  }
+}
+
+/* -------------------------------------------------------
+   NEXT / PREVIOUS
+------------------------------------------------------- */
+
+function nextSong() {
+
+  if (!state.queue.length) {
+    return;
+  }
+
+  if (
+    state.repeat ===
+    "one"
+  ) {
+
+    playById(
+      state.current.id
+    );
+
+    return;
+  }
+
+  let nextIndex;
+
+  if (state.shuffle) {
+
+    nextIndex =
+      Math.floor(
+        Math.random() *
+        state.queue.length
+      );
+
+  } else {
+
+    nextIndex =
+      state.queueIndex + 1;
+
+    if (
+      nextIndex >=
+      state.queue.length
+    ) {
+
+      if (
+        state.repeat ===
+        "all"
+      ) {
+        nextIndex = 0;
+      } else {
+        return;
+      }
+    }
+  }
+
+  state.queueIndex =
+    nextIndex;
+
+  playById(
+    state.queue[nextIndex].id
+  );
+}
+
+function previousSong() {
+
+  if (!state.queue.length) {
+    return;
+  }
+
+  let previousIndex =
+    state.queueIndex - 1;
+
+  if (
+    previousIndex < 0
+  ) {
+    previousIndex =
+      state.queue.length - 1;
+  }
+
+  state.queueIndex =
+    previousIndex;
+
+  playById(
+    state.queue[previousIndex].id
+  );
+}
+
+/* -------------------------------------------------------
+   SHUFFLE / REPEAT
+------------------------------------------------------- */
+
+function toggleShuffle() {
+
+  state.shuffle =
+    !state.shuffle;
+
+  $("shuffle")
+    ?.classList.toggle(
+      "active",
+      state.shuffle
+    );
+
+  toast(
+    state.shuffle
+      ? "Shuffle ON"
+      : "Shuffle OFF"
+  );
+}
+
+function toggleRepeat() {
+
+  const modes =
+    [
+      "off",
+      "one",
+      "all"
+    ];
+
+  const index =
+    modes.indexOf(
+      state.repeat
+    );
+
+  state.repeat =
+    modes[
+      (index + 1) %
+      modes.length
+    ];
+
+  $("repeat").textContent =
+    state.repeat === "one"
+      ? "🔂"
+      : "🔁";
+
+  toast(
+    `Repeat: ${state.repeat}`
+  );
+}
+
+/* -------------------------------------------------------
+   MUSIC / VIDEO MODE
+------------------------------------------------------- */
+
+function switchToVideoMode() {
+
+  if (
+    state.current?.source_type !==
+    "youtube"
+  ) {
+    return;
+  }
+
+  state.mode =
+    "video";
+
+  $("youtubePlayer")
+    ?.classList.add(
+      "video-active"
+    );
+
+  $("videoModeButton")
+    ?.classList.add(
+      "hidden"
+    );
+
+  $("musicModeButton")
+    ?.classList.remove(
+      "hidden"
+    );
+}
+
+function switchToMusicMode() {
+
+  state.mode =
+    "music";
+
+  $("youtubePlayer")
+    ?.classList.remove(
+      "video-active"
+    );
+
+  $("videoModeButton")
+    ?.classList.remove(
+      "hidden"
+    );
+
+  $("musicModeButton")
+    ?.classList.add(
+      "hidden"
+    );
+}
+
+/* -------------------------------------------------------
+   SEARCH
+------------------------------------------------------- */
+
+function searchSongs(value) {
+
+  const query =
+    value
+      .trim()
+      .toLowerCase();
+
+  if (!query) {
+
+    renderAll();
+
+    return;
+  }
+
+  const results =
+    state.songs.filter(
+      song =>
+        [
+          song.title,
+          song.artist,
+          song.album,
+          song.category,
+          song.language
+        ]
+          .filter(Boolean)
+          .some(
+            field =>
+              String(field)
+                .toLowerCase()
+                .includes(query)
+          )
+    );
+
+  renderSongs(
+    $("musicSongs"),
+    results
+  );
+}
+
+/* -------------------------------------------------------
+   CATEGORY
+------------------------------------------------------- */
+
+function filterCategory(category) {
+
+  const results =
+    state.songs.filter(
+      song =>
+        song.category ===
+        category
+    );
+
+  document
+    .querySelectorAll(".page")
+    .forEach(
+      page =>
+        page.classList.remove(
+          "active"
+        )
+    );
+
+  $("music")
+    .classList.add(
+      "active"
+    );
+
+  renderSongs(
+    $("musicSongs"),
+    results
+  );
+}
+
+/* -------------------------------------------------------
+   FAVORITES
+------------------------------------------------------- */
+
+function toggleFavorite(id) {
+
+  const key =
+    String(id);
+
+  if (
+    state.favorites.has(key)
+  ) {
+
+    state.favorites.delete(
+      key
+    );
+
+  } else {
+
+    state.favorites.add(
+      key
+    );
+  }
+
+  renderAll();
+}
+
+/* -------------------------------------------------------
+   ADMIN
+------------------------------------------------------- */
+
+async function addYouTubeSong(event) {
+
+  event.preventDefault();
+
+  const form =
+    event.target;
+
+  const formData =
+    new FormData(form);
+
+  formData.append(
+    "source_type",
+    "youtube"
+  );
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/admin/songs",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!data.success) {
+      throw new Error(
+        data.error ||
+        "Failed to add YouTube song"
+      );
+    }
+
+    toast(
+      "YouTube song added"
+    );
+
+    form.reset();
+
+    await loadSongs();
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast(
+      error.message
+    );
+  }
+}
+
+async function addMP3Song(event) {
+
+  event.preventDefault();
+
+  const form =
+    event.target;
+
+  const formData =
+    new FormData(form);
+
+  formData.append(
+    "source_type",
+    "mp3"
+  );
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/admin/songs",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!data.success) {
+      throw new Error(
+        data.error ||
+        "Failed to add MP3"
+      );
+    }
+
+    toast(
+      "MP3 song added"
+    );
+
+    form.reset();
+
+    await loadSongs();
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast(
+      error.message
+    );
+  }
+}
+
+/* -------------------------------------------------------
+   NAVIGATION
+------------------------------------------------------- */
+
+document
+  .querySelectorAll(
+    "[data-tab]"
+  )
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const tab =
+          button.dataset.tab;
+
+        document
+          .querySelectorAll(
+            ".page"
+          )
+          .forEach(page => {
+            page.classList.remove(
+              "active"
+            );
+          });
+
+        const target =
+          $(tab);
+
+        if (target) {
+          target.classList.add(
+            "active"
+          );
+        }
+      }
+    );
+  });
+
+/* -------------------------------------------------------
+   EVENTS
+------------------------------------------------------- */
+
+$("playPause")
+  ?.addEventListener(
+    "click",
+    togglePlay
+  );
+
+$("next")
+  ?.addEventListener(
+    "click",
+    nextSong
+  );
+
+$("previous")
+  ?.addEventListener(
+    "click",
+    previousSong
+  );
+
+$("shuffle")
+  ?.addEventListener(
+    "click",
+    toggleShuffle
+  );
+
+$("repeat")
+  ?.addEventListener(
+    "click",
+    toggleRepeat
+  );
+
+$("videoModeButton")
+  ?.addEventListener(
+    "click",
+    switchToVideoMode
+  );
+
+$("musicModeButton")
+  ?.addEventListener(
+    "click",
+    switchToMusicMode
+  );
+
+$("searchInput")
+  ?.addEventListener(
+    "input",
+    event =>
+      searchSongs(
+        event.target.value
+      )
+  );
+
+$("youtubeForm")
+  ?.addEventListener(
+    "submit",
+    addYouTubeSong
+  );
+
+$("mp3Form")
+  ?.addEventListener(
+    "submit",
+    addMP3Song
+  );
+
+audio.addEventListener(
+  "timeupdate",
+  () => {
+
+    if (
+      !audio.duration
+    ) {
+      return;
+    }
+
+    const percentage =
+      (
+        audio.currentTime /
+        audio.duration
+      ) * 100;
+
+    $("progressBar").value =
+      percentage;
+
+    $("currentTime")
+      .textContent =
+        formatTime(
+          audio.currentTime
+        );
+
+    $("duration")
+      .textContent =
+        formatTime(
+          audio.duration
+        );
+  }
+);
+
+audio.addEventListener(
+  "ended",
+  nextSong
+);
+
+$("progressBar")
+  ?.addEventListener(
+    "input",
+    event => {
+
+      if (
+        !audio.duration
+      ) {
+        return;
+      }
+
+      audio.currentTime =
+        (
+          Number(
+            event.target.value
+          ) / 100
+        ) *
+        audio.duration;
+    }
+  );
+
+/* -------------------------------------------------------
+   HELPERS
+------------------------------------------------------- */
+
+function formatTime(seconds) {
+
+  if (
+    !Number.isFinite(seconds)
+  ) {
+    return "0:00";
+  }
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+  const remaining =
+    Math.floor(
+      seconds % 60
+    );
+
+  return `${minutes}:${String(
+    remaining
+  ).padStart(2, "0")}`;
+}
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+/* -------------------------------------------------------
+   START
+------------------------------------------------------- */
+
+loadSongs();

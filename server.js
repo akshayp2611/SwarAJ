@@ -3,396 +3,625 @@ const path = require("path");
 const cors = require("cors");
 const multer = require("multer");
 const { v2: cloudinary } = require("cloudinary");
-const { pool, initDatabase } = require("./database");
-
+const {
+  pool,
+  initDatabase
+} = require("./database");
 const app = express();
 const PORT = process.env.PORT || 10000;
-
+// ==================================================
+// BASIC CONFIG
+// ==================================================
 app.use(cors());
-app.use(express.json({ limit: "20mb" }));
-app.use(express.urlencoded({ extended: true, limit: "20mb" }));
+app.use(
+  express.json({
+    limit: "20mb"
+  })
+);
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "20mb"
+  })
+);
+// ==================================================
+// STATIC FILES
+// ==================================================
 app.use(express.static(__dirname));
-
+app.use(
+  "/images",
+  express.static(
+    path.join(__dirname, "images")
+  )
+);
+// ==================================================
+// CLOUDINARY
+// ==================================================
 let cloudinaryReady = false;
-
 if (process.env.CLOUDINARY_URL) {
   try {
     cloudinary.config();
     cloudinaryReady = true;
-    console.log("Cloudinary configured");
-  } catch (err) {
-    console.error("Cloudinary error:", err.message);
+    console.log(
+      "Cloudinary configured."
+    );
+  } catch (error) {
+    console.error(
+      "Cloudinary configuration error:",
+      error.message
+    );
   }
+} else {
+  console.warn(
+    "CLOUDINARY_URL is not configured."
+  );
 }
-
+// ==================================================
+// MULTER
+// ==================================================
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 100 * 1024 * 1024
   },
-  fileFilter(req, file, cb) {
+  fileFilter: (
+    req,
+    file,
+    cb
+  ) => {
     const valid =
       file.mimetype.startsWith("audio/") ||
-      /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(
+      /\.(mp3|wav|m4a|aac|ogg)$/i.test(
         file.originalname
       );
-
-    if (!valid) {
-      return cb(
-        new Error("Only audio files are allowed.")
+    if (valid) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          "Only audio files are allowed."
+        )
       );
     }
-
-    cb(null, true);
   }
 });
-
+// ==================================================
+// HELPERS
+// ==================================================
 function clean(value) {
-  if (value === undefined || value === null) {
+  if (
+    value === undefined ||
+    value === null
+  ) {
     return "";
   }
-
   return String(value).trim();
 }
-
 function nullable(value) {
-  const value = clean(value);
-  return value || null;
+  const cleaned = clean(value);
+  return cleaned
+    ? cleaned
+    : null;
 }
-
-/* =====================================================
-   YOUTUBE
-===================================================== */
-
-function cleanYouTubeId(id) {
-  if (!id) return null;
-
-  const value = String(id)
-    .trim()
-    .replace(/[^a-zA-Z0-9_-]/g, "");
-
-  if (value.length < 5 || value.length > 20) {
+// ==================================================
+// YOUTUBE VIDEO ID
+// ==================================================
+function extractYouTubeVideoId(value) {
+  if (!value) {
     return null;
   }
-
-  return value;
-}
-
-function extractYouTubeVideoId(value) {
-  if (!value) return null;
-
   try {
-    const url = new URL(String(value).trim());
-
-    const host = url.hostname
-      .toLowerCase()
-      .replace(/^www\./, "");
-
+    const url = new URL(
+      String(value).trim()
+    );
+    const host =
+      url.hostname
+        .toLowerCase()
+        .replace(/^www\./, "");
+    // ------------------------------------------
+    // https://youtu.be/VIDEO_ID
+    // ------------------------------------------
     if (host === "youtu.be") {
-      return cleanYouTubeId(
+      const id =
         url.pathname
           .replace(/^\/+/, "")
-          .split("/")[0]
-      );
+          .split("/")[0];
+      return cleanYouTubeId(id);
     }
-
+    // ------------------------------------------
+    // youtube.com
+    // ------------------------------------------
     if (
       host === "youtube.com" ||
       host === "m.youtube.com"
     ) {
-      const v = url.searchParams.get("v");
-
-      if (v) {
-        return cleanYouTubeId(v);
+      // https://youtube.com/watch?v=VIDEO_ID
+      const watchId =
+        url.searchParams.get("v");
+      if (watchId) {
+        return cleanYouTubeId(
+          watchId
+        );
       }
-
-      const patterns = [
-        /^\/shorts\/([^/?]+)/,
-        /^\/embed\/([^/?]+)/,
-        /^\/live\/([^/?]+)/
-      ];
-
-      for (const pattern of patterns) {
-        const match =
-          url.pathname.match(pattern);
-
-        if (match) {
-          return cleanYouTubeId(match[1]);
-        }
+      // https://youtube.com/shorts/VIDEO_ID
+      const shorts =
+        url.pathname.match(
+          /^\/shorts\/([^/?]+)/
+        );
+      if (shorts) {
+        return cleanYouTubeId(
+          shorts[1]
+        );
+      }
+      // https://youtube.com/embed/VIDEO_ID
+      const embed =
+        url.pathname.match(
+          /^\/embed\/([^/?]+)/
+        );
+      if (embed) {
+        return cleanYouTubeId(
+          embed[1]
+        );
+      }
+      // https://youtube.com/live/VIDEO_ID
+      const live =
+        url.pathname.match(
+          /^\/live\/([^/?]+)/
+        );
+      if (live) {
+        return cleanYouTubeId(
+          live[1]
+        );
       }
     }
-  } catch {
+  } catch (error) {
     return null;
   }
-
   return null;
 }
-
-/* =====================================================
-   CLOUDINARY MP3
-===================================================== */
-
-function uploadAudio(buffer, filename) {
-  return new Promise((resolve, reject) => {
-    const safeName = filename
-      .replace(/\.[^/.]+$/, "")
-      .replace(/[^a-zA-Z0-9_-]/g, "_");
-
-    const stream =
-      cloudinary.uploader.upload_stream(
-        {
-          resource_type: "video",
-          folder: "swaraj/songs",
-          public_id: safeName,
-          overwrite: true
-        },
-        (error, result) => {
-          if (error) {
-            return reject(error);
-          }
-
-          resolve(result);
-        }
-      );
-
-    stream.end(buffer);
-  });
-}
-
-/* =====================================================
-   PAGES
-===================================================== */
-
-app.get("/", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "index.html")
-  );
-});
-
-app.get("/admin", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "admin.html")
-  );
-});
-
-/* =====================================================
-   HEALTH
-===================================================== */
-
-app.get("/api/health", async (req, res) => {
-  let database = "not configured";
-
-  if (pool) {
-    try {
-      await pool.query("SELECT 1");
-      database = "connected";
-    } catch {
-      database = "error";
-    }
+// ==================================================
+// CLEAN YOUTUBE ID
+// ==================================================
+function cleanYouTubeId(id) {
+  if (!id) {
+    return null;
   }
-
-  res.json({
-    status: "ok",
-    service: "स्वरAJ Music",
-    database,
-    cloudinary: cloudinaryReady,
-    youtube: true,
-    timestamp: new Date().toISOString()
-  });
-});
-
-/* =====================================================
-   CATEGORIES
-===================================================== */
-
+  const cleaned =
+    String(id)
+      .trim()
+      .replace(
+        /[^a-zA-Z0-9_-]/g,
+        ""
+      );
+  if (
+    cleaned.length < 5 ||
+    cleaned.length > 20
+  ) {
+    return null;
+  }
+  return cleaned;
+}
+// ==================================================
+// YOUTUBE URL VALIDATION
+// ==================================================
+function isValidYouTubeUrl(value) {
+  if (!value) {
+    return true;
+  }
+  return Boolean(
+    extractYouTubeVideoId(value)
+  );
+}
+// ==================================================
+// CLOUDINARY AUDIO UPLOAD
+// ==================================================
+function uploadAudio(
+  buffer,
+  filename
+) {
+  return new Promise(
+    (resolve, reject) => {
+      const safeName =
+        filename
+          .replace(
+            /\.[^/.]+$/,
+            ""
+          )
+          .replace(
+            /[^a-zA-Z0-9_-]/g,
+            "_"
+          );
+      const stream =
+        cloudinary.uploader.upload_stream(
+          {
+            resource_type: "video",
+            folder:
+              "swaraj/songs",
+            public_id:
+              safeName,
+            overwrite: true
+          },
+          (
+            error,
+            result
+          ) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            resolve(result);
+          }
+        );
+      stream.end(buffer);
+    }
+  );
+}
+// ==================================================
+// HOME
+// ==================================================
+app.get(
+  "/",
+  (req, res) => {
+    res.sendFile(
+      path.join(
+        __dirname,
+        "index.html"
+      )
+    );
+  }
+);
+// ==================================================
+// ADMIN
+// ==================================================
+app.get(
+  "/admin",
+  (req, res) => {
+    res.sendFile(
+      path.join(
+        __dirname,
+        "admin.html"
+      )
+    );
+  }
+);
+// ==================================================
+// HEALTH
+// ==================================================
+app.get(
+  "/api/health",
+  async (req, res) => {
+    let database =
+      "not configured";
+    if (pool) {
+      try {
+        await pool.query(
+          "SELECT 1"
+        );
+        database =
+          "connected";
+      } catch (error) {
+        database =
+          "error";
+      }
+    }
+    res.json({
+      status: "ok",
+      service:
+        "स्वरAJ Music",
+      environment:
+        process.env.NODE_ENV ||
+        "development",
+      node:
+        process.version,
+      database,
+      cloudinary:
+        cloudinaryReady,
+      timestamp:
+        new Date().toISOString()
+    });
+  }
+);
+// ==================================================
+// CATEGORIES
+// ==================================================
 app.get(
   "/api/categories",
   async (req, res) => {
     if (!pool) {
       return res.json([]);
     }
-
     try {
-      const result = await pool.query(`
-        SELECT
-          category,
-          COUNT(*)::int AS song_count
-        FROM songs
-        WHERE published = TRUE
-        GROUP BY category
-        ORDER BY category
-      `);
-
-      res.json(result.rows);
+      const result =
+        await pool.query(`
+          SELECT
+            category,
+            COUNT(*)::int AS song_count
+          FROM songs
+          WHERE published = TRUE
+          GROUP BY category
+          ORDER BY category
+        `);
+      res.json(
+        result.rows
+      );
     } catch (error) {
       console.error(
         "CATEGORY ERROR:",
         error
       );
-
       res.status(500).json({
-        error: "Unable to load categories",
-        details: error.message
+        error:
+          "Unable to load categories",
+        details:
+          error.message
       });
     }
   }
 );
-
-/* =====================================================
-   ALL SONGS
-===================================================== */
-
-app.get("/api/songs", async (req, res) => {
-  if (!pool) {
-    return res.json([]);
+// ==================================================
+// SONGS
+// ==================================================
+app.get(
+  "/api/songs",
+  async (req, res) => {
+    if (!pool) {
+      return res.json([]);
+    }
+    try {
+      const result =
+        await pool.query(`
+          SELECT
+            id,
+            title,
+            artist,
+            album,
+            category,
+            language,
+            genre,
+            audio_url,
+            youtube_url,
+            cover_url,
+            lyrics,
+            featured,
+            published,
+            created_at
+          FROM songs
+          WHERE published = TRUE
+          ORDER BY
+            created_at DESC,
+            id DESC
+        `);
+      res.json(
+        result.rows
+      );
+    } catch (error) {
+      console.error(
+        "SONGS ERROR:",
+        error
+      );
+      res.status(500).json({
+        error:
+          "Unable to load songs",
+        details:
+          error.message
+      });
+    }
   }
-
-  try {
-    const result = await pool.query(`
-      SELECT
-        id,
-        title,
-        artist,
-        album,
-        category,
-        language,
-        genre,
-        file_path,
-        audio_url,
-        youtube_url,
-        cover_url,
-        lyrics,
-        featured,
-        published,
-        created_at
-      FROM songs
-      WHERE published = TRUE
-      ORDER BY created_at DESC, id DESC
-    `);
-
-    const songs = result.rows.map(song => ({
-      ...song,
-
-      source:
-        song.audio_url
-          ? "mp3"
-          : song.youtube_url
-            ? "youtube"
-            : "unknown"
-    }));
-
-    res.json(songs);
-
-  } catch (error) {
-    console.error(
-      "SONGS ERROR:",
-      error
-    );
-
-    res.status(500).json({
-      error: "Unable to load songs",
-      details: error.message
+);
+// ==================================================
+// SINGLE SONG
+// ==================================================
+app.get(
+  "/api/songs/:id",
+  async (req, res) => {
+    if (!pool) {
+      return res.status(503).json({
+        error:
+          "Database not configured"
+      });
+    }
+    try {
+      const result =
+        await pool.query(
+          `
+          SELECT *
+          FROM songs
+          WHERE id = $1
+          `,
+          [
+            req.params.id
+          ]
+        );
+      if (
+        result.rows.length === 0
+      ) {
+        return res.status(404).json({
+          error:
+            "Song not found"
+        });
+      }
+      res.json(
+        result.rows[0]
+      );
+    } catch (error) {
+      console.error(
+        "SINGLE SONG ERROR:",
+        error
+      );
+      res.status(500).json({
+        error:
+          error.message
+      });
+    }
+  }
+);
+// ==================================================
+// YOUTUBE EMBED API
+// ==================================================
+app.get(
+  "/api/youtube/embed",
+  (req, res) => {
+    const youtubeUrl =
+      clean(req.query.url);
+    if (!youtubeUrl) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "YouTube URL is required."
+      });
+    }
+    const videoId =
+      extractYouTubeVideoId(
+        youtubeUrl
+      );
+    if (!videoId) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "Invalid YouTube URL.",
+        supported:
+          [
+            "youtube.com/watch?v=...",
+            "youtu.be/...",
+            "youtube.com/shorts/...",
+            "youtube.com/live/..."
+          ]
+      });
+    }
+    const embedUrl =
+      `https://www.youtube.com/embed/${encodeURIComponent(videoId)}` +
+      `?autoplay=1` +
+      `&playsinline=1` +
+      `&rel=0` +
+      `&modestbranding=1`;
+    res.json({
+      success: true,
+      video_id:
+        videoId,
+      original_url:
+        youtubeUrl,
+      embed_url:
+        embedUrl
     });
   }
-});
-
-/* =====================================================
-   ADD SONG
-===================================================== */
-
+);
+// ==================================================
+// ADD SONG
+// ==================================================
 app.post(
   "/api/admin/upload-song",
   upload.single("audio"),
   async (req, res) => {
-
+    console.log(
+      "================================"
+    );
+    console.log(
+      "ADD SONG REQUEST"
+    );
+    console.log(
+      "================================"
+    );
     if (!pool) {
       return res.status(503).json({
         success: false,
-        error: "Database not configured"
+        error:
+          "Database not configured"
       });
     }
-
     try {
-
       const title =
-        clean(req.body.title);
-
+        clean(
+          req.body.title
+        );
       const artist =
-        clean(req.body.artist);
-
+        clean(
+          req.body.artist
+        );
       const album =
-        clean(req.body.album);
-
+        clean(
+          req.body.album
+        );
       const category =
-        clean(req.body.category) ||
+        clean(
+          req.body.category
+        ) ||
         "All Songs";
-
       const language =
-        clean(req.body.language);
-
+        clean(
+          req.body.language
+        );
       const genre =
-        clean(req.body.genre);
-
+        clean(
+          req.body.genre
+        );
       const audioUrl =
-        nullable(req.body.audio_url);
-
+        nullable(
+          req.body.audio_url
+        );
       const youtubeUrl =
-        nullable(req.body.youtube_url);
-
+        nullable(
+          req.body.youtube_url
+        );
       const coverUrl =
-        nullable(req.body.cover_url);
-
+        nullable(
+          req.body.cover_url
+        );
       const lyrics =
-        clean(req.body.lyrics);
-
+        clean(
+          req.body.lyrics
+        );
       const featured =
-        req.body.featured === "true";
-
+        req.body.featured ===
+        "true";
       const published =
-        req.body.published !== "false";
-
+        req.body.published !==
+        "false";
+      console.log({
+        title,
+        artist,
+        album,
+        category,
+        audioUrl,
+        youtubeUrl,
+        hasFile:
+          Boolean(req.file)
+      });
+      // ------------------------------------------
+      // TITLE
+      // ------------------------------------------
       if (!title) {
         return res.status(400).json({
           success: false,
-          error: "Song title is required."
+          error:
+            "Song title is required."
         });
       }
-
-      if (youtubeUrl) {
-        const youtubeId =
-          extractYouTubeVideoId(
-            youtubeUrl
-          );
-
-        if (!youtubeId) {
-          return res.status(400).json({
-            success: false,
-            error:
-              "Invalid YouTube URL."
-          });
-        }
-      }
-
-      /*
-       * Do not allow ambiguous
-       * MP3 + YouTube source.
-       */
-      if (audioUrl && youtubeUrl) {
+      // ------------------------------------------
+      // SOURCE VALIDATION
+      // ------------------------------------------
+      if (
+        youtubeUrl &&
+        !isValidYouTubeUrl(
+          youtubeUrl
+        )
+      ) {
         return res.status(400).json({
           success: false,
           error:
-            "Use either MP3 URL/upload OR YouTube URL, not both."
+            "Invalid YouTube URL.",
+          details:
+            "Use a valid YouTube watch, youtu.be, shorts, or live URL."
         });
       }
-
+      // ------------------------------------------
+      // AUDIO URL
+      // ------------------------------------------
       let finalAudioUrl =
         audioUrl;
-
-      /*
-       * Uploaded MP3
-       */
+      // ------------------------------------------
+      // CLOUDINARY UPLOAD
+      // ------------------------------------------
       if (req.file) {
-
         if (!cloudinaryReady) {
           return res.status(500).json({
             success: false,
@@ -400,28 +629,24 @@ app.post(
               "CLOUDINARY_URL is not configured."
           });
         }
-
+        console.log(
+          "Uploading audio to Cloudinary..."
+        );
         const uploaded =
           await uploadAudio(
             req.file.buffer,
             req.file.originalname
           );
-
         finalAudioUrl =
           uploaded.secure_url;
+        console.log(
+          "Cloudinary URL:",
+          finalAudioUrl
+        );
       }
-
-      if (
-        finalAudioUrl &&
-        youtubeUrl
-      ) {
-        return res.status(400).json({
-          success: false,
-          error:
-            "Only one playback source is allowed."
-        });
-      }
-
+      // ------------------------------------------
+      // SOURCE REQUIRED
+      // ------------------------------------------
       if (
         !finalAudioUrl &&
         !youtubeUrl
@@ -429,10 +654,15 @@ app.post(
         return res.status(400).json({
           success: false,
           error:
-            "Add an MP3 URL, upload an MP3, or add a YouTube URL."
+            "Add an MP3 URL, YouTube URL, or upload an MP3 file."
         });
       }
-
+      // ------------------------------------------
+      // INSERT DATABASE
+      // ------------------------------------------
+      console.log(
+        "Saving song to PostgreSQL..."
+      );
       const result =
         await pool.query(
           `
@@ -443,7 +673,6 @@ app.post(
             category,
             language,
             genre,
-            file_path,
             audio_url,
             youtube_url,
             cover_url,
@@ -452,8 +681,18 @@ app.post(
             published
           )
           VALUES (
-            $1,$2,$3,$4,$5,$6,
-            NULL,$7,$8,$9,$10,$11,$12
+            $1,
+            $2,
+            $3,
+            $4,
+            $5,
+            $6,
+            $7,
+            $8,
+            $9,
+            $10,
+            $11,
+            $12
           )
           RETURNING *
           `,
@@ -472,30 +711,50 @@ app.post(
             published
           ]
         );
-
-      const song =
-        result.rows[0];
-
+      console.log(
+        "Song successfully inserted."
+      );
+      console.log(
+        "Song ID:",
+        result.rows[0].id
+      );
       res.status(201).json({
         success: true,
         message:
           "Song added successfully.",
-        song: {
-          ...song,
-          source:
-            song.audio_url
-              ? "mp3"
-              : "youtube"
-        }
+        song:
+          result.rows[0]
       });
-
     } catch (error) {
-
       console.error(
-        "ADD SONG ERROR:",
-        error
+        "================================"
       );
-
+      console.error(
+        "ADD SONG ERROR"
+      );
+      console.error(
+        "MESSAGE:",
+        error.message
+      );
+      console.error(
+        "CODE:",
+        error.code
+      );
+      console.error(
+        "DETAIL:",
+        error.detail
+      );
+      console.error(
+        "HINT:",
+        error.hint
+      );
+      console.error(
+        "STACK:",
+        error.stack
+      );
+      console.error(
+        "================================"
+      );
       res.status(500).json({
         success: false,
         error:
@@ -505,59 +764,55 @@ app.post(
         code:
           error.code || null,
         detail:
-          error.detail || null
+          error.detail || null,
+        hint:
+          error.hint || null
       });
     }
   }
 );
-
-/* =====================================================
-   DELETE
-===================================================== */
-
+// ==================================================
+// DELETE SONG
+// ==================================================
 app.delete(
   "/api/admin/songs/:id",
   async (req, res) => {
-
     if (!pool) {
       return res.status(503).json({
         error:
           "Database not configured"
       });
     }
-
     try {
-
       const result =
         await pool.query(
           `
           DELETE FROM songs
           WHERE id = $1
-          RETURNING id
+          RETURNING *
           `,
-          [req.params.id]
+          [
+            req.params.id
+          ]
         );
-
-      if (!result.rows.length) {
+      if (
+        result.rows.length === 0
+      ) {
         return res.status(404).json({
           error:
             "Song not found"
         });
       }
-
       res.json({
         success: true,
         message:
           "Song deleted successfully."
       });
-
     } catch (error) {
-
       console.error(
         "DELETE ERROR:",
         error
       );
-
       res.status(500).json({
         success: false,
         error:
@@ -568,33 +823,35 @@ app.delete(
     }
   }
 );
-
-/* =====================================================
-   API 404
-===================================================== */
-
-app.use("/api", (req, res) => {
-  res.status(404).json({
-    success: false,
-    error:
-      "API endpoint not found",
-    path:
-      req.originalUrl
-  });
-});
-
-/* =====================================================
-   ERROR HANDLER
-===================================================== */
-
+// ==================================================
+// API 404
+// ==================================================
 app.use(
-  (error, req, res, next) => {
-
+  "/api",
+  (req, res) => {
+    res.status(404).json({
+      success: false,
+      error:
+        "API endpoint not found",
+      path:
+        req.originalUrl
+    });
+  }
+);
+// ==================================================
+// GENERAL ERROR HANDLER
+// ==================================================
+app.use(
+  (
+    error,
+    req,
+    res,
+    next
+  ) => {
     console.error(
       "SERVER ERROR:",
       error
     );
-
     res.status(500).json({
       success: false,
       error:
@@ -603,73 +860,62 @@ app.use(
     });
   }
 );
-
-/* =====================================================
-   START
-===================================================== */
-
+// ==================================================
+// START SERVER
+// ==================================================
 async function startServer() {
-
   try {
-
     await initDatabase();
-
     app.listen(
       PORT,
       "0.0.0.0",
       () => {
-
         console.log(
-          "================================"
+          "=========================================="
         );
-
         console.log(
           "स्वरAJ Music Server"
         );
-
         console.log(
-          `PORT: ${PORT}`
+          "=========================================="
         );
-
         console.log(
-          `DATABASE: ${
+          `Server: http://0.0.0.0:${PORT}`
+        );
+        console.log(
+          `Environment: ${
+            process.env.NODE_ENV ||
+            "development"
+          }`
+        );
+        console.log(
+          `Database: ${
             pool
-              ? "READY"
+              ? "configured"
               : "NOT CONFIGURED"
           }`
         );
-
         console.log(
-          `CLOUDINARY: ${
+          `Cloudinary: ${
             cloudinaryReady
-              ? "READY"
+              ? "configured"
               : "NOT CONFIGURED"
           }`
         );
-
         console.log(
-          "MP3: ENABLED"
+          "YouTube embedded playback: ENABLED"
         );
-
         console.log(
-          "YOUTUBE: ENABLED"
-        );
-
-        console.log(
-          "================================"
+          "=========================================="
         );
       }
     );
-
   } catch (error) {
-
     console.error(
       "STARTUP ERROR:",
       error
     );
-
     process.exit(1);
   }
 }
-
 startServer();

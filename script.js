@@ -1,473 +1,712 @@
-const audio = document.getElementById("audio");
-
 const state = {
   songs: [],
-  filtered: [],
-  index: -1,
+  categories: [],
+  currentIndex: -1,
   shuffle: false,
   repeat: false,
-  liked: JSON.parse(
-    localStorage.getItem("swaraj-liked") || "[]"
+  liked: new Set(
+    JSON.parse(
+      localStorage.getItem("swarajLiked") || "[]"
+    )
   )
 };
 
-const $ = id =>
-  document.getElementById(id);
+const audio = document.getElementById(
+  "audioPlayer"
+);
 
-// --------------------------------------------------
-// Escape HTML
-// --------------------------------------------------
+const playButton =
+  document.getElementById("playButton");
 
-function esc(value) {
-  return String(value ?? "").replace(
-    /[&<>"']/g,
-    char => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    })[char]
-  );
+const previousButton =
+  document.getElementById("previousButton");
+
+const nextButton =
+  document.getElementById("nextButton");
+
+const shuffleButton =
+  document.getElementById("shuffleButton");
+
+const repeatButton =
+  document.getElementById("repeatButton");
+
+const progressBar =
+  document.getElementById("progressBar");
+
+const volumeBar =
+  document.getElementById("volumeBar");
+
+const currentTime =
+  document.getElementById("currentTime");
+
+const duration =
+  document.getElementById("duration");
+
+const searchInput =
+  document.getElementById("searchInput");
+
+const toast =
+  document.getElementById("toast");
+
+// ----------------------------------------------------
+// Helpers
+// ----------------------------------------------------
+
+function escapeHTML(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
-
-// --------------------------------------------------
-// Time formatter
-// --------------------------------------------------
 
 function formatTime(seconds) {
   if (!Number.isFinite(seconds)) {
     return "0:00";
   }
 
-  const minutes = Math.floor(
-    seconds / 60
-  );
+  const minutes = Math.floor(seconds / 60);
 
-  const secs = Math.floor(
-    seconds % 60
-  )
+  const secs = Math.floor(seconds % 60)
     .toString()
     .padStart(2, "0");
 
   return `${minutes}:${secs}`;
 }
 
-// --------------------------------------------------
-// Normalize song
-// --------------------------------------------------
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add("show");
 
-function normalizeSong(song, index) {
-  return {
-    id:
-      song.id ??
-      `song-${index + 1}`,
+  clearTimeout(showToast.timer);
 
-    title:
-      song.title ??
-      "Untitled",
-
-    artist:
-      song.artist ??
-      "स्वरAJ",
-
-    album:
-      song.album ??
-      song.category ??
-      "Music",
-
-    category:
-      song.category ??
-      "Music",
-
-    cover:
-      song.cover ||
-      "/images/default-cover.svg",
-
-    url:
-      song.url ||
-      "",
-
-    file:
-      song.file ||
-      ""
-  };
+  showToast.timer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2200);
 }
 
-// --------------------------------------------------
-// Load songs
-// --------------------------------------------------
+function saveLiked() {
+  localStorage.setItem(
+    "swarajLiked",
+    JSON.stringify(
+      Array.from(state.liked)
+    )
+  );
+}
 
-async function load() {
+function getSongId(song) {
+  return String(
+    song.id ||
+    song.filename ||
+    song.file_path ||
+    song.title
+  );
+}
+
+function isLiked(song) {
+  return state.liked.has(
+    getSongId(song)
+  );
+}
+
+// ----------------------------------------------------
+// API
+// ----------------------------------------------------
+
+async function loadSongs() {
+  const container =
+    document.getElementById("homeSongs");
+
+  container.innerHTML = `
+    <div class="empty-state">
+      Loading your music library...
+    </div>
+  `;
+
   try {
-    const [
-      songsResponse,
-      categoriesResponse
-    ] = await Promise.all([
-      fetch("/api/songs", {
+    const response = await fetch(
+      "/api/songs",
+      {
         cache: "no-store"
-      }),
+      }
+    );
 
-      fetch("/api/categories", {
-        cache: "no-store"
-      })
-    ]);
-
-    if (!songsResponse.ok) {
+    if (!response.ok) {
       throw new Error(
-        `Songs API returned ${songsResponse.status}`
+        `Songs API returned ${response.status}`
       );
     }
 
-    const songsData =
-      await songsResponse.json();
+    const data = await response.json();
 
-    // IMPORTANT:
-    // server returns { success, count, songs }
-    state.songs = Array.isArray(
-      songsData
-    )
-      ? songsData
-      : Array.isArray(songsData.songs)
-        ? songsData.songs
-        : [];
+    if (!data.success) {
+      throw new Error(
+        data.error || "Unable to load songs"
+      );
+    }
 
     state.songs =
-      state.songs.map(
-        normalizeSong
-      );
+      Array.isArray(data.songs)
+        ? data.songs
+        : [];
 
-    state.filtered = [
-      ...state.songs
-    ];
+    document.getElementById(
+      "songCount"
+    ).textContent = state.songs.length;
 
-    let categories = [];
+    renderHomeSongs();
+    renderAllSongs();
+    renderLikedSongs();
 
-    if (categoriesResponse.ok) {
-      const categoriesData =
-        await categoriesResponse.json();
+    updateLikedCount();
 
-      categories =
-        Array.isArray(
-          categoriesData
-        )
-          ? categoriesData
-          : Array.isArray(
-              categoriesData.categories
-            )
-            ? categoriesData.categories
-            : [];
-    }
+    await loadCategories();
 
-    $("songCount").textContent =
-      state.songs.length;
+    document.getElementById(
+      "serverStatus"
+    ).textContent = "Library ready";
 
-    renderCategories(
-      categories
-    );
-
-    renderSongs(
-      state.songs
-    );
-
-    if (!state.songs.length) {
-      $("songList").innerHTML = `
-        <div class="empty">
-          No songs found.
-          <br><br>
-          Add MP3 files inside
-          <b>songs/</b>
-          and redeploy.
-        </div>
-      `;
-    }
   } catch (error) {
-    console.error(
-      "Unable to load music:",
-      error
-    );
+    console.error(error);
 
-    $("songCount").textContent =
-      "0";
-
-    $("songList").innerHTML = `
-      <div class="empty">
-        Unable to load songs.
+    container.innerHTML = `
+      <div class="error-state">
+        <strong>Unable to load songs.</strong>
         <br><br>
-        ${esc(error.message)}
+        ${escapeHTML(error.message)}
       </div>
     `;
+
+    document.getElementById(
+      "serverStatus"
+    ).textContent = "API error";
   }
 }
 
-// --------------------------------------------------
-// Render categories
-// --------------------------------------------------
-
-function renderCategories(
-  categories
-) {
-  const icons = [
-    "♫",
-    "♥",
-    "🙏",
-    "⚡",
-    "💔",
-    "🎧",
-    "🎼"
-  ];
-
-  const normalizedCategories =
-    categories.map(
-      (category, index) => {
-        if (
-          typeof category ===
-          "string"
-        ) {
-          return {
-            name: category,
-            count:
-              state.songs.filter(
-                song =>
-                  song.category ===
-                  category
-              ).length
-          };
-        }
-
-        return {
-          name:
-            category.name ??
-            "Music",
-
-          count:
-            Number(
-              category.count
-            ) || 0
-        };
+async function loadCategories() {
+  try {
+    const response = await fetch(
+      "/api/categories",
+      {
+        cache: "no-store"
       }
     );
 
-  $("categories").innerHTML =
-    normalizedCategories.length
-      ? normalizedCategories
-          .map(
-            (category, index) => `
-              <button
-                class="category"
-                onclick='filterCategory(${JSON.stringify(
-                  category.name
-                )})'
-              >
-                <div class="category-icon">
-                  ${
-                    icons[
-                      index %
-                        icons.length
-                    ]
-                  }
-                </div>
+    if (!response.ok) {
+      throw new Error(
+        `Categories API returned ${response.status}`
+      );
+    }
 
-                <h3>
-                  ${esc(
-                    category.name
-                  )}
-                </h3>
+    const data = await response.json();
 
-                <p>
-                  ${
-                    category.count
-                  }
-                  song${
-                    category.count ===
-                    1
-                      ? ""
-                      : "s"
-                  }
-                </p>
-              </button>
-            `
-          )
-          .join("")
-      : `
-          <div class="empty">
-            No categories yet.
-          </div>
-        `;
+    state.categories =
+      Array.isArray(data.categories)
+        ? data.categories
+        : [];
 
-  $("sideCategories").innerHTML =
-    normalizedCategories
-      .map(
-        category => `
-          <button
-            class="cat-side"
-            onclick='filterCategory(${JSON.stringify(
-              category.name
-            )})'
+    document.getElementById(
+      "categoryCount"
+    ).textContent =
+      state.categories.length;
+
+    renderCategories();
+    renderSidebarCategories();
+
+  } catch (error) {
+    console.error(
+      "Category error:",
+      error
+    );
+  }
+}
+
+// ----------------------------------------------------
+// Rendering
+// ----------------------------------------------------
+
+function renderCategories() {
+  const container =
+    document.getElementById(
+      "categoriesGrid"
+    );
+
+  if (!state.categories.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        No categories found.
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    state.categories
+      .map((category, index) => {
+        const name =
+          category.category ||
+          "Uncategorized";
+
+        const count =
+          category.song_count || 0;
+
+        return `
+          <article
+            class="category-card"
+            data-category="${escapeHTML(name)}"
           >
-            ${esc(
-              category.name
+            <h3>
+              ${escapeHTML(name)}
+            </h3>
+
+            <span>
+              ${count}
+              ${count === 1 ? "song" : "songs"}
+            </span>
+
+            <div class="category-number">
+              ${String(index + 1).padStart(2, "0")}
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+
+  container
+    .querySelectorAll(".category-card")
+    .forEach((card) => {
+      card.addEventListener(
+        "click",
+        () => {
+          const category =
+            card.dataset.category;
+
+          showCategory(category);
+        }
+      );
+    });
+}
+
+function renderSidebarCategories() {
+  const container =
+    document.getElementById(
+      "sidebarCategories"
+    );
+
+  if (!state.categories.length) {
+    container.innerHTML = `
+      <div class="sidebar-loading">
+        No categories
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    state.categories
+      .map(
+        (category) => `
+          <div
+            class="sidebar-category"
+            data-category="${escapeHTML(
+              category.category
+            )}"
+          >
+            ${escapeHTML(
+              category.category
             )}
-            <small>
-              (${category.count})
-            </small>
-          </button>
+          </div>
         `
       )
       .join("");
+
+  container
+    .querySelectorAll(".sidebar-category")
+    .forEach((item) => {
+      item.addEventListener(
+        "click",
+        () => {
+          showCategory(
+            item.dataset.category
+          );
+        }
+      );
+    });
 }
 
-// --------------------------------------------------
-// Render songs
-// --------------------------------------------------
+function createSongHTML(song, index) {
+  const liked = isLiked(song);
 
-function renderSongs(
-  songs
-) {
-  state.filtered = [
-    ...songs
-  ];
+  const cover = song.cover
+    ? `
+      <img
+        src="${escapeHTML(song.cover)}"
+        alt=""
+        loading="lazy"
+        onerror="this.style.display='none'"
+      >
+    `
+    : "♫";
 
-  $("songList").innerHTML =
-    songs.length
-      ? songs
-          .map(
-            (song, index) => `
-              <div class="song">
+  return `
+    <article
+      class="song-card"
+      data-index="${index}"
+    >
 
-                <img
-                  src="${esc(
-                    song.cover
-                  )}"
-                  onerror="
-                    this.onerror=null;
-                    this.src='/images/default-cover.svg';
-                  "
-                  alt=""
-                >
+      <div class="song-cover">
+        ${cover}
+      </div>
 
-                <div class="song-info">
+      <div class="song-info">
 
-                  <b>
-                    ${esc(
-                      song.title
-                    )}
-                  </b>
+        <div class="song-title">
+          ${escapeHTML(song.title)}
+        </div>
 
-                  <span>
-                    ${esc(
-                      song.artist
-                    )}
-                    •
-                    ${esc(
-                      song.album
-                    )}
-                  </span>
+        <div class="song-meta">
+          ${escapeHTML(
+            song.artist || "स्वरAJ"
+          )}
+          ·
+          ${escapeHTML(
+            song.album ||
+            song.category ||
+            "Music"
+          )}
+        </div>
 
-                </div>
+      </div>
 
-                <button
-                  onclick='toggleLike(${JSON.stringify(
-                    song.id
-                  )})'
-                  title="Like"
-                >
-                  ${
-                    state.liked.includes(
-                      song.id
-                    )
-                      ? "♥"
-                      : "♡"
-                  }
-                </button>
+      <div class="song-category">
+        ${escapeHTML(
+          song.category || ""
+        )}
+      </div>
 
-                <button
-                  class="play-small"
-                  onclick="playFromList(${index})"
-                  title="Play"
-                >
-                  ▶
-                </button>
+      <button
+        class="song-like ${
+          liked ? "liked" : ""
+        }"
+        data-like-index="${index}"
+        aria-label="Like"
+      >
+        ${liked ? "♥" : "♡"}
+      </button>
 
-              </div>
-            `
-          )
-          .join("")
-      : `
-          <div class="empty">
-            No matching songs.
-          </div>
-        `;
+    </article>
+  `;
 }
 
-// --------------------------------------------------
-// Play song from displayed list
-// --------------------------------------------------
+function bindSongList(container) {
+  container
+    .querySelectorAll(".song-card")
+    .forEach((card) => {
+      card.addEventListener(
+        "click",
+        (event) => {
+          if (
+            event.target.closest(
+              ".song-like"
+            )
+          ) {
+            return;
+          }
 
-window.playFromList =
-  function (index) {
-    const song =
-      state.filtered[index];
+          const index =
+            Number(card.dataset.index);
 
-    if (!song) {
-      return;
-    }
+          playSong(index);
+        }
+      );
+    });
 
-    const globalIndex =
-      state.songs.findIndex(
-        item =>
-          item.id ===
-          song.id
+  container
+    .querySelectorAll("[data-like-index]")
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        (event) => {
+          event.stopPropagation();
+
+          toggleLike(
+            Number(
+              button.dataset.likeIndex
+            )
+          );
+        }
+      );
+    });
+}
+
+function renderHomeSongs() {
+  const container =
+    document.getElementById("homeSongs");
+
+  if (!state.songs.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        No songs found.
+        <br><br>
+        Add MP3 files inside the
+        <strong>songs/</strong>
+        folder.
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    state.songs
+      .slice(0, 12)
+      .map((song) =>
+        createSongHTML(
+          song,
+          state.songs.indexOf(song)
+        )
+      )
+      .join("");
+
+  bindSongList(container);
+}
+
+function renderAllSongs(songs = state.songs) {
+  const container =
+    document.getElementById("allSongs");
+
+  if (!songs.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        No songs found.
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    songs
+      .map((song) => {
+        const index =
+          state.songs.indexOf(song);
+
+        return createSongHTML(
+          song,
+          index
+        );
+      })
+      .join("");
+
+  bindSongList(container);
+}
+
+function renderLikedSongs() {
+  const container =
+    document.getElementById(
+      "likedSongs"
+    );
+
+  const likedSongs =
+    state.songs.filter((song) =>
+      isLiked(song)
+    );
+
+  if (!likedSongs.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        You haven't liked any songs yet.
+        <br><br>
+        Tap ♡ on a song to add it here.
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    likedSongs
+      .map((song) => {
+        const index =
+          state.songs.indexOf(song);
+
+        return createSongHTML(
+          song,
+          index
+        );
+      })
+      .join("");
+
+  bindSongList(container);
+}
+
+function updateLikedCount() {
+  const count =
+    state.songs.filter((song) =>
+      isLiked(song)
+    ).length;
+
+  document.getElementById(
+    "likedCount"
+  ).textContent = count;
+}
+
+// ----------------------------------------------------
+// Category
+// ----------------------------------------------------
+
+function showCategory(category) {
+  const filtered =
+    state.songs.filter(
+      (song) =>
+        String(song.category)
+          .toLowerCase() ===
+        String(category)
+          .toLowerCase()
+    );
+
+  switchView("all");
+
+  renderAllSongs(filtered);
+
+  showToast(
+    `${category}: ${filtered.length} songs`
+  );
+}
+
+// ----------------------------------------------------
+// Playback
+// ----------------------------------------------------
+
+function playSong(index) {
+  if (
+    index < 0 ||
+    index >= state.songs.length
+  ) {
+    return;
+  }
+
+  const song =
+    state.songs[index];
+
+  if (!song.file_path) {
+    showToast(
+      "Audio file not available."
+    );
+
+    return;
+  }
+
+  state.currentIndex = index;
+
+  audio.src = song.file_path;
+  audio.load();
+
+  audio.play()
+    .then(() => {
+      playButton.textContent = "Ⅱ";
+    })
+    .catch((error) => {
+      console.error(
+        "Playback error:",
+        error
       );
 
-    if (globalIndex !== -1) {
-      play(globalIndex);
+      showToast(
+        "Unable to play this song."
+      );
+    });
+
+  updatePlayer(song);
+}
+
+function updatePlayer(song) {
+  document.getElementById(
+    "playerTitle"
+  ).textContent =
+    song.title || "Unknown Song";
+
+  document.getElementById(
+    "playerArtist"
+  ).textContent =
+    song.artist || "स्वरAJ";
+
+  const cover =
+    document.getElementById(
+      "playerCover"
+    );
+
+  if (song.cover) {
+    cover.innerHTML = `
+      <img
+        src="${escapeHTML(song.cover)}"
+        alt=""
+      >
+    `;
+  } else {
+    cover.textContent = "♫";
+  }
+
+  document.getElementById(
+    "likeCurrent"
+  ).textContent =
+    isLiked(song)
+      ? "♥"
+      : "♡";
+}
+
+function playNext() {
+  if (!state.songs.length) {
+    return;
+  }
+
+  let nextIndex;
+
+  if (state.shuffle) {
+    nextIndex =
+      Math.floor(
+        Math.random() *
+          state.songs.length
+      );
+  } else {
+    nextIndex =
+      state.currentIndex + 1;
+
+    if (
+      nextIndex >=
+      state.songs.length
+    ) {
+      nextIndex = 0;
     }
-  };
+  }
 
-// --------------------------------------------------
-// Filter category
-// --------------------------------------------------
+  playSong(nextIndex);
+}
 
-window.filterCategory =
-  function (category) {
-    const songs =
-      category === "All Songs"
-        ? state.songs
-        : state.songs.filter(
-            song =>
-              song.category ===
-              category
-          );
+function playPrevious() {
+  if (!state.songs.length) {
+    return;
+  }
 
-    $("songsTitle").textContent =
-      category;
+  let previousIndex =
+    state.currentIndex - 1;
 
-    $("songsSubtitle").textContent =
-      `${songs.length} song${
-        songs.length === 1
-          ? ""
-          : "s"
-      }`;
+  if (previousIndex < 0) {
+    previousIndex =
+      state.songs.length - 1;
+  }
 
-    renderSongs(
-      songs
-    );
+  playSong(previousIndex);
+}
 
-    $("songsSection").scrollIntoView(
-      {
-        behavior: "smooth"
-      }
-    );
+// ----------------------------------------------------
+// Like
+// ----------------------------------------------------
 
-    closeMenu();
-  };
-
-// --------------------------------------------------
-// Play
-// --------------------------------------------------
-
-function play(index) {
+function toggleLike(index) {
   const song =
     state.songs[index];
 
@@ -475,522 +714,396 @@ function play(index) {
     return;
   }
 
-  if (!song.url) {
-    console.error(
-      "Song URL missing:",
-      song
-    );
+  const id = getSongId(song);
 
-    return;
+  if (state.liked.has(id)) {
+    state.liked.delete(id);
+    showToast("Removed from liked songs.");
+  } else {
+    state.liked.add(id);
+    showToast("Added to liked songs.");
   }
 
-  state.index =
-    index;
+  saveLiked();
 
-  console.log(
-    "Playing:",
-    song.title
-  );
+  renderHomeSongs();
+  renderAllSongs();
+  renderLikedSongs();
+  updateLikedCount();
 
-  console.log(
-    "URL:",
-    song.url
-  );
+  if (
+    state.currentIndex === index
+  ) {
+    updatePlayer(song);
+  }
+}
 
-  audio.pause();
+// ----------------------------------------------------
+// Navigation
+// ----------------------------------------------------
 
-  audio.src =
-    song.url;
-
-  audio.load();
-
-  audio.play()
-    .then(() => {
-      $("playBtn").textContent =
-        "❚❚";
-    })
-    .catch(error => {
-      console.error(
-        "Audio playback error:",
-        error
-      );
-
-      $("playBtn").textContent =
-        "▶";
-
-      alert(
-        `Unable to play "${song.title}".\n\nCheck that the audio file exists in the songs folder.`
+function switchView(view) {
+  document
+    .querySelectorAll(".view")
+    .forEach((element) => {
+      element.classList.remove(
+        "active-view"
       );
     });
 
-  $("nowTitle").textContent =
-    song.title;
-
-  $("nowArtist").textContent =
-    `${song.artist} • ${song.album}`;
-
-  $("cover").src =
-    song.cover ||
-    "/images/default-cover.svg";
-
-  $("likeBtn").textContent =
-    state.liked.includes(
-      song.id
-    )
-      ? "♥"
-      : "♡";
-}
-
-// --------------------------------------------------
-// Next
-// --------------------------------------------------
-
-function next() {
-  if (!state.songs.length) {
-    return;
-  }
-
-  if (
-    state.index === -1
-  ) {
-    play(0);
-    return;
-  }
-
-  if (state.shuffle) {
-    let nextIndex =
-      Math.floor(
-        Math.random() *
-          state.songs.length
-      );
-
-    if (
-      state.songs.length >
-        1 &&
-      nextIndex ===
-        state.index
-    ) {
-      nextIndex =
-        (nextIndex + 1) %
-        state.songs.length;
-    }
-
-    play(
-      nextIndex
+  const target =
+    document.getElementById(
+      `${view}View`
     );
 
-    return;
+  if (target) {
+    target.classList.add(
+      "active-view"
+    );
   }
 
-  play(
-    (state.index + 1) %
-      state.songs.length
-  );
+  document
+    .querySelectorAll(".nav-item")
+    .forEach((item) => {
+      item.classList.toggle(
+        "active",
+        item.dataset.view === view
+      );
+    });
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
-// --------------------------------------------------
-// Previous
-// --------------------------------------------------
-
-function previous() {
-  if (!state.songs.length) {
-    return;
-  }
-
-  if (
-    state.index === -1
-  ) {
-    play(0);
-    return;
-  }
-
-  play(
-    (
-      state.index -
-      1 +
-      state.songs.length
-    ) %
-      state.songs.length
-  );
-}
-
-// --------------------------------------------------
-// Like
-// --------------------------------------------------
-
-window.toggleLike =
-  function (id) {
-    if (
-      state.liked.includes(
-        id
-      )
-    ) {
-      state.liked =
-        state.liked.filter(
-          item =>
-            item !== id
+document
+  .querySelectorAll(".nav-item")
+  .forEach((item) => {
+    item.addEventListener(
+      "click",
+      () => {
+        switchView(
+          item.dataset.view
         );
-    } else {
-      state.liked.push(
-        id
-      );
-    }
-
-    localStorage.setItem(
-      "swaraj-liked",
-      JSON.stringify(
-        state.liked
-      )
+      }
     );
+  });
 
-    if (
-      state.index >= 0 &&
-      state.songs[
-        state.index
-      ]
-    ) {
-      $("likeBtn").textContent =
-        state.liked.includes(
-          state.songs[
-            state.index
-          ].id
-        )
-          ? "♥"
-          : "♡";
-    }
+// ----------------------------------------------------
+// Search
+// ----------------------------------------------------
 
-    renderSongs(
-      state.filtered
-    );
-  };
-
-// --------------------------------------------------
-// Play button
-// --------------------------------------------------
-
-$("playBtn").onclick =
+searchInput.addEventListener(
+  "input",
   () => {
-    if (!state.songs.length) {
+    const query =
+      searchInput.value
+        .trim()
+        .toLowerCase();
+
+    if (!query) {
+      renderHomeSongs();
+      renderAllSongs();
       return;
     }
 
-    if (
-      state.index < 0
-    ) {
-      play(0);
+    const results =
+      state.songs.filter(
+        (song) =>
+          String(
+            song.title || ""
+          )
+            .toLowerCase()
+            .includes(query) ||
+          String(
+            song.artist || ""
+          )
+            .toLowerCase()
+            .includes(query) ||
+          String(
+            song.album || ""
+          )
+            .toLowerCase()
+            .includes(query) ||
+          String(
+            song.category || ""
+          )
+            .toLowerCase()
+            .includes(query)
+      );
+
+    switchView("all");
+
+    renderAllSongs(results);
+  }
+);
+
+// ----------------------------------------------------
+// Player events
+// ----------------------------------------------------
+
+playButton.addEventListener(
+  "click",
+  () => {
+    if (!state.songs.length) {
+      showToast("No songs available.");
+      return;
+    }
+
+    if (state.currentIndex === -1) {
+      playSong(0);
       return;
     }
 
     if (audio.paused) {
-      audio
-        .play()
-        .then(() => {
-          $("playBtn").textContent =
-            "❚❚";
-        })
-        .catch(error => {
-          console.error(
-            error
-          );
-        });
+      audio.play();
     } else {
       audio.pause();
-
-      $("playBtn").textContent =
-        "▶";
     }
-  };
+  }
+);
 
-// --------------------------------------------------
-// Navigation
-// --------------------------------------------------
+nextButton.addEventListener(
+  "click",
+  playNext
+);
 
-$("nextBtn").onclick =
-  next;
+previousButton.addEventListener(
+  "click",
+  playPrevious
+);
 
-$("prevBtn").onclick =
-  previous;
-
-// --------------------------------------------------
-// Shuffle
-// --------------------------------------------------
-
-$("shuffleBtn").onclick =
+shuffleButton.addEventListener(
+  "click",
   () => {
     state.shuffle =
       !state.shuffle;
 
-    $("shuffleBtn").style.color =
+    shuffleButton.style.color =
       state.shuffle
-        ? "#ff3192"
+        ? "#b98aff"
         : "";
-  };
 
-// --------------------------------------------------
-// Repeat
-// --------------------------------------------------
+    showToast(
+      state.shuffle
+        ? "Shuffle enabled"
+        : "Shuffle disabled"
+    );
+  }
+);
 
-$("repeatBtn").onclick =
+repeatButton.addEventListener(
+  "click",
   () => {
     state.repeat =
       !state.repeat;
 
-    $("repeatBtn").style.color =
+    repeatButton.style.color =
       state.repeat
-        ? "#ff3192"
+        ? "#b98aff"
         : "";
-  };
 
-// --------------------------------------------------
-// Player like
-// --------------------------------------------------
+    showToast(
+      state.repeat
+        ? "Repeat enabled"
+        : "Repeat disabled"
+    );
+  }
+);
 
-$("likeBtn").onclick =
+audio.addEventListener(
+  "play",
   () => {
-    if (
-      state.index >= 0
-    ) {
-      toggleLike(
-        state.songs[
-          state.index
-        ].id
-      );
-    }
-  };
+    playButton.textContent = "Ⅱ";
+  }
+);
 
-// --------------------------------------------------
-// Audio metadata
-// --------------------------------------------------
+audio.addEventListener(
+  "pause",
+  () => {
+    playButton.textContent = "▶";
+  }
+);
+
+audio.addEventListener(
+  "timeupdate",
+  () => {
+    if (!audio.duration) {
+      return;
+    }
+
+    const percentage =
+      (audio.currentTime /
+        audio.duration) *
+      100;
+
+    progressBar.value =
+      percentage;
+
+    currentTime.textContent =
+      formatTime(
+        audio.currentTime
+      );
+  }
+);
 
 audio.addEventListener(
   "loadedmetadata",
   () => {
-    $("duration").textContent =
+    duration.textContent =
       formatTime(
         audio.duration
       );
   }
 );
 
-// --------------------------------------------------
-// Audio time
-// --------------------------------------------------
-
-audio.addEventListener(
-  "timeupdate",
-  () => {
-    $("currentTime").textContent =
-      formatTime(
-        audio.currentTime
-      );
-
-    $("progress").value =
-      audio.duration
-        ? (
-            audio.currentTime /
-            audio.duration
-          ) * 100
-        : 0;
-  }
-);
-
-// --------------------------------------------------
-// Audio playing
-// --------------------------------------------------
-
-audio.addEventListener(
-  "play",
-  () => {
-    $("playBtn").textContent =
-      "❚❚";
-  }
-);
-
-// --------------------------------------------------
-// Audio paused
-// --------------------------------------------------
-
-audio.addEventListener(
-  "pause",
-  () => {
-    $("playBtn").textContent =
-      "▶";
-  }
-);
-
-// --------------------------------------------------
-// Audio error
-// --------------------------------------------------
-
-audio.addEventListener(
-  "error",
-  () => {
-    console.error(
-      "Audio element error:",
-      audio.error
-    );
-
-    $("playBtn").textContent =
-      "▶";
-  }
-);
-
-// --------------------------------------------------
-// Song ended
-// --------------------------------------------------
-
 audio.addEventListener(
   "ended",
   () => {
     if (state.repeat) {
-      play(
-        state.index
+      audio.currentTime = 0;
+      audio.play();
+      return;
+    }
+
+    playNext();
+  }
+);
+
+progressBar.addEventListener(
+  "input",
+  () => {
+    if (!audio.duration) {
+      return;
+    }
+
+    audio.currentTime =
+      (progressBar.value / 100) *
+      audio.duration;
+  }
+);
+
+volumeBar.addEventListener(
+  "input",
+  () => {
+    audio.volume =
+      Number(
+        volumeBar.value
       );
-    } else {
-      next();
+  }
+);
+
+audio.volume = 0.8;
+
+// ----------------------------------------------------
+// Current song like
+// ----------------------------------------------------
+
+document
+  .getElementById("likeCurrent")
+  .addEventListener(
+    "click",
+    () => {
+      if (
+        state.currentIndex === -1
+      ) {
+        return;
+      }
+
+      toggleLike(
+        state.currentIndex
+      );
+    }
+  );
+
+// ----------------------------------------------------
+// Explore buttons
+// ----------------------------------------------------
+
+document
+  .getElementById("exploreButton")
+  .addEventListener(
+    "click",
+    () => {
+      switchView("all");
+    }
+  );
+
+document
+  .getElementById("viewAllSongs")
+  .addEventListener(
+    "click",
+    () => {
+      switchView("all");
+      renderAllSongs();
+    }
+  );
+
+document
+  .getElementById("viewAllCategories")
+  .addEventListener(
+    "click",
+    () => {
+      document
+        .getElementById(
+          "categoriesGrid"
+        )
+        .scrollIntoView({
+          behavior: "smooth"
+        });
+    }
+  );
+
+// ----------------------------------------------------
+// Mobile menu
+// ----------------------------------------------------
+
+document
+  .getElementById("mobileMenu")
+  .addEventListener(
+    "click",
+    () => {
+      document
+        .querySelector(".sidebar")
+        .classList.toggle(
+          "mobile-open"
+        );
+    }
+  );
+
+// ----------------------------------------------------
+// Keyboard shortcuts
+// ----------------------------------------------------
+
+document.addEventListener(
+  "keydown",
+  (event) => {
+    if (
+      event.target.tagName ===
+      "INPUT"
+    ) {
+      return;
+    }
+
+    if (event.code === "Space") {
+      event.preventDefault();
+
+      playButton.click();
+    }
+
+    if (event.code === "ArrowRight") {
+      playNext();
+    }
+
+    if (event.code === "ArrowLeft") {
+      playPrevious();
     }
   }
 );
 
-// --------------------------------------------------
-// Progress
-// --------------------------------------------------
-
-$("progress").oninput =
-  event => {
-    if (
-      audio.duration
-    ) {
-      audio.currentTime =
-        (
-          Number(
-            event.target.value
-          ) / 100
-        ) *
-        audio.duration;
-    }
-  };
-
-// --------------------------------------------------
-// Volume
-// --------------------------------------------------
-
-$("volume").oninput =
-  event => {
-    audio.volume =
-      Number(
-        event.target.value
-      );
-  };
-
-audio.volume = 0.9;
-
-// --------------------------------------------------
-// Search
-// --------------------------------------------------
-
-$("search").addEventListener(
-  "input",
-  event => {
-    const query =
-      event.target.value
-        .trim()
-        .toLowerCase();
-
-    const songs =
-      !query
-        ? state.songs
-        : state.songs.filter(
-            song =>
-              [
-                song.title,
-                song.artist,
-                song.album,
-                song.category,
-                song.file
-              ].some(
-                value =>
-                  String(
-                    value
-                  )
-                    .toLowerCase()
-                    .includes(
-                      query
-                    )
-              )
-          );
-
-    $("songsTitle").textContent =
-      query
-        ? `Search: ${event.target.value}`
-        : "All Songs";
-
-    $("songsSubtitle").textContent =
-      `${songs.length} song${
-        songs.length === 1
-          ? ""
-          : "s"
-      }`;
-
-    renderSongs(
-      songs
-    );
-  });
-
-// --------------------------------------------------
-// Explore
-// --------------------------------------------------
-
-$("exploreBtn").onclick =
-  () => {
-    $("songsSection").scrollIntoView(
-      {
-        behavior: "smooth"
-      }
-    );
-  };
-
-// --------------------------------------------------
-// View all
-// --------------------------------------------------
-
-$("viewAll").onclick =
-  () => {
-    filterCategory(
-      "All Songs"
-    );
-  };
-
-// --------------------------------------------------
-// Mobile menu
-// --------------------------------------------------
-
-$("menuBtn").onclick =
-  () => {
-    $("sidebar").classList.toggle(
-      "open"
-    );
-
-    $("overlay").classList.toggle(
-      "show"
-    );
-  };
-
-$("overlay").onclick =
-  closeMenu;
-
-function closeMenu() {
-  $("sidebar").classList.remove(
-    "open"
-  );
-
-  $("overlay").classList.remove(
-    "show"
-  );
-}
-
-// --------------------------------------------------
+// ----------------------------------------------------
 // Start
-// --------------------------------------------------
+// ----------------------------------------------------
 
-load();
+loadSongs();

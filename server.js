@@ -1,503 +1,450 @@
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
-
-const {
-  initializeDatabase,
-  isDatabaseAvailable,
-  getSongs,
-  getCategories,
-  upsertSong,
-  removeMissingSongs,
-  closeDatabase
-} = require("./database");
+const fs = require("fs");
+const { Pool } = require("pg");
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 10000;
+const HOST = "0.0.0.0";
 
-const ROOT_DIR = __dirname;
-const SONGS_DIR = path.join(ROOT_DIR, "songs");
-const IMAGES_DIR = path.join(ROOT_DIR, "images");
+const ROOT = __dirname;
+const SONGS_DIR = path.join(ROOT, "songs");
+const IMAGES_DIR = path.join(ROOT, "images");
 
-const INDEX_FILE = path.join(ROOT_DIR, "index.html");
+// =====================================================
+// POSTGRESQL
+// =====================================================
 
-app.disable("x-powered-by");
+let pool = null;
+
+if (process.env.DATABASE_URL) {
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  });
+
+  pool.on("error", (err) => {
+    console.error("PostgreSQL pool error:", err);
+  });
+} else {
+  console.warn("DATABASE_URL is not configured.");
+}
+
+// =====================================================
+// MIDDLEWARE
+// =====================================================
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// ----------------------------------------------------
-// Ensure directories exist
-// ----------------------------------------------------
+app.use(express.static(ROOT));
 
-if (!fs.existsSync(SONGS_DIR)) {
-  fs.mkdirSync(SONGS_DIR, {
-    recursive: true
-  });
-}
+// =====================================================
+// DATABASE INITIALIZATION
+// =====================================================
 
-if (!fs.existsSync(IMAGES_DIR)) {
-  fs.mkdirSync(IMAGES_DIR, {
-    recursive: true
-  });
-}
-
-// ----------------------------------------------------
-// Utility functions
-// ----------------------------------------------------
-
-function cleanText(value, fallback = "") {
-  if (!value) return fallback;
-
-  return String(value)
-    .replace(/\0/g, "")
-    .trim();
-}
-
-function titleFromFilename(filename) {
-  return path
-    .basename(filename, path.extname(filename))
-    .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function encodePathParts(relativePath) {
-  return relativePath
-    .split(path.sep)
-    .map((part) => encodeURIComponent(part))
-    .join("/");
-}
-
-function isAudioFile(filePath) {
-  const extension = path.extname(filePath).toLowerCase();
-
-  return [
-    ".mp3",
-    ".m4a",
-    ".aac",
-    ".wav",
-    ".ogg",
-    ".flac"
-  ].includes(extension);
-}
-
-function getCategory(relativePath) {
-  const parts = relativePath.split(path.sep);
-
-  if (parts.length >= 2) {
-    return parts[0] || "Uncategorized";
+async function initializeDatabase() {
+  if (!pool) {
+    console.warn("Database initialization skipped.");
+    return;
   }
 
-  return "Uncategorized";
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS songs (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      artist TEXT DEFAULT 'Unknown Artist',
+      album TEXT DEFAULT 'Unknown Album',
+      category TEXT DEFAULT 'Other',
+      file_path TEXT NOT NULL UNIQUE,
+      cover_path TEXT,
+      duration INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_songs_category
+    ON songs(category)
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_songs_title
+    ON songs(title)
+  `);
+
+  console.log("PostgreSQL database initialized.");
 }
 
-function getCoverForCategory(category) {
-  const possibleFiles = [
-    `${category}.jpg`,
-    `${category}.jpeg`,
-    `${category}.png`,
-    `${category}.webp`,
-    "cover.jpg",
-    "cover.jpeg",
-    "cover.png",
-    "ganpati.jpg"
-  ];
-
-  for (const file of possibleFiles) {
-    const filePath = path.join(IMAGES_DIR, file);
-
-    if (fs.existsSync(filePath)) {
-      return `/images/${encodeURIComponent(file)}`;
-    }
-  }
-
-  return null;
-}
-
-// ----------------------------------------------------
-// Recursive song scanner
-// ----------------------------------------------------
-
-function scanSongsDirectory(directory) {
-  const songs = [];
-
-  function walk(currentDirectory) {
-    let entries = [];
-
-    try {
-      entries = fs.readdirSync(currentDirectory, {
-        withFileTypes: true
-      });
-    } catch (error) {
-      console.error(
-        "Unable to read directory:",
-        currentDirectory,
-        error.message
-      );
-
-      return;
-    }
-
-    for (const entry of entries) {
-      const fullPath = path.join(
-        currentDirectory,
-        entry.name
-      );
-
-      if (entry.isDirectory()) {
-        walk(fullPath);
-        continue;
-      }
-
-      if (!entry.isFile()) {
-        continue;
-      }
-
-      if (!isAudioFile(fullPath)) {
-        continue;
-      }
-
-      const relativePath = path.relative(
-        SONGS_DIR,
-        fullPath
-      );
-
-      const category = getCategory(relativePath);
-
-      const title = titleFromFilename(entry.name);
-
-      const encodedRelativePath =
-        encodePathParts(relativePath);
-
-      songs.push({
-        title,
-        artist: "स्वरAJ",
-        album: category,
-        category,
-        filename: relativePath,
-        file_path: `/songs/${encodedRelativePath}`,
-        cover: getCoverForCategory(category),
-        duration: 0
-      });
-    }
-  }
-
-  walk(directory);
-
-  songs.sort((a, b) =>
-    a.title.localeCompare(b.title)
-  );
-
-  return songs;
-}
-
-// ----------------------------------------------------
-// Synchronize filesystem -> PostgreSQL
-// ----------------------------------------------------
-
-async function syncSongsToDatabase() {
-  const scannedSongs = scanSongsDirectory(SONGS_DIR);
-
-  console.log(
-    `Found ${scannedSongs.length} audio files.`
-  );
-
-  if (!isDatabaseAvailable()) {
-    return scannedSongs;
-  }
-
-  try {
-    const existingFiles = [];
-
-    for (const song of scannedSongs) {
-      existingFiles.push(song.filename);
-
-      await upsertSong(song);
-    }
-
-    await removeMissingSongs(existingFiles);
-
-    console.log(
-      `Database synchronized: ${scannedSongs.length} songs.`
-    );
-
-    return await getSongs();
-  } catch (error) {
-    console.error(
-      "Database synchronization failed:",
-      error.message
-    );
-
-    return scannedSongs;
-  }
-}
-
-// ----------------------------------------------------
-// Health API
-// ----------------------------------------------------
+// =====================================================
+// HEALTH
+// =====================================================
 
 app.get("/api/health", async (req, res) => {
-  let dbStatus = "disconnected";
+  let database = "not_configured";
 
-  if (isDatabaseAvailable()) {
-    dbStatus = "connected";
+  if (pool) {
+    try {
+      await pool.query("SELECT 1");
+      database = "connected";
+    } catch (error) {
+      database = "error";
+    }
   }
 
-  const songs = scanSongsDirectory(SONGS_DIR);
+  let songCount = 0;
 
-  res.json({
+  if (pool) {
+    try {
+      const result = await pool.query(
+        "SELECT COUNT(*)::int AS count FROM songs"
+      );
+
+      songCount = result.rows[0].count;
+    } catch (error) {
+      console.error("Health song count error:", error.message);
+    }
+  }
+
+  res.status(200).json({
     status: "ok",
     service: "स्वरAJ Music",
     nodeVersion: process.version,
-    environment:
-      process.env.NODE_ENV || "production",
-    database: dbStatus,
-    databaseConfigured:
-      Boolean(process.env.DATABASE_URL),
-    songsDirectoryExists:
-      fs.existsSync(SONGS_DIR),
-    imagesDirectoryExists:
-      fs.existsSync(IMAGES_DIR),
-    songCount: songs.length,
+    environment: process.env.NODE_ENV || "production",
+    database,
+    songCount,
+    songsDirectoryExists: fs.existsSync(SONGS_DIR),
+    imagesDirectoryExists: fs.existsSync(IMAGES_DIR),
     timestamp: new Date().toISOString()
   });
 });
 
-// ----------------------------------------------------
-// Songs API
-// ----------------------------------------------------
+// =====================================================
+// API ROOT
+// =====================================================
 
-app.get("/api/songs", async (req, res) => {
-  try {
-    const songs = await syncSongsToDatabase();
-
-    res.json({
-      success: true,
-      count: songs.length,
-      songs
-    });
-  } catch (error) {
-    console.error(
-      "/api/songs error:",
-      error.message
-    );
-
-    res.status(500).json({
-      success: false,
-      error: "Unable to load songs",
-      message: error.message,
-      songs: []
-    });
-  }
+app.get("/api", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "स्वरAJ Music API",
+    endpoints: [
+      "/api/health",
+      "/api/categories",
+      "/api/songs",
+      "/api/songs/:id"
+    ]
+  });
 });
 
-// ----------------------------------------------------
-// Categories API
-// ----------------------------------------------------
+// =====================================================
+// CATEGORIES
+// =====================================================
 
 app.get("/api/categories", async (req, res) => {
   try {
-    if (isDatabaseAvailable()) {
-      const categories = await getCategories();
+    // Prefer PostgreSQL
+    if (pool) {
+      const result = await pool.query(`
+        SELECT
+          category,
+          COUNT(*)::int AS song_count
+        FROM songs
+        WHERE category IS NOT NULL
+          AND TRIM(category) <> ''
+        GROUP BY category
+        ORDER BY category ASC
+      `);
 
       return res.json({
-        success: true,
-        categories
+        status: "ok",
+        source: "database",
+        categories: result.rows
       });
     }
 
-    const songs = scanSongsDirectory(SONGS_DIR);
-
-    const map = new Map();
-
-    for (const song of songs) {
-      const category =
-        song.category || "Uncategorized";
-
-      map.set(
-        category,
-        (map.get(category) || 0) + 1
-      );
+    // Fallback to folders
+    if (!fs.existsSync(SONGS_DIR)) {
+      return res.json({
+        status: "ok",
+        source: "filesystem",
+        categories: []
+      });
     }
 
-    const categories = Array.from(map.entries())
-      .map(([category, song_count]) => ({
+    const categories = fs
+      .readdirSync(SONGS_DIR, { withFileTypes: true })
+      .filter((item) => item.isDirectory())
+      .map((item) => item.name)
+      .sort();
+
+    return res.json({
+      status: "ok",
+      source: "filesystem",
+      categories: categories.map((category) => ({
         category,
-        song_count
+        song_count: 0
       }))
-      .sort((a, b) =>
-        a.category.localeCompare(b.category)
-      );
+    });
+
+  } catch (error) {
+    console.error("Categories API error:", error);
+
+    res.status(500).json({
+      status: "error",
+      message: "Unable to load categories",
+      error:
+        process.env.NODE_ENV === "production"
+          ? undefined
+          : error.message
+    });
+  }
+});
+
+// =====================================================
+// ALL SONGS
+// =====================================================
+
+app.get("/api/songs", async (req, res) => {
+  try {
+    if (!pool) {
+      return res.json({
+        status: "ok",
+        songs: []
+      });
+    }
+
+    const result = await pool.query(`
+      SELECT
+        id,
+        title,
+        artist,
+        album,
+        category,
+        file_path,
+        cover_path,
+        duration,
+        created_at
+      FROM songs
+      ORDER BY id DESC
+    `);
+
+    const songs = result.rows.map((song) => ({
+      ...song,
+      url: `/songs/${song.file_path}`,
+      cover:
+        song.cover_path
+          ? `/images/${song.cover_path}`
+          : null
+    }));
 
     res.json({
-      success: true,
-      categories
+      status: "ok",
+      count: songs.length,
+      songs
     });
+
   } catch (error) {
-    console.error(
-      "/api/categories error:",
-      error.message
+    console.error("Songs API error:", error);
+
+    res.status(500).json({
+      status: "error",
+      message: "Unable to load songs"
+    });
+  }
+});
+
+// =====================================================
+// SONGS BY CATEGORY
+// =====================================================
+
+app.get("/api/songs/category/:category", async (req, res) => {
+  try {
+    if (!pool) {
+      return res.json({
+        status: "ok",
+        songs: []
+      });
+    }
+
+    const category = req.params.category;
+
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        title,
+        artist,
+        album,
+        category,
+        file_path,
+        cover_path,
+        duration
+      FROM songs
+      WHERE LOWER(category) = LOWER($1)
+      ORDER BY title ASC
+      `,
+      [category]
     );
 
-    res.status(500).json({
-      success: false,
-      categories: []
-    });
-  }
-});
-
-// ----------------------------------------------------
-// Rescan API
-// ----------------------------------------------------
-
-app.post("/api/rescan", async (req, res) => {
-  try {
-    const songs = await syncSongsToDatabase();
+    const songs = result.rows.map((song) => ({
+      ...song,
+      url: `/songs/${song.file_path}`,
+      cover:
+        song.cover_path
+          ? `/images/${song.cover_path}`
+          : null
+    }));
 
     res.json({
-      success: true,
+      status: "ok",
+      category,
       count: songs.length,
-      message: "Music library synchronized."
+      songs
     });
+
   } catch (error) {
+    console.error("Category songs error:", error);
+
     res.status(500).json({
-      success: false,
-      error: error.message
+      status: "error",
+      message: "Unable to load category"
     });
   }
 });
 
-// ----------------------------------------------------
-// Static files
-// ----------------------------------------------------
+// =====================================================
+// SINGLE SONG
+// =====================================================
 
-app.use(
-  "/songs",
-  express.static(SONGS_DIR, {
-    fallthrough: false,
-    maxAge: "1h"
-  })
-);
+app.get("/api/songs/:id", async (req, res) => {
+  try {
+    if (!pool) {
+      return res.status(404).json({
+        status: "error",
+        message: "Database not configured"
+      });
+    }
 
-app.use(
-  "/images",
-  express.static(IMAGES_DIR, {
-    fallthrough: false,
-    maxAge: "1d"
-  })
-);
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        title,
+        artist,
+        album,
+        category,
+        file_path,
+        cover_path,
+        duration
+      FROM songs
+      WHERE id = $1
+      `,
+      [req.params.id]
+    );
 
-app.use(
-  express.static(ROOT_DIR, {
-    index: false,
-    maxAge: "1h"
-  })
-);
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "Song not found"
+      });
+    }
 
-// ----------------------------------------------------
-// SPA / HTML fallback
-// ----------------------------------------------------
-//
-// IMPORTANT:
-// Do NOT use app.get("*") with Express 5.
-// It causes:
-// Missing parameter name at index 1: *
-// ----------------------------------------------------
+    const song = result.rows[0];
 
-app.use((req, res, next) => {
-  if (req.method !== "GET") {
-    return next();
+    res.json({
+      status: "ok",
+      song: {
+        ...song,
+        url: `/songs/${song.file_path}`,
+        cover:
+          song.cover_path
+            ? `/images/${song.cover_path}`
+            : null
+      }
+    });
+
+  } catch (error) {
+    console.error("Single song error:", error);
+
+    res.status(500).json({
+      status: "error",
+      message: "Unable to load song"
+    });
   }
-
-  if (
-    req.path.startsWith("/api/") ||
-    req.path.startsWith("/songs/") ||
-    req.path.startsWith("/images/")
-  ) {
-    return next();
-  }
-
-  const acceptsHtml =
-    req.headers.accept &&
-    req.headers.accept.includes("text/html");
-
-  if (!acceptsHtml) {
-    return next();
-  }
-
-  if (!fs.existsSync(INDEX_FILE)) {
-    return res.status(404).send("index.html not found");
-  }
-
-  res.sendFile(INDEX_FILE);
 });
 
-// ----------------------------------------------------
-// 404
-// ----------------------------------------------------
+// =====================================================
+// STATIC SONG FILES
+// =====================================================
 
-app.use((req, res) => {
+if (fs.existsSync(SONGS_DIR)) {
+  app.use(
+    "/songs",
+    express.static(SONGS_DIR, {
+      fallthrough: true,
+      maxAge: "1d"
+    })
+  );
+}
+
+// =====================================================
+// STATIC IMAGES
+// =====================================================
+
+if (fs.existsSync(IMAGES_DIR)) {
+  app.use(
+    "/images",
+    express.static(IMAGES_DIR, {
+      fallthrough: true,
+      maxAge: "7d"
+    })
+  );
+}
+
+// =====================================================
+// API 404
+// =====================================================
+
+app.use("/api", (req, res) => {
   res.status(404).json({
-    success: false,
-    error: "Not found",
+    status: "error",
+    message: "API endpoint not found",
     path: req.originalUrl
   });
 });
 
-// ----------------------------------------------------
-// Start
-// ----------------------------------------------------
+// =====================================================
+// FRONTEND
+// =====================================================
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(ROOT, "index.html"));
+});
+
+// =====================================================
+// START
+// =====================================================
 
 async function startServer() {
   try {
     await initializeDatabase();
 
-    await syncSongsToDatabase();
-
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log("");
-      console.log("======================================");
-      console.log("        स्वरAJ MUSIC SERVER");
-      console.log("======================================");
-      console.log(`Port: ${PORT}`);
-      console.log(`Songs: ${SONGS_DIR}`);
-      console.log(`Images: ${IMAGES_DIR}`);
-      console.log(
-        `Database: ${
-          isDatabaseAvailable()
-            ? "CONNECTED"
-            : "NOT CONNECTED"
-        }`
-      );
-      console.log("======================================");
-      console.log("");
+    app.listen(PORT, HOST, () => {
+      console.log("==========================================");
+      console.log("स्वरAJ Music Server");
+      console.log("==========================================");
+      console.log(`Server: http://${HOST}:${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || "production"}`);
+      console.log(`Database: ${pool ? "configured" : "NOT CONFIGURED"}`);
+      console.log("==========================================");
     });
   } catch (error) {
-    console.error(
-      "Server startup error:",
-      error
-    );
-
+    console.error("Server startup error:", error);
     process.exit(1);
   }
 }
-
-process.on("SIGTERM", async () => {
-  console.log("SIGTERM received.");
-
-  await closeDatabase();
-
-  process.exit(0);
-});
-
-process.on("SIGINT", async () => {
-  console.log("SIGINT received.");
-
-  await closeDatabase();
-
-  process.exit(0);
-});
 
 startServer();

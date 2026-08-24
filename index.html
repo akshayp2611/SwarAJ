@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -15,7 +13,7 @@
     content="#070711"
   >
 
-  <title>स्वरAJ — Premium Music</title>
+  <title>स्वरAJ — Music</title>
 
   <link
     rel="preconnect"
@@ -29,9 +27,8 @@
 
   <link
     rel="stylesheet"
-    href="styles.css"
+    href="/styles.css"
   >
-
 </head>
 
 <body>
@@ -41,19 +38,19 @@
 
 <div class="app">
 
+  <!-- SIDEBAR -->
+
   <aside
     class="sidebar"
     id="sidebar"
   >
 
     <div class="logo">
-
       <div class="logo-mark">
         स्व
       </div>
 
       <div>
-
         <div class="logo-text">
           स्वर<span>AJ</span>
         </div>
@@ -61,9 +58,7 @@
         <small>
           PREMIUM MUSIC
         </small>
-
       </div>
-
     </div>
 
     <nav>
@@ -73,13 +68,6 @@
         data-page="home"
       >
         🏠 Home
-      </button>
-
-      <button
-        class="nav"
-        data-page="youtube"
-      >
-        ▶ YouTube
       </button>
 
       <button
@@ -102,6 +90,8 @@
 
   </aside>
 
+  <!-- MAIN -->
+
   <main>
 
     <header class="topbar">
@@ -115,13 +105,11 @@
 
       <div class="search">
 
-        <span>
-          ⌕
-        </span>
+        <span>⌕</span>
 
         <input
           id="searchInput"
-          placeholder="Search songs, artists or categories..."
+          placeholder="Search songs, artists, categories..."
         >
 
       </div>
@@ -139,8 +127,7 @@
 
     </header>
 
-
-    <!-- ================= HOME ================= -->
+    <!-- HOME -->
 
     <section
       id="homePage"
@@ -163,10 +150,9 @@
           </h1>
 
           <p>
-            MP3 and YouTube music,
-            beautifully organized
-            inside your SwarAJ
-            experience.
+            Your personal MP3 and YouTube
+            music library powered by
+            PostgreSQL.
           </p>
 
           <div class="hero-buttons">
@@ -197,61 +183,47 @@
 
       </section>
 
-
       <!-- STATS -->
 
       <section class="stats">
 
         <div class="stat">
-
           <b id="songCount">
             0
           </b>
-
           <span>
             SONGS
           </span>
-
         </div>
 
         <div class="stat">
-
           <b id="mp3Count">
             0
           </b>
-
           <span>
             MP3
           </span>
-
         </div>
 
         <div class="stat">
-
           <b id="youtubeCount">
             0
           </b>
-
           <span>
             YOUTUBE
           </span>
-
         </div>
 
         <div class="stat">
-
           <b id="categoryCount">
             0
           </b>
-
           <span>
             CATEGORIES
           </span>
-
         </div>
 
       </section>
-
 
       <!-- CATEGORIES -->
 
@@ -260,7 +232,6 @@
         <div class="heading">
 
           <div>
-
             <small>
               DISCOVER
             </small>
@@ -268,7 +239,6 @@
             <h2>
               Browse your music
             </h2>
-
           </div>
 
           <button
@@ -287,7 +257,6 @@
 
       </section>
 
-
       <!-- SONGS -->
 
       <section class="section">
@@ -297,7 +266,7 @@
           <div>
 
             <small>
-              YOUR COLLECTION
+              LIBRARY
             </small>
 
             <h2 id="songHeading">
@@ -305,20 +274,6 @@
             </h2>
 
           </div>
-
-          <select
-            id="sortSelect"
-          >
-
-            <option value="title">
-              Title
-            </option>
-
-            <option value="category">
-              Category
-            </option>
-
-          </select>
 
         </div>
 
@@ -331,86 +286,7 @@
 
     </section>
 
-
-    <!-- ================= YOUTUBE ================= -->
-
-    <section
-      id="youtubePage"
-      class="page"
-    >
-
-      <div class="page-header">
-
-        <small>
-          DISCOVER
-        </small>
-
-        <h1>
-          YouTube Music
-        </h1>
-
-        <p>
-          Search YouTube and add
-          songs directly to SwarAJ.
-        </p>
-
-      </div>
-
-
-      <div
-        class="youtube-search glass"
-      >
-
-        <input
-          id="youtubeSearchInput"
-          placeholder="Search YouTube songs..."
-        >
-
-        <button
-          id="youtubeSearchButton"
-          class="primary"
-        >
-          Search
-        </button>
-
-      </div>
-
-
-      <div
-        id="youtubeResults"
-        class="youtube-grid"
-      ></div>
-
-
-      <div class="section">
-
-        <div class="heading">
-
-          <div>
-
-            <small>
-              SAVED
-            </small>
-
-            <h2>
-              My YouTube Songs
-            </h2>
-
-          </div>
-
-        </div>
-
-        <div
-          id="youtubeSongs"
-          class="youtube-grid"
-        ></div>
-
-      </div>
-
-    </section>
-
-
-    <!-- ================= ADMIN ================= -->
+    <!-- ADMIN -->
 
     <section
       id="adminPage"
@@ -428,57 +304,52 @@
         </h1>
 
         <p>
-          Manage your MP3 and
-          YouTube library.
+          Add MP3 files, MP3 URLs and
+          YouTube URLs to PostgreSQL.
         </p>
 
       </div>
 
+      <!-- AUTH -->
 
-      <div
-        class="admin-note glass"
-      >
+      <div class="admin-auth glass">
 
-        <b>
-          Admin Key
-        </b>
+        <h2>
+          Admin Authentication
+        </h2>
 
         <input
           id="adminKey"
           type="password"
-          autocomplete="off"
-          placeholder="Enter Render ADMIN_KEY"
+          placeholder="ADMIN_KEY"
         >
 
-        <small>
-          The key is sent securely
-          to your server in the
-          request header.
-        </small>
+        <button
+          id="verifyAdmin"
+          class="primary"
+        >
+          Verify Admin
+        </button>
 
       </div>
 
-
       <div class="admin-grid">
 
+        <!-- MP3 FILE -->
 
-        <!-- MP3 -->
-
-        <div
-          class="admin-card glass"
-        >
+        <div class="admin-card glass">
 
           <div class="admin-icon">
             🎵
           </div>
 
           <h2>
-            Upload MP3
+            Upload MP3 File
           </h2>
 
           <p>
-            Upload an MP3 into
-            your selected category.
+            The actual audio file is
+            stored inside PostgreSQL.
           </p>
 
           <input
@@ -492,14 +363,24 @@
           >
 
           <input
+            id="mp3Album"
+            placeholder="Album"
+          >
+
+          <input
             id="mp3Category"
-            placeholder="Category e.g. Bhakti"
+            placeholder="Category"
+          >
+
+          <input
+            id="mp3Cover"
+            placeholder="Cover URL (optional)"
           >
 
           <input
             id="mp3File"
             type="file"
-            accept=".mp3,audio/mpeg"
+            accept=".mp3,.m4a,.wav,.ogg,.aac,audio/*"
           >
 
           <button
@@ -511,48 +392,111 @@
 
         </div>
 
+        <!-- MP3 URL -->
+
+        <div class="admin-card glass">
+
+          <div class="admin-icon">
+            🔗
+          </div>
+
+          <h2>
+            Add MP3 URL
+          </h2>
+
+          <p>
+            Store an external MP3 URL
+            in PostgreSQL.
+          </p>
+
+          <input
+            id="urlTitle"
+            placeholder="Song title"
+          >
+
+          <input
+            id="urlArtist"
+            placeholder="Artist"
+          >
+
+          <input
+            id="urlAlbum"
+            placeholder="Album"
+          >
+
+          <input
+            id="urlCategory"
+            placeholder="Category"
+          >
+
+          <input
+            id="urlCover"
+            placeholder="Cover URL (optional)"
+          >
+
+          <input
+            id="mp3Url"
+            placeholder="https://example.com/song.mp3"
+          >
+
+          <button
+            id="addMp3Url"
+            class="primary full"
+          >
+            Add MP3 URL
+          </button>
+
+        </div>
 
         <!-- YOUTUBE -->
 
-        <div
-          class="admin-card glass"
-        >
+        <div class="admin-card glass">
 
           <div class="admin-icon">
             ▶
           </div>
 
           <h2>
-            Add YouTube
+            Add YouTube Song
           </h2>
 
           <p>
-            Add a YouTube video
-            to your library.
+            Add a YouTube URL to the
+            SwarAJ library.
           </p>
 
           <input
-            id="ytTitle"
+            id="youtubeTitle"
             placeholder="Song title"
           >
 
           <input
-            id="ytArtist"
+            id="youtubeArtist"
             placeholder="Artist"
           >
 
           <input
-            id="ytCategory"
+            id="youtubeAlbum"
+            placeholder="Album"
+          >
+
+          <input
+            id="youtubeCategory"
             placeholder="Category"
           >
 
           <input
-            id="ytUrl"
-            placeholder="https://youtu.be/..."
+            id="youtubeCover"
+            placeholder="Cover URL (optional)"
+          >
+
+          <input
+            id="youtubeUrl"
+            placeholder="https://youtube.com/watch?v=..."
           >
 
           <button
-            id="addYoutube"
+            id="addYouTube"
             class="primary full"
           >
             Add YouTube Song
@@ -562,14 +506,38 @@
 
       </div>
 
+      <!-- ADMIN SONG LIST -->
+
+      <section class="section">
+
+        <div class="heading">
+
+          <div>
+            <small>
+              DATABASE
+            </small>
+
+            <h2>
+              Manage Songs
+            </h2>
+          </div>
+
+        </div>
+
+        <div
+          id="adminSongList"
+          class="admin-song-list"
+        ></div>
+
+      </section>
+
     </section>
 
   </main>
 
 </div>
 
-
-<!-- ================= PLAYER ================= -->
+<!-- PLAYER -->
 
 <div
   id="player"
@@ -599,7 +567,6 @@
 
   </div>
 
-
   <div class="controls">
 
     <button id="previous">
@@ -617,12 +584,15 @@
       ⏭
     </button>
 
-    <button id="modeButton">
+    <button
+      id="youtubeVideoButton"
+      class="video-button"
+      onclick="showYouTubeVideo()"
+    >
       🎬
     </button>
 
   </div>
-
 
   <div class="progress">
 
@@ -646,8 +616,21 @@
 
 </div>
 
+<!-- Hidden YouTube audio player -->
 
-<!-- ================= VIDEO MODAL ================= -->
+<div
+  id="youtubeAudioPlayer"
+  class="youtube-audio-player"
+></div>
+
+<!-- Native MP3 player -->
+
+<audio
+  id="audio"
+  preload="metadata"
+></audio>
+
+<!-- YouTube Video Modal -->
 
 <div
   id="videoModal"
@@ -665,9 +648,9 @@
 
     <div class="video-heading">
 
-      <span>
+      <small>
         YOUTUBE VIDEO
-      </span>
+      </small>
 
       <h2 id="videoTitle">
         YouTube
@@ -678,8 +661,8 @@
     <div class="video-wrapper">
 
       <iframe
-        id="youtubeFrame"
-        title="YouTube Player"
+        id="youtubeVideoFrame"
+        title="YouTube Video"
         allow="autoplay; encrypted-media; picture-in-picture"
         allowfullscreen
       ></iframe>
@@ -690,24 +673,15 @@
 
 </div>
 
-
-<audio
-  id="audio"
-  preload="metadata"
-></audio>
-
-
 <div
   id="toast"
   class="toast"
 ></div>
 
-
 <script
-  src="script.js"
+  src="/script.js"
   defer
 ></script>
 
 </body>
-
 </html>

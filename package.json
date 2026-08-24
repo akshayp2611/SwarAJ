@@ -1,11 +1,10 @@
 {
   "name": "swaraj-music",
   "version": "2.0.0",
-  "description": "स्वरAJ - Premium personal music streaming platform",
+  "description": "स्वरAJ Premium Music Streaming Platform",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=20"

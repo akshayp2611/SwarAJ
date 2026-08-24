@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="theme-color" content="#080b14">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+    <meta name="theme-color" content="#080812">
 
     <title>SwarAJ Music</title>
 
@@ -14,80 +16,86 @@
 
 <div class="app">
 
-    <!-- SIDEBAR -->
+    <!-- ================= SIDEBAR ================= -->
+
     <aside id="sidebar" class="sidebar">
 
         <div class="brand">
             <div class="brand-logo">S</div>
 
-            <div>
+            <div class="brand-text">
                 <strong>SwarAJ</strong>
                 <small>Music</small>
             </div>
         </div>
 
-        <nav>
+        <nav class="nav-menu">
 
             <button class="nav active"
                     data-section="home"
                     onclick="showSection('home')">
                 <span>⌂</span>
-                Home
+                <label>Home</label>
             </button>
 
             <button class="nav"
                     data-section="songs"
                     onclick="showSection('songs')">
                 <span>♫</span>
-                All Songs
+                <label>All Songs</label>
             </button>
 
             <button class="nav"
                     data-section="categories"
                     onclick="showSection('categories')">
                 <span>◈</span>
-                Categories
+                <label>Categories</label>
             </button>
 
             <button class="nav"
                     data-section="library"
                     onclick="showSection('library')">
                 <span>▣</span>
-                Library
+                <label>Library</label>
             </button>
 
             <button class="nav"
                     data-section="liked"
                     onclick="showSection('liked')">
                 <span>♥</span>
-                Liked Songs
+                <label>Liked Songs</label>
             </button>
 
             <button class="nav"
                     data-section="queue"
                     onclick="showSection('queue')">
                 <span>☷</span>
-                Queue
+                <label>Queue</label>
             </button>
 
             <div class="nav-divider"></div>
 
-            <button class="nav admin"
+            <button class="nav admin-nav"
                     data-section="admin"
                     onclick="showAdmin()">
                 <span>⚙</span>
-                Admin
+                <label>Admin</label>
             </button>
 
         </nav>
 
+        <div class="sidebar-footer">
+            <span id="connectionDot"></span>
+            <span id="connectionText">Connecting...</span>
+        </div>
+
     </aside>
 
 
-    <!-- MAIN -->
+    <!-- ================= MAIN ================= -->
+
     <main class="main">
 
-        <!-- TOPBAR -->
         <header class="topbar">
 
             <button class="mobile-menu"
@@ -104,16 +112,14 @@
 
                 <span>⌕</span>
 
-                <input
-                    id="searchInput"
-                    type="search"
-                    placeholder="Search songs, artists, albums..."
-                    autocomplete="off">
+                <input id="searchInput"
+                       type="search"
+                       placeholder="Search songs, artists, albums..."
+                       autocomplete="off">
 
-                <button
-                    id="clearSearch"
-                    onclick="clearSearch()"
-                    hidden>
+                <button id="clearSearch"
+                        onclick="clearSearch()"
+                        hidden>
                     ×
                 </button>
 
@@ -121,13 +127,14 @@
 
             <button class="admin-top"
                     onclick="showAdmin()">
-                ⚙ Admin
+                ⚙ <span>Admin</span>
             </button>
 
         </header>
 
 
-        <!-- HOME -->
+        <!-- ================= HOME ================= -->
+
         <section id="homeSection"
                  class="section active">
 
@@ -135,9 +142,9 @@
 
                 <div class="hero-content">
 
-                    <small>
+                    <span class="eyebrow">
                         YOUR PERSONAL MUSIC UNIVERSE
-                    </small>
+                    </span>
 
                     <h1>
                         Welcome to
@@ -145,9 +152,9 @@
                     </h1>
 
                     <p>
-                        Listen to your complete music
-                        database with MP3 and YouTube
-                        songs in one playlist.
+                        Your complete music collection,
+                        combining MP3 and YouTube songs
+                        into one seamless playlist.
                     </p>
 
                     <div class="actions">
@@ -164,11 +171,32 @@
 
                     </div>
 
+                    <div class="hero-stats">
+
+                        <div>
+                            <strong id="heroSongCount">0</strong>
+                            <span>Songs</span>
+                        </div>
+
+                        <div>
+                            <strong id="heroCategoryCount">0</strong>
+                            <span>Categories</span>
+                        </div>
+
+                        <div>
+                            <strong>MP3 + YT</strong>
+                            <span>Sources</span>
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <div class="hero-disc">
-                    S
-                </div>
+                <div class="hero-art">
+                    <div class="vinyl">
+                        <div class="vinyl-center">S</div>
+                    </div>
+            </div>
 
             </div>
 
@@ -181,7 +209,6 @@
                 </div>
 
             </div>
-
 
             <div class="quick-grid">
 
@@ -224,18 +251,15 @@
 
                 <div>
                     <h2>Your Music</h2>
-                    <p id="homeCount">
-                        Loading...
-                    </p>
+                    <p id="homeCount">Loading...</p>
                 </div>
 
                 <button class="link"
                         onclick="showSection('songs')">
-                    Show All
+                    Show All →
                 </button>
 
             </div>
-
 
             <div id="homeSongs"
                  class="song-grid">
@@ -243,9 +267,11 @@
 
 
             <div class="section-head">
+
                 <div>
                     <h2>Categories</h2>
                 </div>
+
             </div>
 
             <div id="homeCategories"
@@ -255,13 +281,14 @@
         </section>
 
 
-        <!-- ALL SONGS -->
+        <!-- ================= ALL SONGS ================= -->
+
         <section id="songsSection"
                  class="section">
 
             <div class="page-title">
 
-                <small>LIBRARY</small>
+                <span class="eyebrow">LIBRARY</span>
 
                 <h1>All Songs</h1>
 
@@ -292,13 +319,14 @@
         </section>
 
 
-        <!-- CATEGORIES -->
+        <!-- ================= CATEGORIES ================= -->
+
         <section id="categoriesSection"
                  class="section">
 
             <div class="page-title">
 
-                <small>DISCOVER</small>
+                <span class="eyebrow">DISCOVER</span>
 
                 <h1>Categories</h1>
 
@@ -312,8 +340,8 @@
                  class="category-grid large">
             </div>
 
-
             <div id="categoryView"
+                 class="category-view"
                  hidden>
 
                 <div class="section-head">
@@ -325,7 +353,7 @@
 
                     <button class="secondary"
                             onclick="closeCategory()">
-                        Back
+                        ← Back
                     </button>
 
                 </div>
@@ -339,13 +367,14 @@
         </section>
 
 
-        <!-- LIBRARY -->
+        <!-- ================= LIBRARY ================= -->
+
         <section id="librarySection"
                  class="section">
 
             <div class="page-title">
 
-                <small>COLLECTION</small>
+                <span class="eyebrow">COLLECTION</span>
 
                 <h1>Your Library</h1>
 
@@ -355,26 +384,24 @@
 
             </div>
 
-
             <div class="stats">
 
-                <div>
-                    <b id="statSongs">0</b>
+                <div class="stat-card">
+                    <strong id="statSongs">0</strong>
                     <span>Songs</span>
                 </div>
 
-                <div>
-                    <b id="statCats">0</b>
+                <div class="stat-card">
+                    <strong id="statCats">0</strong>
                     <span>Categories</span>
                 </div>
 
-                <div>
-                    <b id="statLiked">0</b>
+                <div class="stat-card">
+                    <strong id="statLiked">0</strong>
                     <span>Liked</span>
                 </div>
 
             </div>
-
 
             <div class="section-head">
 
@@ -394,13 +421,14 @@
         </section>
 
 
-        <!-- LIKED -->
+        <!-- ================= LIKED ================= -->
+
         <section id="likedSection"
                  class="section">
 
             <div class="page-title">
 
-                <small>FAVOURITES</small>
+                <span class="eyebrow">FAVOURITES</span>
 
                 <h1>Liked Songs</h1>
 
@@ -417,13 +445,14 @@
         </section>
 
 
-        <!-- QUEUE -->
+        <!-- ================= QUEUE ================= -->
+
         <section id="queueSection"
                  class="section">
 
             <div class="page-title">
 
-                <small>PLAYBACK</small>
+                <span class="eyebrow">PLAYBACK</span>
 
                 <h1>Queue</h1>
 
@@ -433,7 +462,7 @@
 
             </div>
 
-            <div class="actions">
+            <div class="queue-toolbar">
 
                 <button class="primary"
                         onclick="playAll()">
@@ -441,8 +470,13 @@
                 </button>
 
                 <button class="secondary"
+                        onclick="toggleShuffle()">
+                    🔀 Shuffle
+                </button>
+
+                <button class="secondary"
                         onclick="clearQueue()">
-                    Clear
+                    Clear Queue
                 </button>
 
             </div>
@@ -454,13 +488,14 @@
         </section>
 
 
-        <!-- ADMIN -->
+        <!-- ================= ADMIN ================= -->
+
         <section id="adminSection"
                  class="section">
 
             <div class="page-title">
 
-                <small>CONTROL CENTER</small>
+                <span class="eyebrow">CONTROL CENTER</span>
 
                 <h1>Admin</h1>
 
@@ -471,22 +506,35 @@
             </div>
 
 
+            <!-- LOGIN -->
+
             <div id="adminLoginBox"
                  class="admin-card">
+
+                <div class="admin-icon">⚙</div>
 
                 <h2>Admin Login</h2>
 
                 <p>
-                    Enter your Render ADMIN_KEY.
+                    Enter your configured Render ADMIN_KEY.
                 </p>
 
                 <form onsubmit="adminLogin(event)">
 
-                    <input
-                        id="adminKeyInput"
-                        type="password"
-                        placeholder="Admin key"
-                        required>
+                    <div class="password-field">
+
+                        <input id="adminKeyInput"
+                               type="password"
+                               placeholder="Enter admin key"
+                               autocomplete="current-password"
+                               required>
+
+                        <button type="button"
+                                onclick="togglePassword()">
+                            👁
+                        </button>
+
+                    </div>
 
                     <button class="primary"
                             type="submit">
@@ -502,8 +550,25 @@
             </div>
 
 
+            <!-- PANEL -->
+
             <div id="adminPanel"
                  hidden>
+
+                <div class="admin-status">
+                    <div>
+                        <span class="status-dot"></span>
+                        Admin authenticated
+                    </div>
+
+                    <button class="secondary"
+                            onclick="adminLogout()">
+                        Logout
+                    </button>
+                </div>
+
+
+                <!-- UPLOAD -->
 
                 <div class="admin-card">
 
@@ -511,53 +576,44 @@
 
                         <div>
                             <h2>Upload MP3</h2>
-
                             <p>
-                                Maximum 100 MB.
+                                Add an MP3 directly to the database.
                             </p>
                         </div>
 
                     </div>
 
-
                     <form id="uploadForm"
                           class="form-grid"
                           onsubmit="uploadMP3(event)">
 
-                        <input
-                            name="title"
-                            placeholder="Title"
-                            required>
+                        <input name="title"
+                               placeholder="Song title"
+                               required>
 
-                        <input
-                            name="artist"
-                            placeholder="Artist"
-                            value="SwarAJ">
+                        <input name="artist"
+                               placeholder="Artist"
+                               value="SwarAJ">
 
-                        <input
-                            name="album"
-                            placeholder="Album"
-                            value="Singles">
+                        <input name="album"
+                               placeholder="Album"
+                               value="Singles">
 
-                        <input
-                            name="category"
-                            placeholder="Category"
-                            value="Other">
+                        <input name="category"
+                               placeholder="Category"
+                               value="Other">
 
-                        <input
-                            name="coverUrl"
-                            placeholder="Cover URL (optional)">
+                        <input name="coverUrl"
+                               placeholder="Cover URL (optional)">
 
-                        <input
-                            name="file"
-                            type="file"
-                            accept="audio/*,.mp3"
-                            required>
+                        <input name="file"
+                               type="file"
+                               accept="audio/mpeg,audio/mp3,.mp3"
+                               required>
 
-                        <button
-                            class="primary"
-                            type="submit">
-                            Upload MP3
+                        <button class="primary"
+                                type="submit">
+                            ⬆ Upload MP3
                         </button>
 
                     </form>
@@ -569,15 +625,22 @@
                 </div>
 
 
+                <!-- ADMIN SONGS -->
+
                 <div class="admin-card">
 
                     <div class="section-head">
 
-                        <h2>Database Songs</h2>
+                        <div>
+                            <h2>Database Songs</h2>
+                            <p>
+                                Manage MP3 and YouTube entries.
+                            </p>
+                        </div>
 
                         <button class="secondary"
                                 onclick="loadAdminSongs()">
-                            Refresh
+                            ↻ Refresh
                         </button>
 
                     </div>
@@ -597,16 +660,20 @@
 </div>
 
 
-<!-- PLAYER -->
+<!-- ================= FIXED PLAYER ================= -->
+
 <div id="player"
      class="player">
+
+    <!-- LEFT -->
 
     <div class="now-playing">
 
         <img id="playerCover"
-             src="/images/ganpati.jpg">
+             src="/images/ganpati.jpg"
+             alt="">
 
-        <div>
+        <div class="now-text">
 
             <b id="playerTitle">
                 Nothing playing
@@ -616,9 +683,14 @@
                 SwarAJ
             </small>
 
+            <span id="playerSource"
+                  class="player-source">
+            </span>
+
         </div>
 
         <button id="likeCurrent"
+                class="like-current"
                 onclick="toggleCurrentLike()">
             ♡
         </button>
@@ -626,42 +698,46 @@
     </div>
 
 
+    <!-- CENTER -->
+
     <div class="player-center">
 
         <div class="controls">
 
             <button id="shuffleBtn"
-                    onclick="toggleShuffle()">
+                    onclick="toggleShuffle()"
+                    title="Shuffle">
                 🔀
             </button>
 
-            <button onclick="playPrevious()">
+            <button onclick="playPrevious()"
+                    title="Previous">
                 ⏮
             </button>
 
             <button id="playBtn"
                     class="play-button"
-                    onclick="togglePlay()">
+                    onclick="togglePlay()"
+                    title="Play">
                 ▶
             </button>
 
-            <button onclick="playNext()">
+            <button onclick="playNext()"
+                    title="Next">
                 ⏭
             </button>
 
             <button id="repeatBtn"
-                    onclick="toggleRepeat()">
+                    onclick="toggleRepeat()"
+                    title="Repeat">
                 🔁
             </button>
 
         </div>
 
-
         <div class="progress">
 
-            <span id="currentTime">
-                0:00
-            </span>
+            <span id="currentTime">0:00</span>
 
             <input id="progress"
                    type="range"
@@ -669,14 +745,14 @@
                    max="100"
                    value="0">
 
-            <span id="duration">
-                0:00
-            </span>
+            <span id="duration">0:00</span>
 
         </div>
 
     </div>
 
+
+    <!-- RIGHT -->
 
     <div class="volume">
 
@@ -694,41 +770,40 @@
 
     </div>
 
-</div>
 
+    <!-- INLINE YOUTUBE -->
 
-<!-- YOUTUBE -->
-<div id="ytWrap"
-     class="youtube-wrapper"
-     hidden>
-
-    <div class="youtube-box">
-
-        <button class="youtube-close"
-                onclick="closeYouTube()">
-            ×
-        </button>
+    <div id="youtubeContainer"
+         class="youtube-inline"
+         hidden>
 
         <div id="youtubePlayer"></div>
+
+        <button class="youtube-hide"
+                onclick="hideYouTube()">
+            ×
+        </button>
 
     </div>
 
 </div>
 
 
-<!-- AUDIO -->
+<!-- ================= AUDIO ================= -->
+
 <audio id="audio"
-       preload="metadata">
+       preload="auto"
+       playsinline>
 </audio>
 
 
-<!-- TOAST -->
+<!-- ================= TOAST ================= -->
+
 <div id="toast"
      class="toast">
 </div>
 
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script src="/script.js"></script>
 
 </body>

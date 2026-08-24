@@ -1,675 +1,396 @@
 const express = require("express");
+const fs = require("fs");
 const path = require("path");
-const cors = require("cors");
-const multer = require("multer");
-const { v2: cloudinary } = require("cloudinary");
-const { pool, initDatabase } = require("./database");
 
 const app = express();
-const PORT = process.env.PORT || 10000;
 
-app.use(cors());
-app.use(express.json({ limit: "20mb" }));
-app.use(express.urlencoded({ extended: true, limit: "20mb" }));
-app.use(express.static(__dirname));
+const PORT = process.env.PORT || 3000;
 
-let cloudinaryReady = false;
+const ROOT = __dirname;
+const SONGS_DIR = path.join(ROOT, "songs");
+const IMAGES_DIR = path.join(ROOT, "images");
 
-if (process.env.CLOUDINARY_URL) {
-  try {
-    cloudinary.config();
-    cloudinaryReady = true;
-    console.log("Cloudinary configured");
-  } catch (err) {
-    console.error("Cloudinary error:", err.message);
+const AUDIO_EXTENSIONS = new Set([
+  ".mp3",
+  ".wav",
+  ".m4a",
+  ".aac",
+  ".ogg",
+  ".flac",
+  ".webm"
+]);
+
+const IMAGE_EXTENSIONS = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".gif"
+]);
+
+app.disable("x-powered-by");
+
+app.use(express.json({ limit: "1mb" }));
+
+function ensureDirectories() {
+  if (!fs.existsSync(SONGS_DIR)) {
+    fs.mkdirSync(SONGS_DIR, { recursive: true });
+  }
+
+  if (!fs.existsSync(IMAGES_DIR)) {
+    fs.mkdirSync(IMAGES_DIR, { recursive: true });
   }
 }
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 100 * 1024 * 1024
-  },
-  fileFilter(req, file, cb) {
-    const valid =
-      file.mimetype.startsWith("audio/") ||
-      /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(
-        file.originalname
-      );
+ensureDirectories();
 
-    if (!valid) {
-      return cb(
-        new Error("Only audio files are allowed.")
-      );
+function cleanName(filename) {
+  return filename
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function encodePath(parts) {
+  return parts
+    .map((part) => encodeURIComponent(part))
+    .join("/");
+}
+
+function scanSongs() {
+  const songs = [];
+
+  if (!fs.existsSync(SONGS_DIR)) {
+    return songs;
+  }
+
+  function walk(directory) {
+    let entries = [];
+
+    try {
+      entries = fs.readdirSync(directory, {
+        withFileTypes: true
+      });
+    } catch (error) {
+      console.error("Unable to read directory:", directory, error.message);
+      return;
     }
 
-    cb(null, true);
-  }
-});
+    for (const entry of entries) {
+      const absolutePath = path.join(directory, entry.name);
 
-function clean(value) {
-  if (value === undefined || value === null) {
-    return "";
-  }
-
-  return String(value).trim();
-}
-
-function nullable(value) {
-  const value = clean(value);
-  return value || null;
-}
-
-/* =====================================================
-   YOUTUBE
-===================================================== */
-
-function cleanYouTubeId(id) {
-  if (!id) return null;
-
-  const value = String(id)
-    .trim()
-    .replace(/[^a-zA-Z0-9_-]/g, "");
-
-  if (value.length < 5 || value.length > 20) {
-    return null;
-  }
-
-  return value;
-}
-
-function extractYouTubeVideoId(value) {
-  if (!value) return null;
-
-  try {
-    const url = new URL(String(value).trim());
-
-    const host = url.hostname
-      .toLowerCase()
-      .replace(/^www\./, "");
-
-    if (host === "youtu.be") {
-      return cleanYouTubeId(
-        url.pathname
-          .replace(/^\/+/, "")
-          .split("/")[0]
-      );
-    }
-
-    if (
-      host === "youtube.com" ||
-      host === "m.youtube.com"
-    ) {
-      const v = url.searchParams.get("v");
-
-      if (v) {
-        return cleanYouTubeId(v);
+      if (entry.isDirectory()) {
+        walk(absolutePath);
+        continue;
       }
 
-      const patterns = [
-        /^\/shorts\/([^/?]+)/,
-        /^\/embed\/([^/?]+)/,
-        /^\/live\/([^/?]+)/
-      ];
+      const extension = path.extname(entry.name).toLowerCase();
 
-      for (const pattern of patterns) {
-        const match =
-          url.pathname.match(pattern);
+      if (!AUDIO_EXTENSIONS.has(extension)) {
+        continue;
+      }
 
-        if (match) {
-          return cleanYouTubeId(match[1]);
-        }
+      const relativePath = path.relative(SONGS_DIR, absolutePath);
+      const pathParts = relativePath.split(path.sep);
+
+      const category =
+        pathParts.length > 1
+          ? cleanName(pathParts[0])
+          : "All Songs";
+
+      const filename = entry.name;
+
+      let stats;
+
+      try {
+        stats = fs.statSync(absolutePath);
+      } catch {
+        stats = null;
+      }
+
+      songs.push({
+        id: Buffer.from(relativePath).toString("base64url"),
+        title: cleanName(filename),
+        filename,
+        category,
+        extension: extension.substring(1),
+        size: stats ? stats.size : 0,
+        url:
+          "/songs/" +
+          encodePath(pathParts),
+        cover:
+          "/api/cover/" +
+          encodeURIComponent(category)
+      });
+    }
+  }
+
+  walk(SONGS_DIR);
+
+  songs.sort((a, b) =>
+    a.title.localeCompare(b.title, undefined, {
+      numeric: true,
+      sensitivity: "base"
+    })
+  );
+
+  return songs;
+}
+
+function findCover(category) {
+  const possibleNames = [
+    category,
+    category.toLowerCase(),
+    category.replace(/\s+/g, "-"),
+    category.replace(/\s+/g, "_"),
+    "default",
+    "ganpati"
+  ];
+
+  for (const name of possibleNames) {
+    for (const extension of IMAGE_EXTENSIONS) {
+      const file = path.join(IMAGES_DIR, name + extension);
+
+      if (fs.existsSync(file)) {
+        return file;
       }
     }
+  }
+
+  let files = [];
+
+  try {
+    files = fs.readdirSync(IMAGES_DIR);
   } catch {
     return null;
   }
 
-  return null;
+  const image = files.find((file) =>
+    IMAGE_EXTENSIONS.has(path.extname(file).toLowerCase())
+  );
+
+  return image ? path.join(IMAGES_DIR, image) : null;
 }
 
-/* =====================================================
-   CLOUDINARY MP3
-===================================================== */
+/*
+|--------------------------------------------------------------------------
+| API
+|--------------------------------------------------------------------------
+*/
 
-function uploadAudio(buffer, filename) {
-  return new Promise((resolve, reject) => {
-    const safeName = filename
-      .replace(/\.[^/.]+$/, "")
-      .replace(/[^a-zA-Z0-9_-]/g, "_");
-
-    const stream =
-      cloudinary.uploader.upload_stream(
-        {
-          resource_type: "video",
-          folder: "swaraj/songs",
-          public_id: safeName,
-          overwrite: true
-        },
-        (error, result) => {
-          if (error) {
-            return reject(error);
-          }
-
-          resolve(result);
-        }
-      );
-
-    stream.end(buffer);
-  });
-}
-
-/* =====================================================
-   PAGES
-===================================================== */
-
-app.get("/", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "index.html")
-  );
-});
-
-app.get("/admin", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "admin.html")
-  );
-});
-
-/* =====================================================
-   HEALTH
-===================================================== */
-
-app.get("/api/health", async (req, res) => {
-  let database = "not configured";
-
-  if (pool) {
-    try {
-      await pool.query("SELECT 1");
-      database = "connected";
-    } catch {
-      database = "error";
-    }
-  }
+app.get("/api/health", (req, res) => {
+  const songs = scanSongs();
 
   res.json({
     status: "ok",
     service: "स्वरAJ Music",
-    database,
-    cloudinary: cloudinaryReady,
-    youtube: true,
+    environment: process.env.NODE_ENV || "production",
+    port: PORT,
+    songsDirectory: SONGS_DIR,
+    songsDirectoryExists: fs.existsSync(SONGS_DIR),
+    songCount: songs.length,
     timestamp: new Date().toISOString()
   });
 });
 
-/* =====================================================
-   CATEGORIES
-===================================================== */
-
-app.get(
-  "/api/categories",
-  async (req, res) => {
-    if (!pool) {
-      return res.json([]);
-    }
-
-    try {
-      const result = await pool.query(`
-        SELECT
-          category,
-          COUNT(*)::int AS song_count
-        FROM songs
-        WHERE published = TRUE
-        GROUP BY category
-        ORDER BY category
-      `);
-
-      res.json(result.rows);
-    } catch (error) {
-      console.error(
-        "CATEGORY ERROR:",
-        error
-      );
-
-      res.status(500).json({
-        error: "Unable to load categories",
-        details: error.message
-      });
-    }
-  }
-);
-
-/* =====================================================
-   ALL SONGS
-===================================================== */
-
-app.get("/api/songs", async (req, res) => {
-  if (!pool) {
-    return res.json([]);
-  }
-
+app.get("/api/songs", (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT
-        id,
-        title,
-        artist,
-        album,
-        category,
-        language,
-        genre,
-        file_path,
-        audio_url,
-        youtube_url,
-        cover_url,
-        lyrics,
-        featured,
-        published,
-        created_at
-      FROM songs
-      WHERE published = TRUE
-      ORDER BY created_at DESC, id DESC
-    `);
+    const songs = scanSongs();
 
-    const songs = result.rows.map(song => ({
-      ...song,
-
-      source:
-        song.audio_url
-          ? "mp3"
-          : song.youtube_url
-            ? "youtube"
-            : "unknown"
-    }));
-
-    res.json(songs);
-
-  } catch (error) {
-    console.error(
-      "SONGS ERROR:",
-      error
-    );
-
-    res.status(500).json({
-      error: "Unable to load songs",
-      details: error.message
+    res.json({
+      success: true,
+      count: songs.length,
+      songs
     });
-  }
-});
-
-/* =====================================================
-   ADD SONG
-===================================================== */
-
-app.post(
-  "/api/admin/upload-song",
-  upload.single("audio"),
-  async (req, res) => {
-
-    if (!pool) {
-      return res.status(503).json({
-        success: false,
-        error: "Database not configured"
-      });
-    }
-
-    try {
-
-      const title =
-        clean(req.body.title);
-
-      const artist =
-        clean(req.body.artist);
-
-      const album =
-        clean(req.body.album);
-
-      const category =
-        clean(req.body.category) ||
-        "All Songs";
-
-      const language =
-        clean(req.body.language);
-
-      const genre =
-        clean(req.body.genre);
-
-      const audioUrl =
-        nullable(req.body.audio_url);
-
-      const youtubeUrl =
-        nullable(req.body.youtube_url);
-
-      const coverUrl =
-        nullable(req.body.cover_url);
-
-      const lyrics =
-        clean(req.body.lyrics);
-
-      const featured =
-        req.body.featured === "true";
-
-      const published =
-        req.body.published !== "false";
-
-      if (!title) {
-        return res.status(400).json({
-          success: false,
-          error: "Song title is required."
-        });
-      }
-
-      if (youtubeUrl) {
-        const youtubeId =
-          extractYouTubeVideoId(
-            youtubeUrl
-          );
-
-        if (!youtubeId) {
-          return res.status(400).json({
-            success: false,
-            error:
-              "Invalid YouTube URL."
-          });
-        }
-      }
-
-      /*
-       * Do not allow ambiguous
-       * MP3 + YouTube source.
-       */
-      if (audioUrl && youtubeUrl) {
-        return res.status(400).json({
-          success: false,
-          error:
-            "Use either MP3 URL/upload OR YouTube URL, not both."
-        });
-      }
-
-      let finalAudioUrl =
-        audioUrl;
-
-      /*
-       * Uploaded MP3
-       */
-      if (req.file) {
-
-        if (!cloudinaryReady) {
-          return res.status(500).json({
-            success: false,
-            error:
-              "CLOUDINARY_URL is not configured."
-          });
-        }
-
-        const uploaded =
-          await uploadAudio(
-            req.file.buffer,
-            req.file.originalname
-          );
-
-        finalAudioUrl =
-          uploaded.secure_url;
-      }
-
-      if (
-        finalAudioUrl &&
-        youtubeUrl
-      ) {
-        return res.status(400).json({
-          success: false,
-          error:
-            "Only one playback source is allowed."
-        });
-      }
-
-      if (
-        !finalAudioUrl &&
-        !youtubeUrl
-      ) {
-        return res.status(400).json({
-          success: false,
-          error:
-            "Add an MP3 URL, upload an MP3, or add a YouTube URL."
-        });
-      }
-
-      const result =
-        await pool.query(
-          `
-          INSERT INTO songs (
-            title,
-            artist,
-            album,
-            category,
-            language,
-            genre,
-            file_path,
-            audio_url,
-            youtube_url,
-            cover_url,
-            lyrics,
-            featured,
-            published
-          )
-          VALUES (
-            $1,$2,$3,$4,$5,$6,
-            NULL,$7,$8,$9,$10,$11,$12
-          )
-          RETURNING *
-          `,
-          [
-            title,
-            artist,
-            album,
-            category,
-            language,
-            genre,
-            finalAudioUrl,
-            youtubeUrl,
-            coverUrl,
-            lyrics,
-            featured,
-            published
-          ]
-        );
-
-      const song =
-        result.rows[0];
-
-      res.status(201).json({
-        success: true,
-        message:
-          "Song added successfully.",
-        song: {
-          ...song,
-          source:
-            song.audio_url
-              ? "mp3"
-              : "youtube"
-        }
-      });
-
-    } catch (error) {
-
-      console.error(
-        "ADD SONG ERROR:",
-        error
-      );
-
-      res.status(500).json({
-        success: false,
-        error:
-          "Failed to add song.",
-        details:
-          error.message,
-        code:
-          error.code || null,
-        detail:
-          error.detail || null
-      });
-    }
-  }
-);
-
-/* =====================================================
-   DELETE
-===================================================== */
-
-app.delete(
-  "/api/admin/songs/:id",
-  async (req, res) => {
-
-    if (!pool) {
-      return res.status(503).json({
-        error:
-          "Database not configured"
-      });
-    }
-
-    try {
-
-      const result =
-        await pool.query(
-          `
-          DELETE FROM songs
-          WHERE id = $1
-          RETURNING id
-          `,
-          [req.params.id]
-        );
-
-      if (!result.rows.length) {
-        return res.status(404).json({
-          error:
-            "Song not found"
-        });
-      }
-
-      res.json({
-        success: true,
-        message:
-          "Song deleted successfully."
-      });
-
-    } catch (error) {
-
-      console.error(
-        "DELETE ERROR:",
-        error
-      );
-
-      res.status(500).json({
-        success: false,
-        error:
-          "Failed to delete song.",
-        details:
-          error.message
-      });
-    }
-  }
-);
-
-/* =====================================================
-   API 404
-===================================================== */
-
-app.use("/api", (req, res) => {
-  res.status(404).json({
-    success: false,
-    error:
-      "API endpoint not found",
-    path:
-      req.originalUrl
-  });
-});
-
-/* =====================================================
-   ERROR HANDLER
-===================================================== */
-
-app.use(
-  (error, req, res, next) => {
-
-    console.error(
-      "SERVER ERROR:",
-      error
-    );
+  } catch (error) {
+    console.error("Song scan failed:", error);
 
     res.status(500).json({
       success: false,
-      error:
-        error.message ||
-        "Server error"
+      count: 0,
+      songs: [],
+      error: "Unable to scan songs"
     });
   }
+});
+
+app.get("/api/categories", (req, res) => {
+  try {
+    const songs = scanSongs();
+
+    const map = new Map();
+
+    for (const song of songs) {
+      if (!map.has(song.category)) {
+        map.set(song.category, {
+          name: song.category,
+          count: 0,
+          cover: song.cover
+        });
+      }
+
+      map.get(song.category).count++;
+    }
+
+    const categories = Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+
+    res.json({
+      success: true,
+      count: categories.length,
+      categories
+    });
+  } catch (error) {
+    console.error("Category scan failed:", error);
+
+    res.status(500).json({
+      success: false,
+      count: 0,
+      categories: []
+    });
+  }
+});
+
+app.get("/api/search", (req, res) => {
+  const query = String(req.query.q || "")
+    .trim()
+    .toLowerCase();
+
+  if (!query) {
+    return res.json({
+      success: true,
+      count: 0,
+      songs: []
+    });
+  }
+
+  const songs = scanSongs();
+
+  const results = songs.filter((song) => {
+    return (
+      song.title.toLowerCase().includes(query) ||
+      song.category.toLowerCase().includes(query) ||
+      song.filename.toLowerCase().includes(query)
+    );
+  });
+
+  res.json({
+    success: true,
+    count: results.length,
+    songs: results
+  });
+});
+
+app.get("/api/cover/:category", (req, res) => {
+  const category = decodeURIComponent(req.params.category || "");
+
+  const cover = findCover(category);
+
+  if (!cover) {
+    return res.status(404).send("Cover not found");
+  }
+
+  res.sendFile(cover);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Static files
+|--------------------------------------------------------------------------
+*/
+
+app.use(
+  "/songs",
+  express.static(SONGS_DIR, {
+    fallthrough: false,
+    setHeaders: (res) => {
+      res.setHeader("Cache-Control", "public, max-age=31536000");
+      res.setHeader("Accept-Ranges", "bytes");
+    }
+  })
 );
 
-/* =====================================================
-   START
-===================================================== */
+app.use(
+  "/images",
+  express.static(IMAGES_DIR, {
+    maxAge: "7d"
+  })
+);
 
-async function startServer() {
+app.use(
+  express.static(ROOT, {
+    extensions: ["html"]
+  })
+);
 
-  try {
+/*
+|--------------------------------------------------------------------------
+| SPA fallback
+|--------------------------------------------------------------------------
+*/
 
-    await initDatabase();
-
-    app.listen(
-      PORT,
-      "0.0.0.0",
-      () => {
-
-        console.log(
-          "================================"
-        );
-
-        console.log(
-          "स्वरAJ Music Server"
-        );
-
-        console.log(
-          `PORT: ${PORT}`
-        );
-
-        console.log(
-          `DATABASE: ${
-            pool
-              ? "READY"
-              : "NOT CONFIGURED"
-          }`
-        );
-
-        console.log(
-          `CLOUDINARY: ${
-            cloudinaryReady
-              ? "READY"
-              : "NOT CONFIGURED"
-          }`
-        );
-
-        console.log(
-          "MP3: ENABLED"
-        );
-
-        console.log(
-          "YOUTUBE: ENABLED"
-        );
-
-        console.log(
-          "================================"
-        );
-      }
-    );
-
-  } catch (error) {
-
-    console.error(
-      "STARTUP ERROR:",
-      error
-    );
-
-    process.exit(1);
+app.get("*", (req, res) => {
+  if (
+    req.path.startsWith("/api/") ||
+    req.path.startsWith("/songs/") ||
+    req.path.startsWith("/images/")
+  ) {
+    return res.status(404).json({
+      error: "Not found"
+    });
   }
-}
 
-startServer();
+  res.sendFile(path.join(ROOT, "index.html"));
+});
+
+/*
+|--------------------------------------------------------------------------
+| Error handler
+|--------------------------------------------------------------------------
+*/
+
+app.use((error, req, res, next) => {
+  console.error("Server error:", error);
+
+  if (res.headersSent) {
+    return next(error);
+  }
+
+  res.status(500).json({
+    success: false,
+    error: "Internal server error"
+  });
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+  const songs = scanSongs();
+
+  console.log("==========================================");
+  console.log(" स्वरAJ Premium Music Server");
+  console.log("==========================================");
+  console.log(`Port: ${PORT}`);
+  console.log(`Songs directory: ${SONGS_DIR}`);
+  console.log(`Songs found: ${songs.length}`);
+
+  if (songs.length === 0) {
+    console.warn("WARNING: No audio files found.");
+    console.warn("Add MP3 files inside the songs/ directory.");
+  } else {
+    console.log("Music library:");
+
+    const categories = {};
+
+    songs.forEach((song) => {
+      categories[song.category] =
+        (categories[song.category] || 0) + 1;
+    });
+
+    Object.entries(categories).forEach(([name, count]) => {
+      console.log(`  ${name}: ${count}`);
+    });
+  }
+
+  console.log("==========================================");
+});

@@ -1,1293 +1,482 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const multer = require("multer");
-const mm = require("music-metadata");
 
 const {
-  query,
-  pool,
-  testDatabase
+  initializeDatabase,
+  isDatabaseAvailable,
+  getSongs,
+  getCategories,
+  upsertSong,
+  removeMissingSongs,
+  closeDatabase
 } = require("./database");
 
 const app = express();
 
-const PORT =
-  Number(process.env.PORT) || 3000;
+const PORT = process.env.PORT || 3000;
 
-const ROOT = __dirname;
+const ROOT_DIR = __dirname;
+const SONGS_DIR = path.join(ROOT_DIR, "songs");
+const IMAGES_DIR = path.join(ROOT_DIR, "images");
 
-const STORAGE_ROOT =
-  process.env.STORAGE_ROOT ||
-  path.join(ROOT, "data");
+const INDEX_FILE = path.join(ROOT_DIR, "index.html");
 
-const MUSIC_DIR =
-  path.join(STORAGE_ROOT, "music");
+app.disable("x-powered-by");
 
-const COVERS_DIR =
-  path.join(STORAGE_ROOT, "covers");
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
 
-const IMAGE_DIR =
-  path.join(ROOT, "images");
+// ----------------------------------------------------
+// Ensure directories exist
+// ----------------------------------------------------
 
-const AUDIO_EXTENSIONS = new Set([
-  ".mp3",
-  ".wav",
-  ".ogg",
-  ".m4a",
-  ".aac",
-  ".flac",
-  ".webm"
-]);
-
-for (const dir of [
-  STORAGE_ROOT,
-  MUSIC_DIR,
-  COVERS_DIR
-]) {
-  fs.mkdirSync(dir, {
+if (!fs.existsSync(SONGS_DIR)) {
+  fs.mkdirSync(SONGS_DIR, {
     recursive: true
   });
 }
 
-app.disable("x-powered-by");
-
-app.use(
-  express.json({
-    limit: "2mb"
-  })
-);
-
-app.use(
-  express.urlencoded({
-    extended: true
-  })
-);
-
-/* =====================================
-   HELPERS
-===================================== */
-
-function cleanName(value) {
-  return String(value || "")
-    .replace(
-      /[<>:"/\\|?*\x00-\x1F]/g,
-      ""
-    )
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 250);
+if (!fs.existsSync(IMAGES_DIR)) {
+  fs.mkdirSync(IMAGES_DIR, {
+    recursive: true
+  });
 }
 
-function safeCategory(value) {
-  return (
-    cleanName(value) ||
-    "Uncategorized"
-  );
+// ----------------------------------------------------
+// Utility functions
+// ----------------------------------------------------
+
+function cleanText(value, fallback = "") {
+  if (!value) return fallback;
+
+  return String(value)
+    .replace(/\0/g, "")
+    .trim();
 }
 
-function storageRelative(file) {
+function titleFromFilename(filename) {
   return path
-    .relative(
-      STORAGE_ROOT,
-      file
-    )
+    .basename(filename, path.extname(filename))
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function encodePathParts(relativePath) {
+  return relativePath
     .split(path.sep)
+    .map((part) => encodeURIComponent(part))
     .join("/");
 }
 
-function mediaUrl(relative) {
-  return (
-    "/media/" +
-    String(relative)
-      .split("/")
-      .map(
-        encodeURIComponent
-      )
-      .join("/")
-  );
+function isAudioFile(filePath) {
+  const extension = path.extname(filePath).toLowerCase();
+
+  return [
+    ".mp3",
+    ".m4a",
+    ".aac",
+    ".wav",
+    ".ogg",
+    ".flac"
+  ].includes(extension);
 }
 
-function getMime(file) {
-  const ext =
-    path.extname(file)
-      .toLowerCase();
+function getCategory(relativePath) {
+  const parts = relativePath.split(path.sep);
 
-  const types = {
-    ".mp3": "audio/mpeg",
-    ".wav": "audio/wav",
-    ".ogg": "audio/ogg",
-    ".m4a": "audio/mp4",
-    ".aac": "audio/aac",
-    ".flac": "audio/flac",
-    ".webm": "audio/webm"
-  };
-
-  return (
-    types[ext] ||
-    "application/octet-stream"
-  );
-}
-
-function jsonSong(row) {
-  return {
-    id: row.id,
-    title: row.title,
-    artist:
-      row.artist || "SwarAJ",
-    album:
-      row.album || "",
-    category:
-      row.category || "Music",
-    filename:
-      row.filename,
-    size:
-      Number(row.file_size || 0),
-    duration:
-      Number(row.duration || 0),
-    url:
-      mediaUrl(row.storage_path),
-    cover:
-      row.cover_path
-        ? mediaUrl(row.cover_path)
-        : "/images/default-cover.svg",
-    playCount:
-      Number(row.play_count || 0)
-  };
-}
-
-/* =====================================
-   DATABASE INITIALIZATION
-===================================== */
-
-async function initDatabase() {
-  await query(`
-    CREATE TABLE IF NOT EXISTS categories (
-      id BIGSERIAL PRIMARY KEY,
-      name VARCHAR(150) UNIQUE NOT NULL,
-      created_at TIMESTAMPTZ DEFAULT NOW()
-    );
-
-    CREATE TABLE IF NOT EXISTS songs (
-      id BIGSERIAL PRIMARY KEY,
-      title VARCHAR(500) NOT NULL,
-      artist VARCHAR(300)
-        DEFAULT 'SwarAJ',
-      album VARCHAR(300),
-
-      category_id BIGINT
-        REFERENCES categories(id)
-        ON DELETE SET NULL,
-
-      filename VARCHAR(1000)
-        NOT NULL,
-
-      storage_path VARCHAR(2000)
-        UNIQUE NOT NULL,
-
-      mime_type VARCHAR(150)
-        DEFAULT 'audio/mpeg',
-
-      file_size BIGINT
-        DEFAULT 0,
-
-      duration DOUBLE PRECISION
-        DEFAULT 0,
-
-      cover_path VARCHAR(2000),
-
-      play_count BIGINT
-        DEFAULT 0,
-
-      created_at TIMESTAMPTZ
-        DEFAULT NOW(),
-
-      updated_at TIMESTAMPTZ
-        DEFAULT NOW()
-    );
-
-    CREATE INDEX IF NOT EXISTS
-      idx_songs_title
-    ON songs(title);
-
-    CREATE INDEX IF NOT EXISTS
-      idx_songs_artist
-    ON songs(artist);
-
-    CREATE INDEX IF NOT EXISTS
-      idx_songs_category
-    ON songs(category_id);
-
-    CREATE TABLE IF NOT EXISTS users (
-      id BIGSERIAL PRIMARY KEY,
-
-      username VARCHAR(100)
-        UNIQUE NOT NULL,
-
-      email VARCHAR(255)
-        UNIQUE,
-
-      password_hash TEXT,
-
-      created_at TIMESTAMPTZ
-        DEFAULT NOW()
-    );
-
-    CREATE TABLE IF NOT EXISTS playlists (
-      id BIGSERIAL PRIMARY KEY,
-
-      user_id BIGINT
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-      name VARCHAR(200)
-        NOT NULL,
-
-      description TEXT,
-
-      created_at TIMESTAMPTZ
-        DEFAULT NOW(),
-
-      updated_at TIMESTAMPTZ
-        DEFAULT NOW()
-    );
-
-    CREATE TABLE IF NOT EXISTS playlist_songs (
-      playlist_id BIGINT
-        REFERENCES playlists(id)
-        ON DELETE CASCADE,
-
-      song_id BIGINT
-        REFERENCES songs(id)
-        ON DELETE CASCADE,
-
-      position INTEGER
-        DEFAULT 0,
-
-      added_at TIMESTAMPTZ
-        DEFAULT NOW(),
-
-      PRIMARY KEY (
-        playlist_id,
-        song_id
-      )
-    );
-
-    CREATE TABLE IF NOT EXISTS favorites (
-      user_id BIGINT
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-      song_id BIGINT
-        REFERENCES songs(id)
-        ON DELETE CASCADE,
-
-      created_at TIMESTAMPTZ
-        DEFAULT NOW(),
-
-      PRIMARY KEY (
-        user_id,
-        song_id
-      )
-    );
-
-    CREATE TABLE IF NOT EXISTS play_history (
-      id BIGSERIAL PRIMARY KEY,
-
-      user_id BIGINT
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-      song_id BIGINT
-        REFERENCES songs(id)
-        ON DELETE CASCADE,
-
-      played_at TIMESTAMPTZ
-        DEFAULT NOW()
-    );
-
-    CREATE INDEX IF NOT EXISTS
-      idx_history_song
-    ON play_history(song_id);
-
-    CREATE INDEX IF NOT EXISTS
-      idx_history_date
-    ON play_history(played_at DESC);
-  `);
-
-  console.log(
-    "✅ PostgreSQL schema ready"
-  );
-}
-
-/* =====================================
-   CATEGORY
-===================================== */
-
-async function getCategoryId(name) {
-  const category =
-    safeCategory(name);
-
-  const result =
-    await query(
-      `
-      INSERT INTO categories(name)
-      VALUES($1)
-      ON CONFLICT(name)
-      DO UPDATE SET
-        name = EXCLUDED.name
-      RETURNING id
-      `,
-      [category]
-    );
-
-  return result.rows[0].id;
-}
-
-/* =====================================
-   IMPORT SONG INTO DATABASE
-===================================== */
-
-async function importSong(
-  filePath,
-  forcedCategory = null
-) {
-  const relative =
-    storageRelative(filePath);
-
-  const existing =
-    await query(
-      `
-      SELECT id
-      FROM songs
-      WHERE storage_path = $1
-      `,
-      [relative]
-    );
-
-  if (
-    existing.rows.length > 0
-  ) {
-    return false;
+  if (parts.length >= 2) {
+    return parts[0] || "Uncategorized";
   }
 
-  const stats =
-    fs.statSync(filePath);
-
-  let metadata = null;
-
-  try {
-    metadata =
-      await mm.parseFile(
-        filePath
-      );
-  } catch (error) {
-    console.warn(
-      "Metadata read failed:",
-      filePath
-    );
-  }
-
-  const extension =
-    path.extname(filePath);
-
-  const title =
-    cleanName(
-      metadata?.common?.title ||
-      path.basename(
-        filePath,
-        extension
-      )
-    ) || "Untitled";
-
-  const artist =
-    cleanName(
-      metadata?.common?.artist ||
-      "SwarAJ"
-    ) || "SwarAJ";
-
-  const album =
-    cleanName(
-      metadata?.common?.album ||
-      ""
-    ) || null;
-
-  const parts =
-    relative.split("/");
-
-  const category =
-    safeCategory(
-      forcedCategory ||
-      parts[1]
-    );
-
-  const categoryId =
-    await getCategoryId(
-      category
-    );
-
-  await query(
-    `
-    INSERT INTO songs (
-      title,
-      artist,
-      album,
-      category_id,
-      filename,
-      storage_path,
-      mime_type,
-      file_size,
-      duration
-    )
-    VALUES (
-      $1,$2,$3,$4,$5,
-      $6,$7,$8,$9
-    )
-    ON CONFLICT(storage_path)
-    DO NOTHING
-    `,
-    [
-      title,
-      artist,
-      album,
-      categoryId,
-      path.basename(filePath),
-      relative,
-      metadata?.format?.mime ||
-        getMime(filePath),
-      stats.size,
-      Number(
-        metadata?.format?.duration ||
-        0
-      )
-    ]
-  );
-
-  return true;
+  return "Uncategorized";
 }
 
-/* =====================================
-   RECURSIVE SONG SCANNER
-===================================== */
+function getCoverForCategory(category) {
+  const possibleFiles = [
+    `${category}.jpg`,
+    `${category}.jpeg`,
+    `${category}.png`,
+    `${category}.webp`,
+    "cover.jpg",
+    "cover.jpeg",
+    "cover.png",
+    "ganpati.jpg"
+  ];
 
-async function scanMusic(
-  directory,
-  category = null
-) {
-  if (
-    !fs.existsSync(directory)
-  ) {
-    return 0;
-  }
+  for (const file of possibleFiles) {
+    const filePath = path.join(IMAGES_DIR, file);
 
-  let imported = 0;
-
-  const entries =
-    fs.readdirSync(
-      directory,
-      {
-        withFileTypes: true
-      }
-    );
-
-  for (const entry of entries) {
-    const fullPath =
-      path.join(
-        directory,
-        entry.name
-      );
-
-    if (entry.isDirectory()) {
-      imported +=
-        await scanMusic(
-          fullPath,
-          category ||
-            entry.name
-        );
-
-      continue;
+    if (fs.existsSync(filePath)) {
+      return `/images/${encodeURIComponent(file)}`;
     }
+  }
 
-    const extension =
-      path.extname(
-        entry.name
-      ).toLowerCase();
+  return null;
+}
 
-    if (
-      !AUDIO_EXTENSIONS.has(
-        extension
-      )
-    ) {
-      continue;
-    }
+// ----------------------------------------------------
+// Recursive song scanner
+// ----------------------------------------------------
+
+function scanSongsDirectory(directory) {
+  const songs = [];
+
+  function walk(currentDirectory) {
+    let entries = [];
 
     try {
-      const added =
-        await importSong(
-          fullPath,
-          category
-        );
-
-      if (added) {
-        imported++;
-      }
+      entries = fs.readdirSync(currentDirectory, {
+        withFileTypes: true
+      });
     } catch (error) {
       console.error(
-        "Song import failed:",
-        fullPath,
+        "Unable to read directory:",
+        currentDirectory,
         error.message
       );
+
+      return;
+    }
+
+    for (const entry of entries) {
+      const fullPath = path.join(
+        currentDirectory,
+        entry.name
+      );
+
+      if (entry.isDirectory()) {
+        walk(fullPath);
+        continue;
+      }
+
+      if (!entry.isFile()) {
+        continue;
+      }
+
+      if (!isAudioFile(fullPath)) {
+        continue;
+      }
+
+      const relativePath = path.relative(
+        SONGS_DIR,
+        fullPath
+      );
+
+      const category = getCategory(relativePath);
+
+      const title = titleFromFilename(entry.name);
+
+      const encodedRelativePath =
+        encodePathParts(relativePath);
+
+      songs.push({
+        title,
+        artist: "स्वरAJ",
+        album: category,
+        category,
+        filename: relativePath,
+        file_path: `/songs/${encodedRelativePath}`,
+        cover: getCoverForCategory(category),
+        duration: 0
+      });
     }
   }
 
-  return imported;
+  walk(directory);
+
+  songs.sort((a, b) =>
+    a.title.localeCompare(b.title)
+  );
+
+  return songs;
 }
 
-/* =====================================
-   HEALTH
-===================================== */
+// ----------------------------------------------------
+// Synchronize filesystem -> PostgreSQL
+// ----------------------------------------------------
 
-app.get(
-  "/api/health",
-  async (req, res) => {
-    try {
-      const db =
-        await testDatabase();
+async function syncSongsToDatabase() {
+  const scannedSongs = scanSongsDirectory(SONGS_DIR);
 
-      const songs =
-        await query(`
-          SELECT COUNT(*)::int AS count
-          FROM songs
-        `);
+  console.log(
+    `Found ${scannedSongs.length} audio files.`
+  );
 
-      const categories =
-        await query(`
-          SELECT COUNT(*)::int AS count
-          FROM categories
-        `);
-
-      res.json({
-        status: "ok",
-        service: "स्वरAJ Music",
-        database: "connected",
-        databaseTime:
-          db.database_time,
-        songCount:
-          songs.rows[0].count,
-        categoryCount:
-          categories.rows[0].count,
-        storage:
-          STORAGE_ROOT,
-        musicDirectoryExists:
-          fs.existsSync(MUSIC_DIR),
-        coversDirectoryExists:
-          fs.existsSync(COVERS_DIR),
-        environment:
-          process.env.NODE_ENV ||
-          "development",
-        nodeVersion:
-          process.version,
-        timestamp:
-          new Date().toISOString()
-      });
-    } catch (error) {
-      console.error(
-        "Health check:",
-        error
-      );
-
-      res.status(500).json({
-        status: "error",
-        service: "स्वरAJ Music",
-        database:
-          "disconnected",
-        error:
-          error.message,
-        timestamp:
-          new Date().toISOString()
-      });
-    }
+  if (!isDatabaseAvailable()) {
+    return scannedSongs;
   }
-);
 
-/* =====================================
-   SONGS
-===================================== */
+  try {
+    const existingFiles = [];
 
-app.get(
-  "/api/songs",
-  async (req, res) => {
-    try {
-      const result =
-        await query(`
-          SELECT
-            s.*,
-            c.name AS category
-          FROM songs s
-          LEFT JOIN categories c
-            ON c.id =
-               s.category_id
-          ORDER BY
-            s.title ASC
-        `);
+    for (const song of scannedSongs) {
+      existingFiles.push(song.filename);
 
-      res.json({
-        success: true,
-        count:
-          result.rows.length,
-        songs:
-          result.rows.map(
-            jsonSong
-          )
-      });
-    } catch (error) {
-      console.error(
-        "Songs API:",
-        error
-      );
-
-      res.status(500).json({
-        success: false,
-        count: 0,
-        songs: [],
-        error:
-          error.message
-      });
+      await upsertSong(song);
     }
+
+    await removeMissingSongs(existingFiles);
+
+    console.log(
+      `Database synchronized: ${scannedSongs.length} songs.`
+    );
+
+    return await getSongs();
+  } catch (error) {
+    console.error(
+      "Database synchronization failed:",
+      error.message
+    );
+
+    return scannedSongs;
   }
-);
+}
 
-/* =====================================
-   CATEGORIES
-===================================== */
+// ----------------------------------------------------
+// Health API
+// ----------------------------------------------------
 
-app.get(
-  "/api/categories",
-  async (req, res) => {
-    try {
-      const result =
-        await query(`
-          SELECT
-            c.id,
-            c.name,
-            COUNT(s.id)::int AS count
-          FROM categories c
-          LEFT JOIN songs s
-            ON s.category_id =
-               c.id
-          GROUP BY
-            c.id,
-            c.name
-          ORDER BY
-            c.name ASC
-        `);
+app.get("/api/health", async (req, res) => {
+  let dbStatus = "disconnected";
 
-      res.json({
-        success: true,
-        count:
-          result.rows.length,
-        categories:
-          result.rows
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        categories: [],
-        error:
-          error.message
-      });
-    }
+  if (isDatabaseAvailable()) {
+    dbStatus = "connected";
   }
-);
 
-/* =====================================
-   SEARCH
-===================================== */
+  const songs = scanSongsDirectory(SONGS_DIR);
 
-app.get(
-  "/api/search",
-  async (req, res) => {
-    try {
-      const search =
-        String(
-          req.query.q || ""
-        ).trim();
-
-      if (!search) {
-        return res.json({
-          success: true,
-          count: 0,
-          songs: []
-        });
-      }
-
-      const q =
-        `%${search}%`;
-
-      const result =
-        await query(
-          `
-          SELECT
-            s.*,
-            c.name AS category
-          FROM songs s
-          LEFT JOIN categories c
-            ON c.id =
-               s.category_id
-          WHERE
-            s.title ILIKE $1
-            OR s.artist ILIKE $1
-            OR COALESCE(
-                s.album,
-                ''
-              ) ILIKE $1
-            OR COALESCE(
-                c.name,
-                ''
-              ) ILIKE $1
-          ORDER BY
-            s.title ASC
-          `,
-          [q]
-        );
-
-      res.json({
-        success: true,
-        count:
-          result.rows.length,
-        songs:
-          result.rows.map(
-            jsonSong
-          )
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        songs: [],
-        error:
-          error.message
-      });
-    }
-  }
-);
-
-/* =====================================
-   PLAY COUNT
-===================================== */
-
-app.post(
-  "/api/songs/:id/play",
-  async (req, res) => {
-    try {
-      await query(
-        `
-        UPDATE songs
-        SET
-          play_count =
-            play_count + 1,
-          updated_at =
-            NOW()
-        WHERE id = $1
-        `,
-        [req.params.id]
-      );
-
-      res.json({
-        success: true
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        error:
-          error.message
-      });
-    }
-  }
-);
-
-/* =====================================
-   ADMIN UPLOAD
-===================================== */
-
-const upload =
-  multer({
-    storage:
-      multer.diskStorage({
-        destination:
-          (req, file, callback) => {
-            const category =
-              safeCategory(
-                req.body.category
-              );
-
-            const directory =
-              path.join(
-                MUSIC_DIR,
-                category
-              );
-
-            fs.mkdirSync(
-              directory,
-              {
-                recursive: true
-              }
-            );
-
-            callback(
-              null,
-              directory
-            );
-          },
-
-        filename:
-          (req, file, callback) => {
-            const original =
-              path.basename(
-                file.originalname
-              );
-
-            const cleaned =
-              cleanName(
-                original
-              );
-
-            callback(
-              null,
-              cleaned ||
-                `song-${Date.now()}.mp3`
-            );
-          }
-      }),
-
-    limits: {
-      fileSize:
-        500 * 1024 * 1024
-    },
-
-    fileFilter:
-      (req, file, callback) => {
-        const ext =
-          path.extname(
-            file.originalname
-          ).toLowerCase();
-
-        if (
-          AUDIO_EXTENSIONS.has(
-            ext
-          )
-        ) {
-          callback(null, true);
-        } else {
-          callback(
-            new Error(
-              "Unsupported audio format"
-            )
-          );
-        }
-      }
+  res.json({
+    status: "ok",
+    service: "स्वरAJ Music",
+    nodeVersion: process.version,
+    environment:
+      process.env.NODE_ENV || "production",
+    database: dbStatus,
+    databaseConfigured:
+      Boolean(process.env.DATABASE_URL),
+    songsDirectoryExists:
+      fs.existsSync(SONGS_DIR),
+    imagesDirectoryExists:
+      fs.existsSync(IMAGES_DIR),
+    songCount: songs.length,
+    timestamp: new Date().toISOString()
   });
+});
 
-app.post(
-  "/api/admin/upload",
-  upload.single("song"),
-  async (req, res) => {
-    try {
-      if (!req.file) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            error:
-              "No valid audio file"
-          });
-      }
+// ----------------------------------------------------
+// Songs API
+// ----------------------------------------------------
 
-      await importSong(
-        req.file.path,
-        req.body.category
-      );
+app.get("/api/songs", async (req, res) => {
+  try {
+    const songs = await syncSongsToDatabase();
 
-      const result =
-        await query(
-          `
-          SELECT
-            s.*,
-            c.name AS category
-          FROM songs s
-          LEFT JOIN categories c
-            ON c.id =
-               s.category_id
-          WHERE
-            s.storage_path = $1
-          `,
-          [
-            storageRelative(
-              req.file.path
-            )
-          ]
-        );
+    res.json({
+      success: true,
+      count: songs.length,
+      songs
+    });
+  } catch (error) {
+    console.error(
+      "/api/songs error:",
+      error.message
+    );
 
-      res.json({
+    res.status(500).json({
+      success: false,
+      error: "Unable to load songs",
+      message: error.message,
+      songs: []
+    });
+  }
+});
+
+// ----------------------------------------------------
+// Categories API
+// ----------------------------------------------------
+
+app.get("/api/categories", async (req, res) => {
+  try {
+    if (isDatabaseAvailable()) {
+      const categories = await getCategories();
+
+      return res.json({
         success: true,
-        message:
-          "Song uploaded successfully",
-        song:
-          result.rows.length
-            ? jsonSong(
-                result.rows[0]
-              )
-            : null
-      });
-    } catch (error) {
-      console.error(
-        "Upload:",
-        error
-      );
-
-      res.status(500).json({
-        success: false,
-        error:
-          error.message
+        categories
       });
     }
-  }
-);
 
-/* =====================================
-   MEDIA STREAMING
-   Express 5 compatible
-===================================== */
+    const songs = scanSongsDirectory(SONGS_DIR);
 
-app.get(
-  "/media/*splat",
-  (req, res) => {
-    try {
-      let requested =
-        req.params.splat;
+    const map = new Map();
 
-      if (
-        Array.isArray(requested)
-      ) {
-        requested =
-          requested.join("/");
-      }
+    for (const song of songs) {
+      const category =
+        song.category || "Uncategorized";
 
-      requested =
-        String(
-          requested || ""
-        );
-
-      const decoded =
-        requested
-          .split("/")
-          .map(part => {
-            try {
-              return decodeURIComponent(
-                part
-              );
-            } catch {
-              return part;
-            }
-          })
-          .join("/");
-
-      const root =
-        path.resolve(
-          STORAGE_ROOT
-        );
-
-      const file =
-        path.resolve(
-          STORAGE_ROOT,
-          decoded
-        );
-
-      if (
-        !file.startsWith(
-          root + path.sep
-        )
-      ) {
-        return res
-          .status(403)
-          .end();
-      }
-
-      if (
-        !fs.existsSync(file)
-      ) {
-        return res
-          .status(404)
-          .json({
-            error:
-              "Media file not found"
-          });
-      }
-
-      const stat =
-        fs.statSync(file);
-
-      if (!stat.isFile()) {
-        return res
-          .status(404)
-          .end();
-      }
-
-      res.setHeader(
-        "Content-Type",
-        getMime(file)
+      map.set(
+        category,
+        (map.get(category) || 0) + 1
       );
-
-      res.setHeader(
-        "Accept-Ranges",
-        "bytes"
-      );
-
-      const range =
-        req.headers.range;
-
-      if (!range) {
-        res.setHeader(
-          "Content-Length",
-          stat.size
-        );
-
-        return fs
-          .createReadStream(file)
-          .pipe(res);
-      }
-
-      const match =
-        range.match(
-          /bytes=(\d*)-(\d*)/
-        );
-
-      if (!match) {
-        return res
-          .status(416)
-          .end();
-      }
-
-      let start =
-        match[1]
-          ? Number(match[1])
-          : 0;
-
-      let end =
-        match[2]
-          ? Number(match[2])
-          : stat.size - 1;
-
-      if (
-        start >= stat.size
-      ) {
-        return res
-          .status(416)
-          .set(
-            "Content-Range",
-            `bytes */${stat.size}`
-          )
-          .end();
-      }
-
-      if (
-        end >= stat.size
-      ) {
-        end =
-          stat.size - 1;
-      }
-
-      if (
-        start > end
-      ) {
-        return res
-          .status(416)
-          .end();
-      }
-
-      res.status(206);
-
-      res.setHeader(
-        "Content-Range",
-        `bytes ${start}-${end}/${stat.size}`
-      );
-
-      res.setHeader(
-        "Content-Length",
-        end - start + 1
-      );
-
-      fs.createReadStream(
-        file,
-        {
-          start,
-          end
-        }
-      ).pipe(res);
-    } catch (error) {
-      console.error(
-        "Media error:",
-        error
-      );
-
-      res
-        .status(500)
-        .end();
     }
-  }
-);
 
-/* =====================================
-   STATIC FILES
-===================================== */
+    const categories = Array.from(map.entries())
+      .map(([category, song_count]) => ({
+        category,
+        song_count
+      }))
+      .sort((a, b) =>
+        a.category.localeCompare(b.category)
+      );
+
+    res.json({
+      success: true,
+      categories
+    });
+  } catch (error) {
+    console.error(
+      "/api/categories error:",
+      error.message
+    );
+
+    res.status(500).json({
+      success: false,
+      categories: []
+    });
+  }
+});
+
+// ----------------------------------------------------
+// Rescan API
+// ----------------------------------------------------
+
+app.post("/api/rescan", async (req, res) => {
+  try {
+    const songs = await syncSongsToDatabase();
+
+    res.json({
+      success: true,
+      count: songs.length,
+      message: "Music library synchronized."
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ----------------------------------------------------
+// Static files
+// ----------------------------------------------------
+
+app.use(
+  "/songs",
+  express.static(SONGS_DIR, {
+    fallthrough: false,
+    maxAge: "1h"
+  })
+);
 
 app.use(
   "/images",
-  express.static(
-    IMAGE_DIR
-  )
+  express.static(IMAGES_DIR, {
+    fallthrough: false,
+    maxAge: "1d"
+  })
 );
 
 app.use(
-  express.static(
-    ROOT,
-    {
-      index: false
-    }
-  )
+  express.static(ROOT_DIR, {
+    index: false,
+    maxAge: "1h"
+  })
 );
 
-/*
- * Express 5 SAFE FALLBACK.
- *
- * Never use:
- *
- * app.get("*", ...)
- *
- * because Express 5 rejects it.
- */
+// ----------------------------------------------------
+// SPA / HTML fallback
+// ----------------------------------------------------
+//
+// IMPORTANT:
+// Do NOT use app.get("*") with Express 5.
+// It causes:
+// Missing parameter name at index 1: *
+// ----------------------------------------------------
 
-app.get(
-  /.*/,
-  (req, res) => {
-    if (
-      req.path.startsWith(
-        "/api/"
-      ) ||
-      req.path.startsWith(
-        "/media/"
-      )
-    ) {
-      return res
-        .status(404)
-        .json({
-          error:
-            "Not found"
-        });
-    }
-
-    res.sendFile(
-      path.join(
-        ROOT,
-        "index.html"
-      )
-    );
+app.use((req, res, next) => {
+  if (req.method !== "GET") {
+    return next();
   }
-);
 
-/* =====================================
-   START SERVER
-===================================== */
+  if (
+    req.path.startsWith("/api/") ||
+    req.path.startsWith("/songs/") ||
+    req.path.startsWith("/images/")
+  ) {
+    return next();
+  }
 
-async function start() {
+  const acceptsHtml =
+    req.headers.accept &&
+    req.headers.accept.includes("text/html");
+
+  if (!acceptsHtml) {
+    return next();
+  }
+
+  if (!fs.existsSync(INDEX_FILE)) {
+    return res.status(404).send("index.html not found");
+  }
+
+  res.sendFile(INDEX_FILE);
+});
+
+// ----------------------------------------------------
+// 404
+// ----------------------------------------------------
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: "Not found",
+    path: req.originalUrl
+  });
+});
+
+// ----------------------------------------------------
+// Start
+// ----------------------------------------------------
+
+async function startServer() {
   try {
-    console.log(
-      "======================================"
-    );
+    await initializeDatabase();
 
-    console.log(
-      "        स्वरAJ MUSIC PLATFORM"
-    );
+    await syncSongsToDatabase();
 
-    console.log(
-      "======================================"
-    );
-
-    console.log(
-      `Node: ${process.version}`
-    );
-
-    console.log(
-      `Port: ${PORT}`
-    );
-
-    console.log(
-      `Storage: ${STORAGE_ROOT}`
-    );
-
-    console.log(
-      `Music: ${MUSIC_DIR}`
-    );
-
-    console.log(
-      `Covers: ${COVERS_DIR}`
-    );
-
-    await testDatabase();
-
-    console.log(
-      "✅ PostgreSQL connection OK"
-    );
-
-    await initDatabase();
-
-    console.log(
-      "🔎 Scanning persistent music..."
-    );
-
-    const imported =
-      await scanMusic(
-        MUSIC_DIR
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log("");
+      console.log("======================================");
+      console.log("        स्वरAJ MUSIC SERVER");
+      console.log("======================================");
+      console.log(`Port: ${PORT}`);
+      console.log(`Songs: ${SONGS_DIR}`);
+      console.log(`Images: ${IMAGES_DIR}`);
+      console.log(
+        `Database: ${
+          isDatabaseAvailable()
+            ? "CONNECTED"
+            : "NOT CONNECTED"
+        }`
       );
-
-    console.log(
-      `🎵 New songs imported: ${imported}`
-    );
-
-    app.listen(
-      PORT,
-      "0.0.0.0",
-      () => {
-        console.log(
-          "======================================"
-        );
-
-        console.log(
-          "🚀 SwarAJ is LIVE"
-        );
-
-        console.log(
-          `🌐 Port: ${PORT}`
-        );
-
-        console.log(
-          "🗄️ PostgreSQL: CONNECTED"
-        );
-
-        console.log(
-          `💾 Storage: ${STORAGE_ROOT}`
-        );
-
-        console.log(
-          "======================================"
-        );
-      }
-    );
+      console.log("======================================");
+      console.log("");
+    });
   } catch (error) {
     console.error(
-      "❌ STARTUP FAILED"
-    );
-
-    console.error(
+      "Server startup error:",
       error
     );
 
@@ -1295,30 +484,20 @@ async function start() {
   }
 }
 
-process.on(
-  "SIGTERM",
-  async () => {
-    console.log(
-      "SIGTERM received"
-    );
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received.");
 
-    await pool.end();
+  await closeDatabase();
 
-    process.exit(0);
-  }
-);
+  process.exit(0);
+});
 
-process.on(
-  "SIGINT",
-  async () => {
-    console.log(
-      "SIGINT received"
-    );
+process.on("SIGINT", async () => {
+  console.log("SIGINT received.");
 
-    await pool.end();
+  await closeDatabase();
 
-    process.exit(0);
-  }
-);
+  process.exit(0);
+});
 
-start();
+startServer();

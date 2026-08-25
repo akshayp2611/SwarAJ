@@ -2,339 +2,1092 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#070914">
-  <title>SwarAJ Music</title>
-  <link rel="stylesheet" href="/styles.css">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#060812"
+  >
+
+  <title>स्वरAJ Music</title>
+
+  <link
+    rel="stylesheet"
+    href="/styles.css"
+  >
 </head>
 
 <body>
-  <div class="app">
 
-    <!-- MOBILE MENU OVERLAY -->
-<div id="menuOverlay" class="menu-overlay"></div>
+<div id="app">
 
-<!-- SIDE MENU -->
-<aside id="sidebar" class="sidebar">
+  <!-- =====================================================
+       DRAWER
+  ====================================================== -->
 
-  <!-- 3D LIQUID LOGO -->
-  <div class="sidebar-brand">
+  <div
+    id="drawerOverlay"
+    class="drawer-overlay"
+  ></div>
 
-    <div class="liquid-logo">
-      <div class="liquid-inner">
-        <span>S</span>
+  <aside
+    id="sidebar"
+    class="sidebar"
+  >
+
+    <!-- LIQUID LOGO -->
+
+    <div class="brand">
+
+      <div class="logo-disc"></div>
+
+      <div class="brand-text">
+
+        <strong>स्वरAJ</strong>
+
+        <small>
+          Music
+        </small>
+
       </div>
 
-      <i class="blob blob-1"></i>
-      <i class="blob blob-2"></i>
-      <i class="blob blob-3"></i>
     </div>
 
-    <div class="brand-text">
-      <strong>SwarAJ</strong>
-      <small>Music</small>
+
+    <!-- SIDE MENU -->
+
+    <nav class="main-nav">
+
+      <button
+        class="nav-item active"
+        data-section="home"
+      >
+        <span>⌂</span>
+        <span>Home</span>
+      </button>
+
+      <button
+        class="nav-item"
+        data-section="search"
+      >
+        <span>⌕</span>
+        <span>Search</span>
+      </button>
+
+      <button
+        class="nav-item"
+        data-section="songs"
+      >
+        <span>♫</span>
+        <span>Library</span>
+      </button>
+
+      <button
+        class="nav-item"
+        data-section="favorites"
+      >
+        <span>♥</span>
+        <span>Liked</span>
+      </button>
+
+      <button
+        class="nav-item"
+        data-section="playlist"
+      >
+        <span>▣</span>
+        <span>Playlist</span>
+      </button>
+
+      <button
+        class="nav-item"
+        data-section="categories"
+      >
+        <span>▦</span>
+        <span>Categories</span>
+      </button>
+
+      <button
+        class="nav-item"
+        data-section="youtube"
+      >
+        <span>▶</span>
+        <span>YouTube</span>
+      </button>
+
+      <button
+        class="nav-item"
+        data-section="admin"
+      >
+        <span>⚙</span>
+        <span>Admin</span>
+      </button>
+
+    </nav>
+
+
+    <div class="sidebar-footer">
+
+      <strong>
+        स्वरAJ
+      </strong>
+
+      <small>
+        Music Platform
+      </small>
+
     </div>
 
-    <button id="closeMenu" class="close-menu">
-      ×
-    </button>
+  </aside>
 
-  </div>
 
-  <!-- MENU -->
-  <nav class="side-menu">
+  <!-- =====================================================
+       MAIN
+  ====================================================== -->
 
-    <button class="side-menu-item active" data-page="home">
-      <span class="menu-icon">⌂</span>
-      <span>Home</span>
-    </button>
+  <main class="main-content">
 
-    <button class="side-menu-item" data-page="search">
-      <span class="menu-icon">⌕</span>
-      <span>Search</span>
-    </button>
+    <!-- TOP BAR -->
 
-    <button class="side-menu-item" data-page="library">
-      <span class="menu-icon">♫</span>
-      <span>Library</span>
-    </button>
+    <header class="topbar">
 
-    <button class="side-menu-item" data-page="liked">
-      <span class="menu-icon">♥</span>
-      <span>Liked Songs</span>
-    </button>
+      <button
+        id="mobileMenuButton"
+        class="icon-button"
+        aria-label="Menu"
+      >
+        ☰
+      </button>
 
-    <button class="side-menu-item" data-page="playlist">
-      <span class="menu-icon">☷</span>
-      <span>Playlist</span>
-    </button>
+      <div class="search-box">
 
-    <div class="menu-divider"></div>
+        <span>
+          ⌕
+        </span>
 
-    <button class="side-menu-item admin-menu" data-page="admin">
-      <span class="menu-icon">⚙</span>
-      <span>Admin</span>
-    </button>
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search songs, artists..."
+          autocomplete="off"
+        >
 
-  </nav>
+      </div>
 
-</aside>
+      <button
+        id="mobileSearchButton"
+        class="icon-button"
+        aria-label="Search"
+      >
+        ⌕
+      </button>
 
-      <nav class="menu">
-        <button class="menu-item active" data-page="home">⌂ <span>Home</span></button>
-        <button class="menu-item" data-page="search">⌕ <span>Search</span></button>
-        <button class="menu-item" data-page="library">♫ <span>Library</span></button>
-        <button class="menu-item" data-page="liked">♥ <span>Liked Songs</span></button>
-        <button class="menu-item" data-page="playlist">☷ <span>Playlist</span></button>
-        <button class="menu-item" id="adminMenu">⚙ <span>Admin</span></button>
-      </nav>
-    </aside>
+      <button
+        id="refreshButton"
+        class="icon-button"
+        aria-label="Refresh"
+      >
+        ↻
+      </button>
 
-    <!-- MAIN -->
-    <main class="main">
+    </header>
 
-      <header class="topbar">
-        <button class="mobile-menu" id="mobileMenu">☰</button>
 
-        <div class="search-box">
-          <span>⌕</span>
-          <input id="searchInput" type="search" placeholder="Search songs, artists...">
-        </div>
+    <!-- =====================================================
+         HOME
+    ====================================================== -->
 
-        <button class="icon-btn" id="refreshBtn">↻</button>
-      </header>
+    <section
+      id="section-home"
+      class="page-section active"
+    >
 
-      <!-- HOME -->
-      <section id="homePage" class="page active">
+      <div class="hero">
 
-        <section class="hero">
+        <div class="hero-content">
 
-          <div class="hero-content">
-            <p class="eyebrow">WELCOME TO</p>
-            <h1>SwarAJ</h1>
-            <p>Your music. Your mood. Your world.</p>
+          <span class="hero-badge">
+            ✦ SWARAJ MUSIC
+          </span>
 
-            <button class="primary-btn" id="heroPlay">
+          <h1>
+            Your Music.
+            <br>
+            <span>Your Vibe.</span>
+          </h1>
+
+          <p>
+            MP3 and YouTube music together
+            in one seamless playlist.
+          </p>
+
+          <div class="hero-actions">
+
+            <button
+              id="heroPlayButton"
+              class="primary-button"
+            >
               ▶ Play Music
             </button>
-          </div>
 
-          <div class="hero-logo">
-            <div class="liquid-orb">
-              <div class="orb-letter">S</div>
-              <i></i>
-              <i></i>
-              <i></i>
-              <i></i>
-            </div>
-          </div>
+            <button
+              id="heroVideoButton"
+              class="secondary-button"
+            >
+              ▶ YouTube
+            </button>
 
-        </section>
-
-        <section class="section">
-          <div class="section-title">
-            <h2>Your Music</h2>
-            <span id="songCount">0 songs</span>
-          </div>
-
-          <!-- ONE COMBINED PLAYLIST -->
-          <div id="songList" class="song-list">
-            <div class="loading">Loading music...</div>
-          </div>
-        </section>
-
-      </section>
-
-      <!-- SEARCH -->
-      <section id="searchPage" class="page">
-        <div class="page-title">
-          <h1>Search</h1>
-          <p>Find your music</p>
-        </div>
-
-        <div id="searchResults" class="song-list"></div>
-      </section>
-
-      <!-- LIBRARY -->
-      <section id="libraryPage" class="page">
-        <div class="page-title">
-          <h1>Your Library</h1>
-          <p>All your music in one place</p>
-        </div>
-
-        <div id="libraryList" class="song-list"></div>
-      </section>
-
-      <!-- LIKED -->
-      <section id="likedPage" class="page">
-        <div class="page-title">
-          <h1>Liked Songs</h1>
-          <p>Your favourites</p>
-        </div>
-
-        <div id="likedList" class="song-list"></div>
-      </section>
-
-      <!-- PLAYLIST -->
-      <section id="playlistPage" class="page">
-        <div class="page-title">
-          <h1>Playlist</h1>
-          <p>MP3 + YouTube together</p>
-        </div>
-
-        <div id="playlistList" class="song-list"></div>
-      </section>
-
-      <!-- ADMIN -->
-      <section id="adminPage" class="page">
-
-        <div class="page-title">
-          <h1>Admin Panel</h1>
-          <p>Manage your music</p>
-        </div>
-
-        <div id="adminLocked" class="admin-card">
-          <h2>Admin Access</h2>
-          <p>Enter your admin key to continue.</p>
-
-          <div class="admin-key-row">
-            <input id="adminKey" type="password" placeholder="Admin key">
-            <button class="primary-btn" id="adminLogin">Open Admin</button>
-          </div>
-
-          <p id="adminError" class="error"></p>
-        </div>
-
-        <div id="adminContent" class="admin-content hidden">
-
-          <div class="admin-card">
-            <h2>Add YouTube Song</h2>
-
-            <form id="youtubeForm">
-
-              <label>Song title</label>
-              <input id="ytTitle" required placeholder="Song title">
-
-              <label>Artist</label>
-              <input id="ytArtist" placeholder="Artist">
-
-              <label>YouTube URL</label>
-              <input id="ytUrl" required
-                     placeholder="https://www.youtube.com/watch?v=...">
-
-              <label>Category</label>
-              <input id="ytCategory" value="Music">
-
-              <label>Cover image URL</label>
-              <input id="ytCover" placeholder="Optional image URL">
-
-              <button class="primary-btn" type="submit">
-                Add YouTube Song
-              </button>
-
-            </form>
-
-            <p id="youtubeStatus"></p>
-          </div>
-
-          <div class="admin-card">
-            <h2>Upload MP3</h2>
-
-            <form id="mp3Form">
-
-              <label>Song title</label>
-              <input id="mp3Title" required>
-
-              <label>Artist</label>
-              <input id="mp3Artist">
-
-              <label>Category</label>
-              <input id="mp3Category" value="Music">
-
-              <label>MP3 file</label>
-              <input id="mp3File" type="file" accept=".mp3,audio/mpeg" required>
-
-              <button class="primary-btn" type="submit">
-                Upload MP3
-              </button>
-
-            </form>
-
-            <p id="mp3Status"></p>
           </div>
 
         </div>
 
-      </section>
 
-    </main>
+        <!-- 3D LIQUID HERO LOGO -->
 
-    <!-- PLAYER -->
-    <footer class="player">
+        <div class="hero-art">
 
-      <!-- YouTube is deliberately hidden initially -->
-      <div id="youtubeFrame" class="youtube-frame hidden-video">
-        <div id="youtubePlayer"></div>
-      </div>
+          <div class="hero-disc"></div>
 
-      <div class="now-playing">
-
-        <div class="cover-wrap">
-          <img id="playerCover" src="/images/default-cover.jpg" alt="">
-          <div id="playerPulse" class="player-pulse"></div>
-        </div>
-
-        <div class="track-info">
-          <strong id="playerTitle">Nothing playing</strong>
-          <span id="playerArtist">Select a song</span>
         </div>
 
       </div>
 
-      <div class="controls">
 
-        <div class="control-buttons">
-          <button id="prevBtn">⏮</button>
+      <!-- STATS -->
 
-          <button id="playBtn" class="play-btn">
+      <div class="stats-grid">
+
+        <div class="stat-card">
+
+          <span>
+            ♫
+          </span>
+
+          <strong id="mp3Count">
+            0
+          </strong>
+
+          <small>
+            MP3 Songs
+          </small>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <span>
+            ▶
+          </span>
+
+          <strong id="videoCount">
+            0
+          </strong>
+
+          <small>
+            YouTube
+          </small>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <span>
+            ▦
+          </span>
+
+          <strong id="categoryCount">
+            0
+          </strong>
+
+          <small>
+            Categories
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <!-- RECENT -->
+
+      <div class="section-heading">
+
+        <div>
+
+          <span>
+            DISCOVER
+          </span>
+
+          <h2>
+            Recently Added
+          </h2>
+
+        </div>
+
+        <button
+          class="text-button"
+          data-section="songs"
+        >
+          View All →
+        </button>
+
+      </div>
+
+
+      <div
+        id="recentSongs"
+        class="song-grid"
+      ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SEARCH
+    ====================================================== -->
+
+    <section
+      id="section-search"
+      class="page-section"
+    >
+
+      <div class="page-header">
+
+        <span>
+          SEARCH
+        </span>
+
+        <h1>
+          Search
+        </h1>
+
+        <p>
+          Find songs, artists and categories.
+        </p>
+
+      </div>
+
+
+      <div
+        id="searchResults"
+        class="song-grid"
+      ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         LIBRARY
+    ====================================================== -->
+
+    <section
+      id="section-songs"
+      class="page-section"
+    >
+
+      <div class="page-header">
+
+        <span>
+          LIBRARY
+        </span>
+
+        <h1>
+          All Songs
+        </h1>
+
+        <p>
+          MP3 and YouTube songs in one library.
+        </p>
+
+      </div>
+
+
+      <div
+        id="mp3Playlist"
+        class="song-grid"
+      ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         LIKED
+    ====================================================== -->
+
+    <section
+      id="section-favorites"
+      class="page-section"
+    >
+
+      <div class="page-header">
+
+        <span>
+          YOUR MUSIC
+        </span>
+
+        <h1>
+          Liked Songs
+        </h1>
+
+        <p>
+          Your favorite songs.
+        </p>
+
+      </div>
+
+
+      <div
+        id="favoritesList"
+        class="song-grid"
+      ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PLAYLIST
+    ====================================================== -->
+
+    <section
+      id="section-playlist"
+      class="page-section"
+    >
+
+      <div class="page-header">
+
+        <span>
+          YOUR MUSIC
+        </span>
+
+        <h1>
+          Playlist
+        </h1>
+
+        <p>
+          Your personal SwarAJ playlist.
+        </p>
+
+      </div>
+
+
+      <div
+        id="playlistList"
+        class="song-grid"
+      ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CATEGORIES
+    ====================================================== -->
+
+    <section
+      id="section-categories"
+      class="page-section"
+    >
+
+      <div class="page-header">
+
+        <span>
+          BROWSE
+        </span>
+
+        <h1>
+          Categories
+        </h1>
+
+        <p>
+          Browse your complete music library.
+        </p>
+
+      </div>
+
+
+      <div
+        id="categoriesGrid"
+        class="categories-grid"
+      ></div>
+
+
+      <div
+        id="categorySongs"
+        class="song-grid"
+      ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         YOUTUBE
+    ====================================================== -->
+
+    <section
+      id="section-youtube"
+      class="page-section"
+    >
+
+      <div class="page-header">
+
+        <span>
+          YOUTUBE MUSIC
+        </span>
+
+        <h1>
+          YouTube
+        </h1>
+
+        <p>
+          YouTube songs play as audio first.
+          Watch the video only when requested.
+        </p>
+
+      </div>
+
+
+      <!-- VIDEO PLAYER -->
+
+      <div
+        id="videoPlayerArea"
+        class="video-player-area"
+        hidden
+      >
+
+        <div class="video-player-header">
+
+          <div>
+
+            <span id="playerModeLabel">
+              YOUTUBE MUSIC
+            </span>
+
+            <h2 id="videoPlayerTitle">
+              YouTube
+            </h2>
+
+          </div>
+
+
+          <button
+            id="watchVideoButton"
+            class="primary-button"
+          >
+            ▶ Watch Video
+          </button>
+
+        </div>
+
+
+        <div
+          id="youtubeFrame"
+          class="youtube-frame"
+          hidden
+        ></div>
+
+
+        <div class="video-controls">
+
+          <button
+            id="videoPrevButton"
+          >
+            ⏮
+          </button>
+
+          <button
+            id="videoPlayButton"
+          >
             ▶
           </button>
 
-          <button id="nextBtn">⏭</button>
+          <button
+            id="videoNextButton"
+          >
+            ⏭
+          </button>
+
         </div>
 
-        <div class="progress-row">
+      </div>
 
-          <span id="currentTime">0:00</span>
 
-          <input
-            id="progress"
-            type="range"
-            min="0"
-            max="100"
-            value="0"
+      <div class="section-heading">
+
+        <div>
+
+          <span>
+            PLAYLIST
+          </span>
+
+          <h2>
+            YouTube Songs
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="videoPlaylist"
+        class="song-grid"
+      ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ADMIN
+    ====================================================== -->
+
+    <section
+      id="section-admin"
+      class="page-section"
+    >
+
+      <div class="page-header">
+
+        <span>
+          MANAGEMENT
+        </span>
+
+        <h1>
+          Admin
+        </h1>
+
+        <p>
+          Manage your SwarAJ music library.
+        </p>
+
+      </div>
+
+
+      <!-- ADMIN LOGIN -->
+
+      <div
+        id="adminLogin"
+        class="admin-card"
+      >
+
+        <div class="admin-icon">
+          🔐
+        </div>
+
+        <h2>
+          Admin Access
+        </h2>
+
+        <p>
+          Enter your admin key to continue.
+        </p>
+
+
+        <form
+          id="adminLoginForm"
+          class="admin-form"
+        >
+
+          <label>
+
+            Admin Key
+
+            <input
+              id="adminKey"
+              type="password"
+              placeholder="Enter admin key"
+              required
+            >
+
+          </label>
+
+
+          <button
+            class="primary-button"
+            type="submit"
+          >
+            Unlock Admin
+          </button>
+
+
+          <div
+            id="adminLoginMessage"
+            class="form-status"
+          ></div>
+
+        </form>
+
+      </div>
+
+
+      <!-- ADMIN CONTENT -->
+
+      <div
+        id="adminContent"
+        class="admin-content hidden"
+      >
+
+        <div class="admin-toolbar">
+
+          <div>
+
+            <strong>
+              Admin Dashboard
+            </strong>
+
+            <small>
+              Add and manage music.
+            </small>
+
+          </div>
+
+
+          <div class="admin-toolbar-actions">
+
+            <button
+              id="adminRefreshButton"
+              class="secondary-button"
+            >
+              ↻ Refresh
+            </button>
+
+            <button
+              id="adminLogoutButton"
+              class="danger-button"
+            >
+              Logout
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- YOUTUBE UPLOAD -->
+
+        <div class="admin-card">
+
+          <h2>
+            ▶ Add YouTube Song
+          </h2>
+
+
+          <form
+            id="youtubeUploadForm"
+            class="admin-form"
           >
 
-          <span id="duration">0:00</span>
+            <label>
+
+              Song Title
+
+              <input
+                id="youtubeTitle"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              Artist
+
+              <input
+                id="youtubeArtist"
+                value="YouTube"
+              >
+
+            </label>
+
+
+            <label>
+
+              Category
+
+              <input
+                id="youtubeCategory"
+                value="Other"
+              >
+
+            </label>
+
+
+            <label>
+
+              Cover URL
+
+              <input
+                id="youtubeCover"
+                type="url"
+                placeholder="https://..."
+              >
+
+            </label>
+
+
+            <label>
+
+              YouTube URL
+
+              <input
+                id="youtubeUrl"
+                type="url"
+                placeholder="https://www.youtube.com/watch?v=..."
+                required
+              >
+
+            </label>
+
+
+            <button
+              class="primary-button"
+              type="submit"
+            >
+              ▶ Add YouTube Song
+            </button>
+
+
+            <div
+              id="youtubeUploadStatus"
+              class="form-status"
+            ></div>
+
+          </form>
+
+        </div>
+
+
+        <!-- MP3 UPLOAD -->
+
+        <div class="admin-card">
+
+          <h2>
+            ♫ Add MP3 Song
+          </h2>
+
+
+          <form
+            id="mp3UploadForm"
+            class="admin-form"
+          >
+
+            <label>
+
+              Song Title
+
+              <input
+                id="uploadTitle"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              Artist
+
+              <input
+                id="uploadArtist"
+                value="SwarAJ"
+              >
+
+            </label>
+
+
+            <label>
+
+              Category
+
+              <input
+                id="uploadCategory"
+                value="Other"
+              >
+
+            </label>
+
+
+            <label>
+
+              Cover URL
+
+              <input
+                id="uploadCover"
+                type="url"
+                placeholder="https://..."
+              >
+
+            </label>
+
+
+            <label>
+
+              MP3 File
+
+              <input
+                id="mp3File"
+                type="file"
+                accept=".mp3,audio/mpeg"
+                required
+              >
+
+            </label>
+
+
+            <button
+              class="primary-button"
+              type="submit"
+            >
+              ♫ Upload MP3
+            </button>
+
+
+            <div
+              id="mp3UploadStatus"
+              class="form-status"
+            ></div>
+
+          </form>
+
+        </div>
+
+
+        <!-- LIBRARY -->
+
+        <div class="admin-card">
+
+          <h2>
+            Music Library
+          </h2>
+
+          <div
+            id="adminSongList"
+          ></div>
 
         </div>
 
       </div>
 
-      <!-- Watch Video only appears for current YouTube song -->
-      <div class="player-actions">
-        <button id="watchVideoBtn" class="watch-btn hidden">
-          ▶ Watch Video
-        </button>
-      </div>
+    </section>
 
-      <audio id="audioPlayer" preload="metadata"></audio>
+  </main>
 
-    </footer>
+</div>
+
+
+<!-- =====================================================
+     AUDIO PLAYER
+====================================================== -->
+
+<audio
+  id="audioPlayer"
+  preload="metadata"
+></audio>
+
+
+<!-- =====================================================
+     MINI PLAYER
+====================================================== -->
+
+<div
+  id="miniPlayer"
+  class="mini-player hidden"
+>
+
+  <img
+    id="miniCover"
+    src="/images/default-cover.jpg"
+    alt="Song"
+  >
+
+
+  <div class="mini-info">
+
+    <strong id="miniTitle">
+      SwarAJ
+    </strong>
+
+    <small id="miniArtist">
+      Music
+    </small>
 
   </div>
 
-  <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="/script.js"></script>
+
+  <div class="mini-main">
+
+    <div class="mini-controls">
+
+      <button
+        data-player="previous"
+        aria-label="Previous"
+      >
+        ⏮
+      </button>
+
+      <button
+        id="miniPlayButton"
+        data-player="play"
+        aria-label="Play"
+      >
+        ▶
+      </button>
+
+      <button
+        data-player="next"
+        aria-label="Next"
+      >
+        ⏭
+      </button>
+
+    </div>
+
+
+    <div class="progress-row">
+
+      <span id="currentTime">
+        0:00
+      </span>
+
+      <input
+        id="progressBar"
+        type="range"
+        min="0"
+        max="100"
+        value="0"
+        step="0.1"
+      >
+
+      <span id="duration">
+        0:00
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<div
+  id="swarajToast"
+></div>
+
+
+<!-- =====================================================
+     YOUTUBE IFRAME API
+====================================================== -->
+
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script
+  src="/script.js"
+  defer
+></script>
+
 </body>
 </html>

@@ -391,10 +391,6 @@
         `;
       }).join("");
 
-    /*
-     * PLAY BUTTON
-     */
-
     container
       .querySelectorAll("[data-play]")
       .forEach(button => {
@@ -412,10 +408,6 @@
           }
         );
       });
-
-    /*
-     * WATCH BUTTON
-     */
 
     container
       .querySelectorAll("[data-watch]")
@@ -444,10 +436,6 @@
           }
         );
       });
-
-    /*
-     * CLICK SONG
-     */
 
     container
       .querySelectorAll(".song")
@@ -634,11 +622,6 @@
 
     state.youtubeVideoId =
       videoId;
-
-    /*
-     * Keep video hidden
-     * until Watch button is clicked.
-     */
 
     hideYouTube();
 
@@ -1365,6 +1348,12 @@
     }
   }
 
+  /*
+   * ----------------------------------------------------
+   * ADMIN LOGIN - FIXED
+   * ----------------------------------------------------
+   */
+
   if ($("adminLogin")) {
 
     $("adminLogin")
@@ -1390,18 +1379,21 @@
 
             const response =
               await fetch(
-                "/api/admin/verify",
+                "/api/admin/login",
                 {
                   method: "POST",
 
                   headers: {
                     "Content-Type":
-                      "application/json"
+                      "application/json",
+
+                    "x-admin-key":
+                      key
                   },
 
                   body:
                     JSON.stringify({
-                      key
+                      adminKey: key
                     })
                 }
               );
@@ -1423,22 +1415,42 @@
             state.adminKey =
               key;
 
-            $("adminLocked")
-              .classList.add(
-                "hidden"
-              );
+            if ($("adminLocked")) {
 
-            $("adminContent")
-              .classList.remove(
-                "hidden"
-              );
+              $("adminLocked")
+                .classList.add(
+                  "hidden"
+                );
+            }
+
+            if ($("adminContent")) {
+
+              $("adminContent")
+                .classList.remove(
+                  "hidden"
+                );
+            }
+
+            if ($("adminError")) {
+
+              $("adminError")
+                .textContent = "";
+            }
 
           } catch (error) {
 
-            $("adminError")
-              .textContent =
-              error.message ||
-              "Admin authentication failed.";
+            console.error(
+              "Admin login failed:",
+              error
+            );
+
+            if ($("adminError")) {
+
+              $("adminError")
+                .textContent =
+                error.message ||
+                "Admin authentication failed.";
+            }
           }
         }
       );
@@ -1446,7 +1458,7 @@
 
   /*
    * ----------------------------------------------------
-   * YOUTUBE ADMIN UPLOAD
+   * YOUTUBE ADMIN UPLOAD - FIXED
    * ----------------------------------------------------
    */
 
@@ -1489,7 +1501,7 @@
 
             const response =
               await fetch(
-                "/api/admin/songs",
+                "/api/admin/songs/youtube",
                 {
                   method: "POST",
 
@@ -1497,8 +1509,8 @@
                     "Content-Type":
                       "application/json",
 
-                    "Authorization":
-                      `Bearer ${state.adminKey}`
+                    "x-admin-key":
+                      state.adminKey
                   },
 
                   body:
@@ -1549,7 +1561,7 @@
 
               throw new Error(
                 data.message ||
-                "Upload failed"
+                "YouTube upload failed"
               );
             }
 
@@ -1567,11 +1579,15 @@
 
           } catch (error) {
 
-            console.error(error);
+            console.error(
+              "YouTube upload failed:",
+              error
+            );
 
             $("youtubeStatus")
               .textContent =
-              error.message;
+              error.message ||
+              "YouTube upload failed.";
           }
         }
       );
@@ -1579,7 +1595,7 @@
 
   /*
    * ----------------------------------------------------
-   * MP3 ADMIN UPLOAD
+   * MP3 ADMIN UPLOAD - FIXED
    * ----------------------------------------------------
    */
 
@@ -1647,13 +1663,13 @@
 
             const response =
               await fetch(
-                "/api/admin/upload",
+                "/api/admin/songs/upload",
                 {
                   method: "POST",
 
                   headers: {
-                    "Authorization":
-                      `Bearer ${state.adminKey}`
+                    "x-admin-key":
+                      state.adminKey
                   },
 
                   body:
@@ -1686,11 +1702,15 @@
 
           } catch (error) {
 
-            console.error(error);
+            console.error(
+              "MP3 upload failed:",
+              error
+            );
 
             $("mp3Status")
               .textContent =
-              error.message;
+              error.message ||
+              "MP3 upload failed.";
           }
         }
       );

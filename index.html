@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#080808">
+  <meta name="theme-color" content="#070914">
   <title>SwarAJ Music</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
@@ -12,35 +12,27 @@
   <div class="app">
 
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <div class="brand-logo">S</div>
+        <div class="liquid-logo">
+          <div class="logo-core">S</div>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
         <div>
-          <div class="brand-name">SwarAJ</div>
-          <div class="brand-sub">Music</div>
+          <strong>SwarAJ</strong>
+          <small>Music</small>
         </div>
       </div>
 
       <nav class="menu">
-        <button class="menu-item active" data-section="home">
-          <span>⌂</span> Home
-        </button>
-
-        <button class="menu-item" data-section="songs">
-          <span>♫</span> Songs
-        </button>
-
-        <button class="menu-item" data-section="playlist">
-          <span>☷</span> Playlist
-        </button>
-
-        <button class="menu-item" data-section="liked">
-          <span>♥</span> Liked
-        </button>
-
-        <button class="menu-item" data-section="admin">
-          <span>⚙</span> Admin
-        </button>
+        <button class="menu-item active" data-page="home">⌂ <span>Home</span></button>
+        <button class="menu-item" data-page="search">⌕ <span>Search</span></button>
+        <button class="menu-item" data-page="library">♫ <span>Library</span></button>
+        <button class="menu-item" data-page="liked">♥ <span>Liked Songs</span></button>
+        <button class="menu-item" data-page="playlist">☷ <span>Playlist</span></button>
+        <button class="menu-item" id="adminMenu">⚙ <span>Admin</span></button>
       </nav>
     </aside>
 
@@ -48,252 +40,173 @@
     <main class="main">
 
       <header class="topbar">
-        <button id="menuToggle" class="icon-btn">☰</button>
+        <button class="mobile-menu" id="mobileMenu">☰</button>
 
         <div class="search-box">
           <span>⌕</span>
-          <input id="searchInput" type="search" placeholder="Search songs...">
+          <input id="searchInput" type="search" placeholder="Search songs, artists...">
         </div>
 
-        <div class="top-actions">
-          <button id="adminTopBtn" class="small-btn">Admin</button>
-        </div>
+        <button class="icon-btn" id="refreshBtn">↻</button>
       </header>
 
       <!-- HOME -->
-      <section id="homeSection" class="page-section active">
+      <section id="homePage" class="page active">
 
-        <div class="hero">
+        <section class="hero">
+
           <div class="hero-content">
-            <div class="eyebrow">WELCOME TO</div>
+            <p class="eyebrow">WELCOME TO</p>
             <h1>SwarAJ</h1>
-            <p>Listen to your music anytime.</p>
+            <p>Your music. Your mood. Your world.</p>
 
-            <div class="hero-actions">
-              <button id="playAllBtn" class="primary-btn">
-                ▶ Play All
-              </button>
+            <button class="primary-btn" id="heroPlay">
+              ▶ Play Music
+            </button>
+          </div>
 
-              <button id="shuffleBtn" class="secondary-btn">
-                ⤨ Shuffle
-              </button>
+          <div class="hero-logo">
+            <div class="liquid-orb">
+              <div class="orb-letter">S</div>
+              <i></i>
+              <i></i>
+              <i></i>
+              <i></i>
             </div>
           </div>
-        </div>
 
-        <div class="section-head">
-          <div>
-            <h2>Quick Picks</h2>
-            <p>Your music collection</p>
+        </section>
+
+        <section class="section">
+          <div class="section-title">
+            <h2>Your Music</h2>
+            <span id="songCount">0 songs</span>
           </div>
-        </div>
 
-        <div id="homeSongs" class="song-grid">
-          <div class="loading">Loading songs...</div>
-        </div>
+          <!-- ONE COMBINED PLAYLIST -->
+          <div id="songList" class="song-list">
+            <div class="loading">Loading music...</div>
+          </div>
+        </section>
 
       </section>
 
-      <!-- SONGS -->
-      <section id="songsSection" class="page-section">
-
-        <div class="section-head">
-          <div>
-            <h2>All Songs</h2>
-            <p>MP3 and YouTube songs</p>
-          </div>
+      <!-- SEARCH -->
+      <section id="searchPage" class="page">
+        <div class="page-title">
+          <h1>Search</h1>
+          <p>Find your music</p>
         </div>
 
-        <div id="songsList" class="song-list">
-          <div class="loading">Loading songs...</div>
-        </div>
-
+        <div id="searchResults" class="song-list"></div>
       </section>
 
-      <!-- PLAYLIST -->
-      <section id="playlistSection" class="page-section">
-
-        <div class="section-head">
-          <div>
-            <h2>Playlist</h2>
-            <p>All your songs in one playlist</p>
-          </div>
+      <!-- LIBRARY -->
+      <section id="libraryPage" class="page">
+        <div class="page-title">
+          <h1>Your Library</h1>
+          <p>All your music in one place</p>
         </div>
 
-        <div id="playlistList" class="song-list"></div>
-
+        <div id="libraryList" class="song-list"></div>
       </section>
 
       <!-- LIKED -->
-      <section id="likedSection" class="page-section">
-
-        <div class="section-head">
-          <div>
-            <h2>Liked Songs</h2>
-            <p>Your favorite music</p>
-          </div>
+      <section id="likedPage" class="page">
+        <div class="page-title">
+          <h1>Liked Songs</h1>
+          <p>Your favourites</p>
         </div>
 
         <div id="likedList" class="song-list"></div>
+      </section>
 
+      <!-- PLAYLIST -->
+      <section id="playlistPage" class="page">
+        <div class="page-title">
+          <h1>Playlist</h1>
+          <p>MP3 + YouTube together</p>
+        </div>
+
+        <div id="playlistList" class="song-list"></div>
       </section>
 
       <!-- ADMIN -->
-      <section id="adminSection" class="page-section">
+      <section id="adminPage" class="page">
 
-        <div class="admin-card">
+        <div class="page-title">
+          <h1>Admin Panel</h1>
+          <p>Manage your music</p>
+        </div>
 
-          <div class="admin-header">
-            <div>
-              <div class="eyebrow">CONTROL PANEL</div>
-              <h2>Admin</h2>
-              <p>Manage your SwarAJ music collection.</p>
-            </div>
+        <div id="adminLocked" class="admin-card">
+          <h2>Admin Access</h2>
+          <p>Enter your admin key to continue.</p>
+
+          <div class="admin-key-row">
+            <input id="adminKey" type="password" placeholder="Admin key">
+            <button class="primary-btn" id="adminLogin">Open Admin</button>
           </div>
 
-          <div id="adminLoginBox" class="admin-login">
-            <h3>Admin Access</h3>
+          <p id="adminError" class="error"></p>
+        </div>
 
-            <input
-              id="adminKeyInput"
-              type="password"
-              placeholder="Enter admin key"
-              autocomplete="off"
-            >
+        <div id="adminContent" class="admin-content hidden">
 
-            <button id="adminLoginBtn" class="primary-btn">
-              Unlock Admin
-            </button>
+          <div class="admin-card">
+            <h2>Add YouTube Song</h2>
 
-            <div id="adminLoginMessage" class="form-message"></div>
+            <form id="youtubeForm">
+
+              <label>Song title</label>
+              <input id="ytTitle" required placeholder="Song title">
+
+              <label>Artist</label>
+              <input id="ytArtist" placeholder="Artist">
+
+              <label>YouTube URL</label>
+              <input id="ytUrl" required
+                     placeholder="https://www.youtube.com/watch?v=...">
+
+              <label>Category</label>
+              <input id="ytCategory" value="Music">
+
+              <label>Cover image URL</label>
+              <input id="ytCover" placeholder="Optional image URL">
+
+              <button class="primary-btn" type="submit">
+                Add YouTube Song
+              </button>
+
+            </form>
+
+            <p id="youtubeStatus"></p>
           </div>
 
-          <div id="adminPanel" class="hidden">
+          <div class="admin-card">
+            <h2>Upload MP3</h2>
 
-            <div class="admin-tabs">
-              <button class="admin-tab active" data-admin-tab="upload">
-                Upload Song
+            <form id="mp3Form">
+
+              <label>Song title</label>
+              <input id="mp3Title" required>
+
+              <label>Artist</label>
+              <input id="mp3Artist">
+
+              <label>Category</label>
+              <input id="mp3Category" value="Music">
+
+              <label>MP3 file</label>
+              <input id="mp3File" type="file" accept=".mp3,audio/mpeg" required>
+
+              <button class="primary-btn" type="submit">
+                Upload MP3
               </button>
 
-              <button class="admin-tab" data-admin-tab="youtube">
-                YouTube URL
-              </button>
-            </div>
+            </form>
 
-            <!-- MP3 UPLOAD -->
-            <div id="uploadAdminTab" class="admin-tab-content active">
-
-              <form id="uploadForm">
-
-                <label>Song Title</label>
-                <input
-                  id="uploadTitle"
-                  name="title"
-                  type="text"
-                  required
-                  placeholder="Song title"
-                >
-
-                <label>Artist</label>
-                <input
-                  id="uploadArtist"
-                  name="artist"
-                  type="text"
-                  placeholder="Artist"
-                >
-
-                <label>Category</label>
-                <input
-                  id="uploadCategory"
-                  name="category"
-                  type="text"
-                  placeholder="Bhakti / Love / Marathi"
-                >
-
-                <label>Cover Image URL</label>
-                <input
-                  id="uploadCover"
-                  name="cover"
-                  type="url"
-                  placeholder="https://..."
-                >
-
-                <label>MP3 File</label>
-                <input
-                  id="uploadFile"
-                  name="file"
-                  type="file"
-                  accept=".mp3,audio/mpeg,audio/*"
-                  required
-                >
-
-                <button class="primary-btn" type="submit">
-                  Upload Song
-                </button>
-
-                <div id="uploadMessage" class="form-message"></div>
-
-              </form>
-
-            </div>
-
-            <!-- YOUTUBE -->
-            <div id="youtubeAdminTab" class="admin-tab-content">
-
-              <form id="youtubeForm">
-
-                <label>Song Title</label>
-                <input
-                  id="youtubeTitle"
-                  name="title"
-                  type="text"
-                  required
-                  placeholder="YouTube song title"
-                >
-
-                <label>Artist</label>
-                <input
-                  id="youtubeArtist"
-                  name="artist"
-                  type="text"
-                  placeholder="Artist"
-                >
-
-                <label>Category</label>
-                <input
-                  id="youtubeCategory"
-                  name="category"
-                  type="text"
-                  placeholder="YouTube"
-                >
-
-                <label>YouTube URL</label>
-                <input
-                  id="youtubeUrl"
-                  name="url"
-                  type="url"
-                  required
-                  placeholder="https://www.youtube.com/watch?v=..."
-                >
-
-                <label>Cover Image URL</label>
-                <input
-                  id="youtubeCover"
-                  name="cover"
-                  type="url"
-                  placeholder="https://..."
-                >
-
-                <button class="primary-btn" type="submit">
-                  Add YouTube Song
-                </button>
-
-                <div id="youtubeMessage" class="form-message"></div>
-
-              </form>
-
-            </div>
-
+            <p id="mp3Status"></p>
           </div>
 
         </div>
@@ -303,42 +216,37 @@
     </main>
 
     <!-- PLAYER -->
-    <footer id="player" class="player">
+    <footer class="player">
 
-      <div class="player-left">
-
-        <div id="playerArtwork" class="player-artwork">
-          <span>♫</span>
-        </div>
-
-        <div class="player-info">
-          <div id="playerTitle" class="player-title">
-            Nothing Playing
-          </div>
-
-          <div id="playerArtist" class="player-artist">
-            Select a song
-          </div>
-        </div>
-
-        <button id="likeBtn" class="like-btn">♡</button>
+      <!-- YouTube is deliberately hidden initially -->
+      <div id="youtubeFrame" class="youtube-frame hidden-video">
+        <div id="youtubePlayer"></div>
       </div>
 
-      <div class="player-center">
+      <div class="now-playing">
 
-        <!-- VIDEO AREA IS COMPLETELY HIDDEN INITIALLY -->
-        <div id="videoContainer" class="video-container hidden">
-          <div id="youtubePlayer"></div>
+        <div class="cover-wrap">
+          <img id="playerCover" src="/images/default-cover.jpg" alt="">
+          <div id="playerPulse" class="player-pulse"></div>
         </div>
 
-        <div class="controls">
-          <button id="prevBtn" class="control-btn">⏮</button>
+        <div class="track-info">
+          <strong id="playerTitle">Nothing playing</strong>
+          <span id="playerArtist">Select a song</span>
+        </div>
 
-          <button id="playPauseBtn" class="play-btn">
+      </div>
+
+      <div class="controls">
+
+        <div class="control-buttons">
+          <button id="prevBtn">⏮</button>
+
+          <button id="playBtn" class="play-btn">
             ▶
           </button>
 
-          <button id="nextBtn" class="control-btn">⏭</button>
+          <button id="nextBtn">⏭</button>
         </div>
 
         <div class="progress-row">
@@ -346,7 +254,7 @@
           <span id="currentTime">0:00</span>
 
           <input
-            id="progressBar"
+            id="progress"
             type="range"
             min="0"
             max="100"
@@ -357,35 +265,22 @@
 
         </div>
 
-        <!-- ONLY APPEARS FOR YOUTUBE -->
+      </div>
+
+      <!-- Watch Video only appears for current YouTube song -->
+      <div class="player-actions">
         <button id="watchVideoBtn" class="watch-btn hidden">
           ▶ Watch Video
         </button>
-
       </div>
 
-      <div class="player-right">
-
-        <span>🔊</span>
-
-        <input
-          id="volumeBar"
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value="1"
-        >
-
-      </div>
+      <audio id="audioPlayer" preload="metadata"></audio>
 
     </footer>
 
-    <!-- REAL AUDIO ELEMENT -->
-    <audio id="audioPlayer" preload="metadata"></audio>
-
   </div>
 
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="/script.js"></script>
 </body>
 </html>

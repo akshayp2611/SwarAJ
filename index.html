@@ -11,20 +11,74 @@
 <body>
   <div class="app">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="liquid-logo">
-          <div class="logo-core">S</div>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <div>
-          <strong>SwarAJ</strong>
-          <small>Music</small>
-        </div>
+    <!-- MOBILE MENU OVERLAY -->
+<div id="menuOverlay" class="menu-overlay"></div>
+
+<!-- SIDE MENU -->
+<aside id="sidebar" class="sidebar">
+
+  <!-- 3D LIQUID LOGO -->
+  <div class="sidebar-brand">
+
+    <div class="liquid-logo">
+      <div class="liquid-inner">
+        <span>S</span>
       </div>
+
+      <i class="blob blob-1"></i>
+      <i class="blob blob-2"></i>
+      <i class="blob blob-3"></i>
+    </div>
+
+    <div class="brand-text">
+      <strong>SwarAJ</strong>
+      <small>Music</small>
+    </div>
+
+    <button id="closeMenu" class="close-menu">
+      ×
+    </button>
+
+  </div>
+
+  <!-- MENU -->
+  <nav class="side-menu">
+
+    <button class="side-menu-item active" data-page="home">
+      <span class="menu-icon">⌂</span>
+      <span>Home</span>
+    </button>
+
+    <button class="side-menu-item" data-page="search">
+      <span class="menu-icon">⌕</span>
+      <span>Search</span>
+    </button>
+
+    <button class="side-menu-item" data-page="library">
+      <span class="menu-icon">♫</span>
+      <span>Library</span>
+    </button>
+
+    <button class="side-menu-item" data-page="liked">
+      <span class="menu-icon">♥</span>
+      <span>Liked Songs</span>
+    </button>
+
+    <button class="side-menu-item" data-page="playlist">
+      <span class="menu-icon">☷</span>
+      <span>Playlist</span>
+    </button>
+
+    <div class="menu-divider"></div>
+
+    <button class="side-menu-item admin-menu" data-page="admin">
+      <span class="menu-icon">⚙</span>
+      <span>Admin</span>
+    </button>
+
+  </nav>
+
+</aside>
 
       <nav class="menu">
         <button class="menu-item active" data-page="home">⌂ <span>Home</span></button>

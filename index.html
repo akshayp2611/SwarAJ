@@ -6,7 +6,7 @@
 
   <meta
     name="viewport"
-    content="width=device-width,initial-scale=1,viewport-fit=cover"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
   >
 
   <meta
@@ -35,7 +35,7 @@
         <span>स्व</span>
       </div>
 
-      <div>
+      <div class="brand-text">
         <strong>स्वरAJ</strong>
         <small>Music</small>
       </div>
@@ -44,46 +44,77 @@
 
     <nav class="menu">
 
-      <button class="menu-item active" data-page="home">
+      <button
+        class="menu-item active"
+        data-page="home"
+      >
         <span>⌂</span>
-        Home
+        <label>Home</label>
       </button>
 
-      <button class="menu-item" data-page="search">
+      <button
+        class="menu-item"
+        data-page="search"
+      >
         <span>⌕</span>
-        Search
+        <label>Search</label>
       </button>
 
-      <button class="menu-item" data-page="library">
+      <button
+        class="menu-item"
+        data-page="library"
+      >
         <span>♫</span>
-        Library
+        <label>Library</label>
       </button>
 
-      <button class="menu-item" data-page="liked">
+      <button
+        class="menu-item"
+        data-page="liked"
+      >
         <span>♥</span>
-        Liked
+        <label>Liked</label>
       </button>
 
-      <button class="menu-item" data-page="playlist">
+      <button
+        class="menu-item"
+        data-page="playlist"
+      >
         <span>☷</span>
-        Playlist
+        <label>Playlist</label>
       </button>
 
-      <button id="adminMenu" class="menu-item" data-page="admin">
+      <button
+        id="adminMenu"
+        class="menu-item"
+        data-page="admin"
+      >
         <span>⚙</span>
-        Admin
+        <label>Admin</label>
       </button>
 
     </nav>
 
     <div class="sidebar-footer">
+
       <strong>स्वरAJ</strong>
-      <small>Music Platform</small>
+
+      <small>
+        Music Platform
+      </small>
+
     </div>
 
   </aside>
 
-  <div id="drawerOverlay" class="drawer-overlay"></div>
+
+  <!-- DRAWER OVERLAY -->
+
+  <div
+    id="drawerOverlay"
+    class="drawer-overlay"
+  ></div>
+
 
   <!-- =================================================
        MAIN
@@ -120,19 +151,67 @@
         id="refreshBtn"
         class="icon-btn"
         title="Refresh"
+        aria-label="Refresh"
       >
         ↻
       </button>
 
     </header>
 
+
     <!-- =================================================
          HOME
     ================================================== -->
 
-    <section id="homePage" class="page active">
+    <section
+      id="homePage"
+      class="page active"
+    >
+
+      <!-- HERO FRAME -->
 
       <div class="hero">
+
+        <!-- =================================================
+             3D LIQUID SWARAJ LOGO
+        ================================================== -->
+
+        <div class="hero-liquid-logo-wrap">
+
+          <div class="hero-liquid-orbit">
+
+            <div class="hero-liquid-logo">
+
+              <div class="liquid-shine"></div>
+
+              <div class="liquid-bubble bubble-one"></div>
+
+              <div class="liquid-bubble bubble-two"></div>
+
+              <div class="liquid-bubble bubble-three"></div>
+
+              <div class="hero-logo-text">
+
+                <span>स्व</span>
+
+                <b>रAJ</b>
+
+              </div>
+
+            </div>
+
+            <div class="orbit-ring orbit-ring-1"></div>
+
+            <div class="orbit-ring orbit-ring-2"></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             HERO CONTENT
+        ================================================== -->
 
         <div class="hero-content">
 
@@ -160,41 +239,10 @@
 
         </div>
 
-
-        <!-- =================================================
-             3D LIQUID SWARAJ LOGO
-        ================================================== -->
-
-        <div class="hero-logo">
-
-          <div class="hero-liquid-orbit">
-
-            <div class="hero-liquid-logo">
-
-              <div class="liquid-shine"></div>
-
-              <div class="liquid-bubble bubble-one"></div>
-              <div class="liquid-bubble bubble-two"></div>
-              <div class="liquid-bubble bubble-three"></div>
-
-              <div class="hero-logo-text">
-                <span>स्व</span><b>रAJ</b>
-              </div>
-
-            </div>
-
-            <div class="orbit-ring orbit-ring-1"></div>
-            <div class="orbit-ring orbit-ring-2"></div>
-
-            <div class="orbit-dot orbit-dot-1"></div>
-            <div class="orbit-dot orbit-dot-2"></div>
-
-          </div>
-
-        </div>
-
       </div>
 
+
+      <!-- RECENTLY ADDED -->
 
       <div class="section-title">
 
@@ -220,7 +268,10 @@
          SEARCH
     ================================================== -->
 
-    <section id="searchPage" class="page">
+    <section
+      id="searchPage"
+      class="page"
+    >
 
       <div class="page-title">
 
@@ -246,7 +297,10 @@
          LIBRARY
     ================================================== -->
 
-    <section id="libraryPage" class="page">
+    <section
+      id="libraryPage"
+      class="page"
+    >
 
       <div class="page-title">
 
@@ -272,7 +326,10 @@
          LIKED
     ================================================== -->
 
-    <section id="likedPage" class="page">
+    <section
+      id="likedPage"
+      class="page"
+    >
 
       <div class="page-title">
 
@@ -298,7 +355,10 @@
          PLAYLIST
     ================================================== -->
 
-    <section id="playlistPage" class="page">
+    <section
+      id="playlistPage"
+      class="page"
+    >
 
       <div class="page-title">
 
@@ -324,7 +384,10 @@
          ADMIN
     ================================================== -->
 
-    <section id="adminPage" class="page">
+    <section
+      id="adminPage"
+      class="page"
+    >
 
       <div class="page-title">
 
@@ -539,7 +602,9 @@
     id="youtubeFrame"
     class="youtube-frame hidden-video"
   >
+
     <div id="youtubePlayer"></div>
+
   </div>
 
 
@@ -567,7 +632,6 @@
           id="playerCover"
           src="/images/default-cover.jpg"
           alt="Cover"
-          onerror="this.src='/images/default-cover.jpg'"
         >
 
       </div>
@@ -594,7 +658,6 @@
         <button
           id="prevBtn"
           title="Previous"
-          aria-label="Previous song"
         >
           ⏮
         </button>
@@ -603,7 +666,6 @@
           id="playBtn"
           class="play-btn"
           title="Play/Pause"
-          aria-label="Play or pause"
         >
           ▶
         </button>
@@ -611,7 +673,6 @@
         <button
           id="nextBtn"
           title="Next"
-          aria-label="Next song"
         >
           ⏭
         </button>
@@ -654,10 +715,7 @@
 
 <script src="https://www.youtube.com/iframe_api"></script>
 
-<script
-  src="/script.js"
-  defer
-></script>
+<script src="/script.js" defer></script>
 
 </body>
 </html>

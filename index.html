@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#060812"
+  >
+
+  <title>स्वरAJ Music</title>
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- =================================================
+       SIDE DRAWER
+  ================================================== -->
+
+  <aside id="sidebar" class="sidebar">
+
+    <div class="brand">
+
+      <div class="logo-disc">
+        <span>स्वरAJ</span>
+      </div>
+
+      <div class="brand-text">
+        <strong>स्वरAJ</strong>
+        <small>Music</small>
+      </div>
+
+    </div>
+
+    <nav class="menu">
+
+      <button
+        class="menu-item active"
+        data-page="home"
+      >
+        <span>⌂</span>
+        <label>Home</label>
+      </button>
+
+      <button
+        class="menu-item"
+        data-page="search"
+      >
+        <span>⌕</span>
+        <label>Search</label>
+      </button>
+
+      <button
+        class="menu-item"
+        data-page="library"
+      >
+        <span>♫</span>
+        <label>Library</label>
+      </button>
+
+      <button
+        class="menu-item"
+        data-page="liked"
+      >
+        <span>♥</span>
+        <label>Liked</label>
+      </button>
+
+      <button
+        class="menu-item"
+        data-page="playlist"
+      >
+        <span>☷</span>
+        <label>Playlist</label>
+      </button>
+
+      <button
+        id="adminMenu"
+        class="menu-item"
+        data-page="admin"
+      >
+        <span>⚙</span>
+        <label>Admin</label>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+      <strong>स्वरAJ</strong>
+
+      <small>
+        Music Platform
+      </small>
+
+    </div>
+
+  </aside>
+
+
+  <!-- DRAWER OVERLAY -->
+
+  <div
+    id="drawerOverlay"
+    class="drawer-overlay"
+  ></div>
+
+
+  <!-- =================================================
+       MAIN
+  ================================================== -->
+
+  <main class="main">
+
+    <!-- TOP BAR -->
+
+    <header class="topbar">
+
+      <button
+        id="mobileMenu"
+        class="mobile-menu"
+        aria-label="Open menu"
+      >
+        ☰
+      </button>
+
+      <div class="search-box">
+
+        <span>⌕</span>
+
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search songs, artists..."
+          autocomplete="off"
+        >
+
+      </div>
+
+      <button
+        id="refreshBtn"
+        class="icon-btn"
+        title="Refresh"
+        aria-label="Refresh"
+      >
+        ↻
+      </button>
+
+    </header>
+
+
+    <!-- =================================================
+         HOME
+    ================================================== -->
+
+    <section
+      id="homePage"
+      class="page active"
+    >
+
+      <!-- HERO FRAME -->
+
+      <div class="hero">
+
+        <!-- =================================================
+             3D LIQUID SWARAJ LOGO
+        ================================================== -->
+
+        <div class="hero-liquid-logo-wrap">
+
+          <div class="hero-liquid-orbit">
+
+            <div class="hero-liquid-logo">
+
+              <div class="liquid-shine"></div>
+
+              <div class="liquid-bubble bubble-one"></div>
+
+              <div class="liquid-bubble bubble-two"></div>
+
+              <div class="liquid-bubble bubble-three"></div>
+
+              <div class="hero-logo-text">
+
+                <span>स्वर</span>
+
+                <b>AJ</b>
+
+              </div>
+
+            </div>
+
+            <div class="orbit-ring orbit-ring-1"></div>
+
+            <div class="orbit-ring orbit-ring-2"></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             HERO CONTENT
+        ================================================== -->
+
+        <div class="hero-content">
+
+          <div class="eyebrow">
+            ✦ SWARAJ MUSIC
+          </div>
+
+          <h1>
+            Your Music.
+            <br>
+            Your Vibe.
+          </h1>
+
+          <p>
+            MP3 and YouTube music together
+            in one seamless playlist.
+          </p>
+
+          <button
+            id="heroPlay"
+            class="primary-btn"
+          >
+            ▶ Play Music
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- RECENTLY ADDED -->
+
+      <div class="section-title">
+
+        <h2>
+          Recently Added
+        </h2>
+
+        <span id="songCount">
+          0 songs
+        </span>
+
+      </div>
+
+      <div
+        id="songList"
+        class="song-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         SEARCH
+    ================================================== -->
+
+    <section
+      id="searchPage"
+      class="page"
+    >
+
+      <div class="page-title">
+
+        <h1>
+          Search
+        </h1>
+
+        <p>
+          Find your favorite songs and artists.
+        </p>
+
+      </div>
+
+      <div
+        id="searchResults"
+        class="song-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         LIBRARY
+    ================================================== -->
+
+    <section
+      id="libraryPage"
+      class="page"
+    >
+
+      <div class="page-title">
+
+        <h1>
+          Library
+        </h1>
+
+        <p>
+          Your complete music library.
+        </p>
+
+      </div>
+
+      <div
+        id="libraryList"
+        class="song-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         LIKED
+    ================================================== -->
+
+    <section
+      id="likedPage"
+      class="page"
+    >
+
+      <div class="page-title">
+
+        <h1>
+          Liked Songs
+        </h1>
+
+        <p>
+          Your favorite music.
+        </p>
+
+      </div>
+
+      <div
+        id="likedList"
+        class="song-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         PLAYLIST
+    ================================================== -->
+
+    <section
+      id="playlistPage"
+      class="page"
+    >
+
+      <div class="page-title">
+
+        <h1>
+          Playlist
+        </h1>
+
+        <p>
+          Your music playlist.
+        </p>
+
+      </div>
+
+      <div
+        id="playlistList"
+        class="song-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         ADMIN
+    ================================================== -->
+
+    <section
+      id="adminPage"
+      class="page"
+    >
+
+      <div class="page-title">
+
+        <h1>
+          Admin
+        </h1>
+
+        <p>
+          Manage your SwarAJ music library.
+        </p>
+
+      </div>
+
+
+      <!-- ADMIN LOCK -->
+
+      <div
+        id="adminLocked"
+        class="admin-card"
+      >
+
+        <h2>
+          🔐 Admin Access
+        </h2>
+
+        <p>
+          Enter your admin key.
+        </p>
+
+        <div class="admin-key-row">
+
+          <input
+            id="adminKey"
+            type="password"
+            placeholder="Admin key"
+          >
+
+          <button
+            id="adminLogin"
+            class="primary-btn"
+          >
+            Unlock
+          </button>
+
+        </div>
+
+        <div
+          id="adminError"
+          class="error"
+        ></div>
+
+      </div>
+
+
+      <!-- ADMIN CONTENT -->
+
+      <div
+        id="adminContent"
+        class="admin-content hidden"
+      >
+
+        <!-- YOUTUBE -->
+
+        <div class="admin-card">
+
+          <h2>
+            ▶ Add YouTube Song
+          </h2>
+
+          <form id="youtubeForm">
+
+            <label>
+              Song Title
+            </label>
+
+            <input
+              id="ytTitle"
+              required
+            >
+
+            <label>
+              Artist
+            </label>
+
+            <input
+              id="ytArtist"
+              value="YouTube"
+            >
+
+            <label>
+              Category
+            </label>
+
+            <input
+              id="ytCategory"
+              value="Music"
+            >
+
+            <label>
+              Cover URL
+            </label>
+
+            <input
+              id="ytCover"
+              type="url"
+            >
+
+            <label>
+              YouTube URL
+            </label>
+
+            <input
+              id="ytUrl"
+              type="url"
+              placeholder="https://youtube.com/watch?v=..."
+              required
+            >
+
+            <button
+              class="primary-btn"
+              type="submit"
+            >
+              Add YouTube Song
+            </button>
+
+          </form>
+
+          <div
+            id="youtubeStatus"
+            class="admin-status"
+          ></div>
+
+        </div>
+
+
+        <!-- MP3 -->
+
+        <div class="admin-card">
+
+          <h2>
+            ♫ Add MP3 Song
+          </h2>
+
+          <form id="mp3Form">
+
+            <label>
+              Song Title
+            </label>
+
+            <input
+              id="mp3Title"
+              required
+            >
+
+            <label>
+              Artist
+            </label>
+
+            <input
+              id="mp3Artist"
+              value="SwarAJ"
+            >
+
+            <label>
+              Category
+            </label>
+
+            <input
+              id="mp3Category"
+              value="Music"
+            >
+
+            <label>
+              MP3 File
+            </label>
+
+            <input
+              id="mp3File"
+              type="file"
+              accept=".mp3,audio/mpeg"
+              required
+            >
+
+            <button
+              class="primary-btn"
+              type="submit"
+            >
+              Upload MP3
+            </button>
+
+          </form>
+
+          <div
+            id="mp3Status"
+            class="admin-status"
+          ></div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =================================================
+       YOUTUBE PLAYER
+  ================================================== -->
+
+  <div
+    id="youtubeFrame"
+    class="youtube-frame hidden-video"
+  >
+
+    <div id="youtubePlayer"></div>
+
+  </div>
+
+
+  <!-- =================================================
+       AUDIO
+  ================================================== -->
+
+  <audio
+    id="audioPlayer"
+    preload="metadata"
+  ></audio>
+
+
+  <!-- =================================================
+       PLAYER
+  ================================================== -->
+
+  <div class="player">
+
+    <div class="now-playing">
+
+      <div class="cover-wrap">
+
+        <img
+          id="playerCover"
+          src="/images/default-cover.jpg"
+          alt="Cover"
+        >
+
+      </div>
+
+      <div class="track-info">
+
+        <strong id="playerTitle">
+          SwarAJ
+        </strong>
+
+        <span id="playerArtist">
+          Music
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="controls">
+
+      <div class="control-buttons">
+
+        <button
+          id="prevBtn"
+          title="Previous"
+        >
+          ⏮
+        </button>
+
+        <button
+          id="playBtn"
+          class="play-btn"
+          title="Play/Pause"
+        >
+          ▶
+        </button>
+
+        <button
+          id="nextBtn"
+          title="Next"
+        >
+          ⏭
+        </button>
+
+      </div>
+
+
+      <div class="progress-row">
+
+        <span id="currentTime">
+          0:00
+        </span>
+
+        <input
+          id="progress"
+          type="range"
+          min="0"
+          max="100"
+          value="0"
+        >
+
+        <span id="duration">
+          0:00
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="player-actions"></div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     YOUTUBE IFRAME API
+===================================================== -->
+
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script src="/script.js" defer></script>
+
+</body>
+</html>

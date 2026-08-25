@@ -1,21 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  >
-
-  <meta
-    name="theme-color"
-    content="#060812"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050612">
   <title>स्वरAJ Music</title>
-
   <link rel="stylesheet" href="/styles.css">
 </head>
 
@@ -23,15 +12,12 @@
 
 <div class="app">
 
-  <!-- =================================================
-       SIDE DRAWER
-  ================================================== -->
-
-  <aside id="sidebar" class="sidebar">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
 
     <div class="brand">
 
-      <div class="logo-disc">
+      <div class="logo-disc liquid-mini-logo">
         <span>स्वरAJ</span>
       </div>
 
@@ -44,51 +30,32 @@
 
     <nav class="menu">
 
-      <button
-        class="menu-item active"
-        data-page="home"
-      >
+      <button class="menu-item active" data-page="home">
         <span>⌂</span>
         <label>Home</label>
       </button>
 
-      <button
-        class="menu-item"
-        data-page="search"
-      >
+      <button class="menu-item" data-page="search">
         <span>⌕</span>
         <label>Search</label>
       </button>
 
-      <button
-        class="menu-item"
-        data-page="library"
-      >
+      <button class="menu-item" data-page="library">
         <span>♫</span>
         <label>Library</label>
       </button>
 
-      <button
-        class="menu-item"
-        data-page="liked"
-      >
+      <button class="menu-item" data-page="liked">
         <span>♥</span>
-        <label>Liked</label>
+        <label>Liked Songs</label>
       </button>
 
-      <button
-        class="menu-item"
-        data-page="playlist"
-      >
+      <button class="menu-item" data-page="playlist">
         <span>☷</span>
         <label>Playlist</label>
       </button>
 
-      <button
-        id="adminMenu"
-        class="menu-item"
-        data-page="admin"
-      >
+      <button class="menu-item" data-page="admin">
         <span>⚙</span>
         <label>Admin</label>
       </button>
@@ -96,41 +63,24 @@
     </nav>
 
     <div class="sidebar-footer">
-
       <strong>स्वरAJ</strong>
-
-      <small>
-        Music Platform
-      </small>
-
+      <small>Music Platform</small>
     </div>
 
   </aside>
 
+  <div class="drawer-overlay" id="drawerOverlay"></div>
 
-  <!-- DRAWER OVERLAY -->
-
-  <div
-    id="drawerOverlay"
-    class="drawer-overlay"
-  ></div>
-
-
-  <!-- =================================================
-       MAIN
-  ================================================== -->
-
+  <!-- MAIN -->
   <main class="main">
 
-    <!-- TOP BAR -->
-
+    <!-- TOPBAR -->
     <header class="topbar">
 
       <button
-        id="mobileMenu"
         class="mobile-menu"
-        aria-label="Open menu"
-      >
+        id="mobileMenu"
+        aria-label="Open menu">
         ☰
       </button>
 
@@ -139,61 +89,58 @@
         <span>⌕</span>
 
         <input
-          id="searchInput"
           type="search"
-          placeholder="Search songs, artists..."
-          autocomplete="off"
-        >
+          id="searchInput"
+          placeholder="Search songs, artists, categories..."
+          autocomplete="off">
 
       </div>
 
       <button
-        id="refreshBtn"
         class="icon-btn"
-        title="Refresh"
-        aria-label="Refresh"
-      >
+        id="refreshBtn"
+        title="Refresh">
         ↻
       </button>
 
     </header>
 
 
-    <!-- =================================================
-         HOME
-    ================================================== -->
+    <!-- HOME -->
+    <section class="page active" id="homePage">
 
-    <section
-      id="homePage"
-      class="page active"
-    >
+      <!-- HERO -->
+      <section class="hero">
 
-      <!-- HERO FRAME -->
+        <!-- LIQUID LOGO -->
+        <div
+          class="hero-liquid-logo-wrap"
+          id="liquidLogoStage">
 
-      <div class="hero">
-
-        <!-- =================================================
-             3D LIQUID SWARAJ LOGO
-        ================================================== -->
-
-        <div class="hero-liquid-logo-wrap">
+          <div class="liquid-particle p1"></div>
+          <div class="liquid-particle p2"></div>
+          <div class="liquid-particle p3"></div>
 
           <div class="hero-liquid-orbit">
 
-            <div class="hero-liquid-logo">
+            <div
+              class="hero-liquid-logo"
+              id="heroLiquidLogo">
+
+              <div class="liquid-depth"></div>
 
               <div class="liquid-shine"></div>
 
               <div class="liquid-bubble bubble-one"></div>
-
               <div class="liquid-bubble bubble-two"></div>
-
               <div class="liquid-bubble bubble-three"></div>
+
+              <div class="liquid-ripple r1"></div>
+              <div class="liquid-ripple r2"></div>
 
               <div class="hero-logo-text">
 
                 <span>स्वर</span>
-
                 <b>AJ</b>
 
               </div>
@@ -201,7 +148,6 @@
             </div>
 
             <div class="orbit-ring orbit-ring-1"></div>
-
             <div class="orbit-ring orbit-ring-2"></div>
 
           </div>
@@ -209,46 +155,79 @@
         </div>
 
 
-        <!-- =================================================
-             HERO CONTENT
-        ================================================== -->
-
+        <!-- HERO CONTENT -->
         <div class="hero-content">
 
           <div class="eyebrow">
-            ✦ SWARAJ MUSIC
+            ✦ SWARAJ MUSIC • 6D LIQUID EXPERIENCE
           </div>
 
           <h1>
-            Your Music.
-            <br>
+            Your Music.<br>
             Your Vibe.
           </h1>
 
           <p>
-            MP3 and YouTube music together
-            in one seamless playlist.
+            MP3 and YouTube music together in one seamless playlist.
           </p>
 
           <button
-            id="heroPlay"
             class="primary-btn"
-          >
+            id="heroPlay">
             ▶ Play Music
           </button>
 
         </div>
 
-      </div>
+      </section>
 
 
-      <!-- RECENTLY ADDED -->
+      <!-- CATEGORIES -->
+      <section class="categories-section">
 
+        <div class="section-title">
+
+          <div>
+
+            <h2>
+              Explore Categories
+            </h2>
+
+            <p>
+              Choose a vibe and dive into your music.
+            </p>
+
+          </div>
+
+          <span id="categoryCount">
+            0 categories
+          </span>
+
+        </div>
+
+
+        <div
+          class="category-grid"
+          id="categoryGrid">
+        </div>
+
+      </section>
+
+
+      <!-- SONGS -->
       <div class="section-title">
 
-        <h2>
-          Recently Added
-        </h2>
+        <div>
+
+          <h2 id="selectedCategoryTitle">
+            Recently Added
+          </h2>
+
+          <p id="selectedCategorySubtitle">
+            Your latest music, all in one place.
+          </p>
+
+        </div>
 
         <span id="songCount">
           0 songs
@@ -256,22 +235,19 @@
 
       </div>
 
+
       <div
-        id="songList"
         class="song-list"
-      ></div>
+        id="songList">
+      </div>
 
     </section>
 
 
-    <!-- =================================================
-         SEARCH
-    ================================================== -->
-
+    <!-- SEARCH -->
     <section
-      id="searchPage"
       class="page"
-    >
+      id="searchPage">
 
       <div class="page-title">
 
@@ -280,27 +256,23 @@
         </h1>
 
         <p>
-          Find your favorite songs and artists.
+          Find your favorite songs, artists and categories.
         </p>
 
       </div>
 
       <div
-        id="searchResults"
         class="song-list"
-      ></div>
+        id="searchResults">
+      </div>
 
     </section>
 
 
-    <!-- =================================================
-         LIBRARY
-    ================================================== -->
-
+    <!-- LIBRARY -->
     <section
-      id="libraryPage"
       class="page"
-    >
+      id="libraryPage">
 
       <div class="page-title">
 
@@ -315,21 +287,17 @@
       </div>
 
       <div
-        id="libraryList"
         class="song-list"
-      ></div>
+        id="libraryList">
+      </div>
 
     </section>
 
 
-    <!-- =================================================
-         LIKED
-    ================================================== -->
-
+    <!-- LIKED -->
     <section
-      id="likedPage"
       class="page"
-    >
+      id="likedPage">
 
       <div class="page-title">
 
@@ -344,21 +312,17 @@
       </div>
 
       <div
-        id="likedList"
         class="song-list"
-      ></div>
+        id="likedList">
+      </div>
 
     </section>
 
 
-    <!-- =================================================
-         PLAYLIST
-    ================================================== -->
-
+    <!-- PLAYLIST -->
     <section
-      id="playlistPage"
       class="page"
-    >
+      id="playlistPage">
 
       <div class="page-title">
 
@@ -373,21 +337,17 @@
       </div>
 
       <div
-        id="playlistList"
         class="song-list"
-      ></div>
+        id="playlistList">
+      </div>
 
     </section>
 
 
-    <!-- =================================================
-         ADMIN
-    ================================================== -->
-
+    <!-- ADMIN -->
     <section
-      id="adminPage"
       class="page"
-    >
+      id="adminPage">
 
       <div class="page-title">
 
@@ -402,12 +362,10 @@
       </div>
 
 
-      <!-- ADMIN LOCK -->
-
+      <!-- ADMIN LOGIN -->
       <div
-        id="adminLocked"
         class="admin-card"
-      >
+        id="adminLocked">
 
         <h2>
           🔐 Admin Access
@@ -420,37 +378,33 @@
         <div class="admin-key-row">
 
           <input
-            id="adminKey"
             type="password"
-            placeholder="Admin key"
-          >
+            id="adminKey"
+            placeholder="Admin key">
 
           <button
-            id="adminLogin"
             class="primary-btn"
-          >
+            id="adminLogin">
             Unlock
           </button>
 
         </div>
 
         <div
-          id="adminError"
           class="error"
-        ></div>
+          id="adminError">
+        </div>
 
       </div>
 
 
       <!-- ADMIN CONTENT -->
-
       <div
-        id="adminContent"
         class="admin-content hidden"
-      >
+        id="adminContent">
+
 
         <!-- YOUTUBE -->
-
         <div class="admin-card">
 
           <h2>
@@ -465,8 +419,8 @@
 
             <input
               id="ytTitle"
-              required
-            >
+              required>
+
 
             <label>
               Artist
@@ -474,8 +428,8 @@
 
             <input
               id="ytArtist"
-              value="YouTube"
-            >
+              value="YouTube">
+
 
             <label>
               Category
@@ -483,8 +437,8 @@
 
             <input
               id="ytCategory"
-              value="Music"
-            >
+              value="Music">
+
 
             <label>
               Cover URL
@@ -492,8 +446,8 @@
 
             <input
               id="ytCover"
-              type="url"
-            >
+              type="url">
+
 
             <label>
               YouTube URL
@@ -503,28 +457,26 @@
               id="ytUrl"
               type="url"
               placeholder="https://youtube.com/watch?v=..."
-              required
-            >
+              required>
+
 
             <button
               class="primary-btn"
-              type="submit"
-            >
+              type="submit">
               Add YouTube Song
             </button>
 
           </form>
 
           <div
-            id="youtubeStatus"
             class="admin-status"
-          ></div>
+            id="youtubeStatus">
+          </div>
 
         </div>
 
 
         <!-- MP3 -->
-
         <div class="admin-card">
 
           <h2>
@@ -539,8 +491,8 @@
 
             <input
               id="mp3Title"
-              required
-            >
+              required>
+
 
             <label>
               Artist
@@ -548,8 +500,8 @@
 
             <input
               id="mp3Artist"
-              value="SwarAJ"
-            >
+              value="SwarAJ">
+
 
             <label>
               Category
@@ -557,8 +509,8 @@
 
             <input
               id="mp3Category"
-              value="Music"
-            >
+              value="Music">
+
 
             <label>
               MP3 File
@@ -568,22 +520,21 @@
               id="mp3File"
               type="file"
               accept=".mp3,audio/mpeg"
-              required
-            >
+              required>
+
 
             <button
               class="primary-btn"
-              type="submit"
-            >
+              type="submit">
               Upload MP3
             </button>
 
           </form>
 
           <div
-            id="mp3Status"
             class="admin-status"
-          ></div>
+            id="mp3Status">
+          </div>
 
         </div>
 
@@ -594,34 +545,24 @@
   </main>
 
 
-  <!-- =================================================
-       YOUTUBE PLAYER
-  ================================================== -->
-
+  <!-- YOUTUBE PLAYER -->
   <div
-    id="youtubeFrame"
     class="youtube-frame hidden-video"
-  >
+    id="youtubeFrame">
 
     <div id="youtubePlayer"></div>
 
   </div>
 
 
-  <!-- =================================================
-       AUDIO
-  ================================================== -->
-
+  <!-- AUDIO -->
   <audio
     id="audioPlayer"
-    preload="metadata"
-  ></audio>
+    preload="metadata">
+  </audio>
 
 
-  <!-- =================================================
-       PLAYER
-  ================================================== -->
-
+  <!-- MUSIC PLAYER -->
   <div class="player">
 
     <div class="now-playing">
@@ -631,8 +572,7 @@
         <img
           id="playerCover"
           src="/images/default-cover.jpg"
-          alt="Cover"
-        >
+          alt="Cover">
 
       </div>
 
@@ -655,25 +595,17 @@
 
       <div class="control-buttons">
 
-        <button
-          id="prevBtn"
-          title="Previous"
-        >
+        <button id="prevBtn">
           ⏮
         </button>
 
         <button
-          id="playBtn"
           class="play-btn"
-          title="Play/Pause"
-        >
+          id="playBtn">
           ▶
         </button>
 
-        <button
-          id="nextBtn"
-          title="Next"
-        >
+        <button id="nextBtn">
           ⏭
         </button>
 
@@ -687,12 +619,11 @@
         </span>
 
         <input
-          id="progress"
           type="range"
+          id="progress"
           min="0"
           max="100"
-          value="0"
-        >
+          value="0">
 
         <span id="duration">
           0:00
@@ -702,20 +633,14 @@
 
     </div>
 
-    <div class="player-actions"></div>
-
   </div>
+
 
 </div>
 
 
-<!-- =====================================================
-     YOUTUBE IFRAME API
-===================================================== -->
-
 <script src="https://www.youtube.com/iframe_api"></script>
-
-<script src="/script.js" defer></script>
+<script src="/script.js"></script>
 
 </body>
 </html>

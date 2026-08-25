@@ -18,9 +18,7 @@
 
   const audio = $("audioPlayer");
 
-  const DEFAULT_COVER =
-    "/images/default-cover.jpg";
-
+  const DEFAULT_COVER = "/images/default-cover.jpg";
 
   /*
    * ----------------------------------------------------
@@ -33,12 +31,9 @@
     state.youtubeReady = true;
 
     state.youtubePlayer = new YT.Player("youtubePlayer", {
-
       width: "100%",
       height: "100%",
-
       videoId: "",
-
       playerVars: {
         autoplay: 0,
         controls: 1,
@@ -55,44 +50,26 @@
 
           if (!state.songs[state.currentIndex]) return;
 
-          if (
-            event.data ===
-            YT.PlayerState.PLAYING
-          ) {
-
+          if (event.data === YT.PlayerState.PLAYING) {
             state.isPlaying = true;
-
             updatePlayButton();
-
             startProgress();
+            renderAll();
           }
 
-          if (
-            event.data ===
-            YT.PlayerState.PAUSED
-          ) {
-
+          if (event.data === YT.PlayerState.PAUSED) {
             state.isPlaying = false;
-
             updatePlayButton();
+            renderAll();
           }
 
-          if (
-            event.data ===
-            YT.PlayerState.ENDED
-          ) {
-
+          if (event.data === YT.PlayerState.ENDED) {
             nextSong();
           }
-
         }
-
       }
-
     });
-
   };
-
 
   function getYouTubeId(url) {
 
@@ -100,10 +77,7 @@
 
     const value = String(url).trim();
 
-    if (
-      /^[a-zA-Z0-9_-]{11}$/.test(value)
-    ) {
-
+    if (/^[a-zA-Z0-9_-]{11}$/.test(value)) {
       return value;
     }
 
@@ -111,10 +85,7 @@
 
       const parsed = new URL(value);
 
-      if (
-        parsed.hostname.includes("youtu.be")
-      ) {
-
+      if (parsed.hostname.includes("youtu.be")) {
         return parsed.pathname
           .replace("/", "")
           .substring(0, 11);
@@ -125,47 +96,29 @@
         parsed.hostname.includes("youtube-nocookie.com")
       ) {
 
-        const v =
-          parsed.searchParams.get("v");
+        const v = parsed.searchParams.get("v");
 
-        if (v) {
-          return v.substring(0, 11);
+        if (v) return v.substring(0, 11);
+
+        const parts = parsed.pathname.split("/");
+
+        const index = parts.indexOf("embed");
+
+        if (index >= 0 && parts[index + 1]) {
+          return parts[index + 1].substring(0, 11);
         }
 
-        const parts =
-          parsed.pathname.split("/");
+        const shorts = parts.indexOf("shorts");
 
-        const index =
-          parts.indexOf("embed");
-
-        if (
-          index >= 0 &&
-          parts[index + 1]
-        ) {
-
-          return parts[index + 1]
-            .substring(0, 11);
+        if (shorts >= 0 && parts[shorts + 1]) {
+          return parts[shorts + 1].substring(0, 11);
         }
-
-        const shorts =
-          parts.indexOf("shorts");
-
-        if (
-          shorts >= 0 &&
-          parts[shorts + 1]
-        ) {
-
-          return parts[shorts + 1]
-            .substring(0, 11);
-        }
-
       }
 
     } catch (_) {}
 
     return null;
   }
-
 
   /*
    * ----------------------------------------------------
@@ -180,7 +133,6 @@
       song.youtubeUrl ||
       song.video_url ||
       song.videoUrl ||
-      song.url ||
       "";
 
     const isYouTube =
@@ -240,7 +192,6 @@
     };
   }
 
-
   /*
    * ----------------------------------------------------
    * LOAD SONGS
@@ -249,25 +200,22 @@
 
   async function loadSongs() {
 
-    $("songList").innerHTML =
-      `<div class="loading">
-        Loading music...
-      </div>`;
+    const list = $("songList");
+
+    if (list) {
+      list.innerHTML =
+        `<div class="loading">Loading music...</div>`;
+    }
 
     try {
 
       const response =
-        await fetch(
-          "/api/songs",
-          {
-            cache: "no-store"
-          }
-        );
+        await fetch("/api/songs", {
+          cache: "no-store"
+        });
 
       if (!response.ok) {
-        throw new Error(
-          `HTTP ${response.status}`
-        );
+        throw new Error(`HTTP ${response.status}`);
       }
 
       const data =
@@ -294,13 +242,15 @@
         error
       );
 
-      $("songList").innerHTML =
-        `<div class="loading">
-          Unable to load songs
-        </div>`;
+      if (list) {
+        list.innerHTML = `
+          <div class="loading">
+            Unable to load songs
+          </div>
+        `;
+      }
     }
   }
-
 
   /*
    * ----------------------------------------------------
@@ -310,8 +260,10 @@
 
   function renderAll() {
 
-    $("songCount").textContent =
-      `${state.songs.length} songs`;
+    if ($("songCount")) {
+      $("songCount").textContent =
+        `${state.songs.length} songs`;
+    }
 
     renderSongs(
       state.songs,
@@ -330,31 +282,30 @@
 
     renderLiked();
 
-    const query =
-      $("searchInput")
-        .value
-        .trim()
-        .toLowerCase();
+    const search =
+      $("searchInput");
 
-    if (query) {
-      renderSearch(query);
+    if (search) {
+
+      const query =
+        search.value
+          .trim()
+          .toLowerCase();
+
+      if (query) {
+        renderSearch(query);
+      }
     }
   }
 
-
-  function renderSongs(
-    songs,
-    container
-  ) {
+  function renderSongs(songs, container) {
 
     if (!container) return;
 
     if (!songs.length) {
 
       container.innerHTML =
-        `<div class="loading">
-          No songs found
-        </div>`;
+        `<div class="loading">No songs found</div>`;
 
       return;
     }
@@ -364,12 +315,10 @@
 
         const index =
           state.songs.findIndex(
-            item =>
-              item.id === song.id
+            item => item.id === song.id
           );
 
         return `
-
           <div
             class="song ${
               index === state.currentIndex
@@ -382,16 +331,13 @@
             <img
               class="song-cover"
               src="${escapeHtml(
-                song.cover ||
-                DEFAULT_COVER
+                song.cover || DEFAULT_COVER
               )}"
-              onerror="
-                this.src='${DEFAULT_COVER}'
-              "
+              onerror="this.src='${DEFAULT_COVER}'"
               alt=""
             >
 
-            <div>
+            <div class="song-details">
 
               <div class="song-name">
                 ${escapeHtml(song.title)}
@@ -411,24 +357,43 @@
 
             </div>
 
-            <button
-              class="song-play"
-              data-play="${index}"
-            >
+            <div class="song-actions">
+
               ${
-                index === state.currentIndex &&
-                state.isPlaying
-                  ? "❚❚"
-                  : "▶"
+                song.type === "youtube"
+                  ? `
+                    <button
+                      class="watch-song-btn"
+                      data-watch="${index}"
+                      title="Watch Video"
+                    >
+                      ▶ Watch
+                    </button>
+                  `
+                  : ""
               }
-            </button>
+
+              <button
+                class="song-play"
+                data-play="${index}"
+              >
+                ${
+                  index === state.currentIndex &&
+                  state.isPlaying
+                    ? "❚❚"
+                    : "▶"
+                }
+              </button>
+
+            </div>
 
           </div>
-
         `;
-
       }).join("");
 
+    /*
+     * PLAY BUTTON
+     */
 
     container
       .querySelectorAll("[data-play]")
@@ -441,26 +406,81 @@
             event.stopPropagation();
 
             const index =
+              Number(button.dataset.play);
+
+            playSong(index);
+          }
+        );
+      });
+
+    /*
+     * WATCH BUTTON
+     */
+
+    container
+      .querySelectorAll("[data-watch]")
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          event => {
+
+            event.stopPropagation();
+
+            const index =
+              Number(button.dataset.watch);
+
+            const song =
+              state.songs[index];
+
+            if (!song) return;
+
+            playSong(index);
+
+            setTimeout(() => {
+              showYouTube();
+            }, 500);
+
+          }
+        );
+      });
+
+    /*
+     * CLICK SONG
+     */
+
+    container
+      .querySelectorAll(".song")
+      .forEach(songElement => {
+
+        songElement.addEventListener(
+          "click",
+          event => {
+
+            if (
+              event.target.closest("button")
+            ) {
+              return;
+            }
+
+            const index =
               Number(
-                button.dataset.play
+                songElement.dataset.index
               );
 
             playSong(index);
           }
         );
-
       });
   }
-
 
   function renderLiked() {
 
     const songs =
-      state.songs.filter(
-        song =>
-          state.liked.includes(
-            String(song.id)
-          )
+      state.songs.filter(song =>
+        state.liked.includes(
+          String(song.id)
+        )
       );
 
     renderSongs(
@@ -469,8 +489,12 @@
     );
   }
 
-
   function renderSearch(query) {
+
+    const container =
+      $("searchResults");
+
+    if (!container) return;
 
     const songs =
       state.songs.filter(song => {
@@ -486,10 +510,9 @@
 
     renderSongs(
       songs,
-      $("searchResults")
+      container
     );
   }
-
 
   /*
    * ----------------------------------------------------
@@ -525,8 +548,8 @@
     renderAll();
   }
 
-
   /*
+   * ----------------------------------------------------
    * MP3
    * ----------------------------------------------------
    */
@@ -553,7 +576,6 @@
           updatePlayButton();
 
           startProgress();
-
         })
         .catch(error => {
 
@@ -565,13 +587,12 @@
           state.isPlaying = false;
 
           updatePlayButton();
-
         });
     }
   }
 
-
   /*
+   * ----------------------------------------------------
    * YOUTUBE
    * ----------------------------------------------------
    */
@@ -614,6 +635,11 @@
     state.youtubeVideoId =
       videoId;
 
+    /*
+     * Keep video hidden
+     * until Watch button is clicked.
+     */
+
     hideYouTube();
 
     audio.pause();
@@ -630,16 +656,13 @@
 
     state.isPlaying = true;
 
-    $("watchVideoBtn")
-      .classList.remove("hidden");
-
     updatePlayButton();
 
     startProgress();
   }
 
-
   /*
+   * ----------------------------------------------------
    * STOP
    * ----------------------------------------------------
    */
@@ -651,12 +674,8 @@
     if (state.youtubePlayer) {
 
       try {
-
-        state.youtubePlayer
-          .stopVideo();
-
+        state.youtubePlayer.stopVideo();
       } catch (_) {}
-
     }
 
     state.isPlaying = false;
@@ -664,62 +683,39 @@
     stopProgress();
   }
 
-
   /*
+   * ----------------------------------------------------
    * WATCH VIDEO
    * ----------------------------------------------------
    */
-
-  $("watchVideoBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        if (
-          !state.songs[
-            state.currentIndex
-          ]
-        ) return;
-
-        const song =
-          state.songs[
-            state.currentIndex
-          ];
-
-        if (
-          song.type !== "youtube"
-        ) return;
-
-        showYouTube();
-      }
-    );
-
 
   function showYouTube() {
 
     const frame =
       $("youtubeFrame");
 
-    frame.classList
-      .remove("hidden-video");
+    if (!frame) return;
 
-    state.youtubeVisible =
-      true;
+    frame.classList.remove(
+      "hidden-video"
+    );
+
+    state.youtubeVisible = true;
   }
-
 
   function hideYouTube() {
 
     const frame =
       $("youtubeFrame");
 
-    frame.classList
-      .add("hidden-video");
+    if (!frame) return;
 
-    state.youtubeVisible =
-      false;
+    frame.classList.add(
+      "hidden-video"
+    );
+
+    state.youtubeVisible = false;
   }
-
 
   /*
    * ----------------------------------------------------
@@ -729,8 +725,7 @@
 
   function nextSong() {
 
-    if (!state.songs.length)
-      return;
+    if (!state.songs.length) return;
 
     let next =
       state.currentIndex + 1;
@@ -744,16 +739,12 @@
     playSong(next);
   }
 
-
   function previousSong() {
 
-    if (!state.songs.length)
-      return;
+    if (!state.songs.length) return;
 
     const current =
-      state.songs[
-        state.currentIndex
-      ];
+      state.songs[state.currentIndex];
 
     let currentTime = 0;
 
@@ -801,7 +792,6 @@
       state.currentIndex - 1;
 
     if (previous < 0) {
-
       previous =
         state.songs.length - 1;
     }
@@ -809,19 +799,19 @@
     playSong(previous);
   }
 
-
-  $("nextBtn")
-    .addEventListener(
+  if ($("nextBtn")) {
+    $("nextBtn").addEventListener(
       "click",
       nextSong
     );
+  }
 
-  $("prevBtn")
-    .addEventListener(
+  if ($("prevBtn")) {
+    $("prevBtn").addEventListener(
       "click",
       previousSong
     );
-
+  }
 
   /*
    * ----------------------------------------------------
@@ -829,8 +819,9 @@
    * ----------------------------------------------------
    */
 
-  $("playBtn")
-    .addEventListener(
+  if ($("playBtn")) {
+
+    $("playBtn").addEventListener(
       "click",
       () => {
 
@@ -888,7 +879,7 @@
         }
       }
     );
-
+  }
 
   audio.addEventListener(
     "play",
@@ -899,10 +890,8 @@
       updatePlayButton();
 
       startProgress();
-
     }
   );
-
 
   audio.addEventListener(
     "pause",
@@ -911,16 +900,13 @@
       state.isPlaying = false;
 
       updatePlayButton();
-
     }
   );
-
 
   audio.addEventListener(
     "ended",
     nextSong
   );
-
 
   /*
    * ----------------------------------------------------
@@ -939,7 +925,6 @@
       );
   }
 
-
   function stopProgress() {
 
     if (
@@ -950,11 +935,9 @@
         state.progressTimer
       );
 
-      state.progressTimer =
-        null;
+      state.progressTimer = null;
     }
   }
-
 
   function updateProgress() {
 
@@ -995,22 +978,31 @@
 
     if (duration > 0) {
 
-      $("progress").value =
-        (current / duration) * 100;
+      if ($("progress")) {
+
+        $("progress").value =
+          (current / duration) * 100;
+      }
     }
 
-    $("currentTime")
-      .textContent =
-      formatTime(current);
+    if ($("currentTime")) {
 
-    $("duration")
-      .textContent =
-      formatTime(duration);
+      $("currentTime")
+        .textContent =
+        formatTime(current);
+    }
+
+    if ($("duration")) {
+
+      $("duration")
+        .textContent =
+        formatTime(duration);
+    }
   }
 
+  if ($("progress")) {
 
-  $("progress")
-    .addEventListener(
+    $("progress").addEventListener(
       "input",
       () => {
 
@@ -1042,8 +1034,7 @@
 
         } else {
 
-          if (!audio.duration)
-            return;
+          if (!audio.duration) return;
 
           audio.currentTime =
             audio.duration *
@@ -1051,32 +1042,26 @@
         }
       }
     );
-
+  }
 
   function formatTime(seconds) {
 
     if (
       !Number.isFinite(seconds)
     ) {
-
       return "0:00";
     }
 
     const minutes =
-      Math.floor(
-        seconds / 60
-      );
+      Math.floor(seconds / 60);
 
     const secs =
-      Math.floor(
-        seconds % 60
-      )
-      .toString()
-      .padStart(2, "0");
+      Math.floor(seconds % 60)
+        .toString()
+        .padStart(2, "0");
 
     return `${minutes}:${secs}`;
   }
-
 
   /*
    * ----------------------------------------------------
@@ -1086,59 +1071,46 @@
 
   function updatePlayerInfo(song) {
 
-    $("playerTitle")
-      .textContent =
-      song.title;
+    if ($("playerTitle")) {
+      $("playerTitle")
+        .textContent =
+        song.title;
+    }
 
-    $("playerArtist")
-      .textContent =
-      song.artist;
+    if ($("playerArtist")) {
+      $("playerArtist")
+        .textContent =
+        song.artist;
+    }
 
-    $("playerCover").src =
-      song.cover ||
-      DEFAULT_COVER;
+    if ($("playerCover")) {
 
-    $("playerCover").onerror =
-      () => {
+      $("playerCover").src =
+        song.cover ||
+        DEFAULT_COVER;
 
-        $("playerCover").src =
-          DEFAULT_COVER;
-      };
-
-
-    if (
-      song.type === "youtube"
-    ) {
-
-      $("watchVideoBtn")
-        .classList
-        .remove("hidden");
-
-    } else {
-
-      $("watchVideoBtn")
-        .classList
-        .add("hidden");
-
-      hideYouTube();
+      $("playerCover").onerror =
+        () => {
+          $("playerCover").src =
+            DEFAULT_COVER;
+        };
     }
   }
 
-
   function updatePlayButton() {
 
-    $("playBtn").textContent =
-      state.isPlaying
-        ? "❚❚"
-        : "▶";
-  }
+    if ($("playBtn")) {
 
+      $("playBtn").textContent =
+        state.isPlaying
+          ? "❚❚"
+          : "▶";
+    }
+  }
 
   /*
    * ----------------------------------------------------
-   * SIDE DRAWER / MENU
-   *
-   * ONLY UI/NAVIGATION CHANGE
+   * SIDE DRAWER
    * ----------------------------------------------------
    */
 
@@ -1154,16 +1126,13 @@
             button.dataset.page;
 
           if (page) {
-
             showPage(page);
           }
 
           closeDrawer();
         }
       );
-
     });
-
 
   function showPage(page) {
 
@@ -1171,21 +1140,20 @@
       .querySelectorAll(".page")
       .forEach(item => {
 
-        item.classList
-          .remove("active");
-
+        item.classList.remove(
+          "active"
+        );
       });
-
 
     const target =
       $(`${page}Page`);
 
     if (target) {
 
-      target.classList
-        .add("active");
+      target.classList.add(
+        "active"
+      );
     }
-
 
     document
       .querySelectorAll(".menu-item")
@@ -1195,15 +1163,11 @@
           "active",
           item.dataset.page === page
         );
-
       });
 
-
     if (page === "admin") {
-
       openAdmin();
     }
-
 
     window.scrollTo({
       top: 0,
@@ -1211,107 +1175,48 @@
     });
   }
 
-
-  /*
-   * ----------------------------------------------------
-   * MOBILE DRAWER
-   * ----------------------------------------------------
-   */
-
-  const mobileMenu =
-    $("mobileMenu");
-
-  const sidebar =
-    $("sidebar");
-
-  const drawerOverlay =
-    $("drawerOverlay");
-
-
-  function openDrawer() {
-
-    if (sidebar) {
-
-      sidebar.classList
-        .add("open");
-    }
-
-    if (drawerOverlay) {
-
-      drawerOverlay.classList
-        .add("active");
-    }
-
-    document.body
-      .classList
-      .add("drawer-open");
-  }
-
-
   function closeDrawer() {
 
-    if (sidebar) {
-
-      sidebar.classList
-        .remove("open");
+    if ($("sidebar")) {
+      $("sidebar")
+        .classList.remove("open");
     }
 
-    if (drawerOverlay) {
-
-      drawerOverlay.classList
-        .remove("active");
+    if ($("drawerOverlay")) {
+      $("drawerOverlay")
+        .classList.remove("show");
     }
-
-    document.body
-      .classList
-      .remove("drawer-open");
   }
 
+  if ($("mobileMenu")) {
 
-  if (mobileMenu) {
+    $("mobileMenu")
+      .addEventListener(
+        "click",
+        () => {
 
-    mobileMenu.addEventListener(
-      "click",
-      () => {
+          $("sidebar")
+            .classList.toggle("open");
 
-        if (
-          sidebar.classList
-            .contains("open")
-        ) {
+          if ($("drawerOverlay")) {
 
-          closeDrawer();
-
-        } else {
-
-          openDrawer();
+            $("drawerOverlay")
+              .classList.toggle(
+                "show"
+              );
+          }
         }
-      }
-    );
+      );
   }
 
+  if ($("drawerOverlay")) {
 
-  if (drawerOverlay) {
-
-    drawerOverlay.addEventListener(
-      "click",
-      closeDrawer
-    );
+    $("drawerOverlay")
+      .addEventListener(
+        "click",
+        closeDrawer
+      );
   }
-
-
-  document.addEventListener(
-    "keydown",
-    event => {
-
-      if (
-        event.key === "Escape"
-      ) {
-
-        closeDrawer();
-      }
-    }
-  );
-
 
   /*
    * ----------------------------------------------------
@@ -1319,29 +1224,31 @@
    * ----------------------------------------------------
    */
 
-  $("searchInput")
-    .addEventListener(
-      "input",
-      event => {
+  if ($("searchInput")) {
 
-        const query =
-          event.target.value
-            .trim()
-            .toLowerCase();
+    $("searchInput")
+      .addEventListener(
+        "input",
+        event => {
 
-        if (query) {
+          const query =
+            event.target.value
+              .trim()
+              .toLowerCase();
 
-          showPage("search");
+          if (query) {
 
-          renderSearch(query);
+            showPage("search");
 
-        } else {
+            renderSearch(query);
 
-          renderSearch("");
+          } else {
+
+            renderSearch("");
+          }
         }
-      }
-    );
-
+      );
+  }
 
   /*
    * ----------------------------------------------------
@@ -1349,22 +1256,24 @@
    * ----------------------------------------------------
    */
 
-  $("heroPlay")
-    .addEventListener(
-      "click",
-      () => {
+  if ($("heroPlay")) {
 
-        if (!state.songs.length)
-          return;
+    $("heroPlay")
+      .addEventListener(
+        "click",
+        () => {
 
-        playSong(
-          state.currentIndex >= 0
-            ? state.currentIndex
-            : 0
-        );
-      }
-    );
+          if (!state.songs.length)
+            return;
 
+          playSong(
+            state.currentIndex >= 0
+              ? state.currentIndex
+              : 0
+          );
+        }
+      );
+  }
 
   /*
    * ----------------------------------------------------
@@ -1372,12 +1281,14 @@
    * ----------------------------------------------------
    */
 
-  $("refreshBtn")
-    .addEventListener(
-      "click",
-      loadSongs
-    );
+  if ($("refreshBtn")) {
 
+    $("refreshBtn")
+      .addEventListener(
+        "click",
+        loadSongs
+      );
+  }
 
   /*
    * ----------------------------------------------------
@@ -1396,8 +1307,7 @@
 
       state.liked =
         state.liked.filter(
-          item =>
-            item !== id
+          item => item !== id
         );
 
     } else {
@@ -1415,112 +1325,124 @@
     renderLiked();
   }
 
-
   /*
    * ----------------------------------------------------
    * ADMIN
    * ----------------------------------------------------
    */
 
-  function openAdmin() {
+  if ($("adminMenu")) {
 
-    $("adminContent")
-      .classList
-      .add("hidden");
-
-    $("adminLocked")
-      .classList
-      .remove("hidden");
-
-    $("adminKey").value = "";
-
-    $("adminError")
-      .textContent = "";
+    $("adminMenu")
+      .addEventListener(
+        "click",
+        () => {
+          showPage("admin");
+        }
+      );
   }
 
+  function openAdmin() {
 
-  $("adminLogin")
-    .addEventListener(
-      "click",
-      async () => {
+    if ($("adminContent")) {
 
-        const key =
-          $("adminKey")
-            .value
-            .trim();
+      $("adminContent")
+        .classList.add("hidden");
+    }
 
-        if (!key) {
+    if ($("adminLocked")) {
 
-          $("adminError")
-            .textContent =
-            "Enter admin key.";
+      $("adminLocked")
+        .classList.remove("hidden");
+    }
 
-          return;
-        }
+    if ($("adminKey")) {
+      $("adminKey").value = "";
+    }
 
+    if ($("adminError")) {
+      $("adminError").textContent = "";
+    }
+  }
 
-        try {
+  if ($("adminLogin")) {
 
-          const response =
-            await fetch(
-              "/api/admin/verify",
-              {
-                method: "POST",
+    $("adminLogin")
+      .addEventListener(
+        "click",
+        async () => {
 
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
+          const key =
+            $("adminKey")
+              .value
+              .trim();
 
-                body:
-                  JSON.stringify({
-                    key
-                  })
-              }
-            );
+          if (!key) {
 
+            $("adminError")
+              .textContent =
+              "Enter admin key.";
 
-          const data =
-            await response.json();
-
-
-          if (
-            !response.ok ||
-            !data.success
-          ) {
-
-            throw new Error(
-              data.message ||
-              "Invalid key"
-            );
+            return;
           }
 
+          try {
 
-          state.adminKey =
-            key;
+            const response =
+              await fetch(
+                "/api/admin/verify",
+                {
+                  method: "POST",
 
+                  headers: {
+                    "Content-Type":
+                      "application/json"
+                  },
 
-          $("adminLocked")
-            .classList
-            .add("hidden");
+                  body:
+                    JSON.stringify({
+                      key
+                    })
+                }
+              );
 
+            const data =
+              await response.json();
 
-          $("adminContent")
-            .classList
-            .remove("hidden");
+            if (
+              !response.ok ||
+              !data.success
+            ) {
 
+              throw new Error(
+                data.message ||
+                "Invalid key"
+              );
+            }
 
-        } catch (error) {
+            state.adminKey =
+              key;
 
-          $("adminError")
-            .textContent =
-            error.message ||
-            "Admin authentication failed.";
+            $("adminLocked")
+              .classList.add(
+                "hidden"
+              );
+
+            $("adminContent")
+              .classList.remove(
+                "hidden"
+              );
+
+          } catch (error) {
+
+            $("adminError")
+              .textContent =
+              error.message ||
+              "Admin authentication failed.";
+          }
         }
-
-      }
-    );
-
+      );
+  }
 
   /*
    * ----------------------------------------------------
@@ -1528,138 +1450,132 @@
    * ----------------------------------------------------
    */
 
-  $("youtubeForm")
-    .addEventListener(
-      "submit",
-      async event => {
+  if ($("youtubeForm")) {
 
-        event.preventDefault();
+    $("youtubeForm")
+      .addEventListener(
+        "submit",
+        async event => {
 
+          event.preventDefault();
 
-        if (!state.adminKey) {
+          if (!state.adminKey) {
 
-          $("youtubeStatus")
-            .textContent =
-            "Admin authentication required.";
+            $("youtubeStatus")
+              .textContent =
+              "Admin authentication required.";
 
-          return;
-        }
-
-
-        const url =
-          $("ytUrl")
-            .value
-            .trim();
-
-
-        const videoId =
-          getYouTubeId(url);
-
-
-        if (!videoId) {
-
-          $("youtubeStatus")
-            .textContent =
-            "Invalid YouTube URL.";
-
-          return;
-        }
-
-
-        try {
-
-          const response =
-            await fetch(
-              "/api/admin/songs",
-              {
-                method: "POST",
-
-                headers: {
-
-                  "Content-Type":
-                    "application/json",
-
-                  "Authorization":
-                    `Bearer ${state.adminKey}`
-                },
-
-                body:
-                  JSON.stringify({
-
-                    title:
-                      $("ytTitle")
-                        .value
-                        .trim(),
-
-                    artist:
-                      $("ytArtist")
-                        .value
-                        .trim(),
-
-                    category:
-                      $("ytCategory")
-                        .value
-                        .trim(),
-
-                    cover:
-                      $("ytCover")
-                        .value
-                        .trim(),
-
-                    type: "youtube",
-
-                    source: "youtube",
-
-                    youtube_url: url,
-
-                    youtubeUrl: url,
-
-                    youtube_id: videoId
-                  })
-              }
-            );
-
-
-          const data =
-            await response.json();
-
-
-          if (!response.ok) {
-
-            throw new Error(
-              data.message ||
-              "Upload failed"
-            );
+            return;
           }
 
+          const url =
+            $("ytUrl")
+              .value
+              .trim();
 
-          $("youtubeStatus")
-            .textContent =
-            "YouTube song added successfully.";
+          const videoId =
+            getYouTubeId(url);
 
+          if (!videoId) {
 
-          event.target.reset();
+            $("youtubeStatus")
+              .textContent =
+              "Invalid YouTube URL.";
 
+            return;
+          }
 
-          $("ytCategory").value =
-            "Music";
+          try {
 
+            const response =
+              await fetch(
+                "/api/admin/songs",
+                {
+                  method: "POST",
 
-          await loadSongs();
+                  headers: {
+                    "Content-Type":
+                      "application/json",
 
+                    "Authorization":
+                      `Bearer ${state.adminKey}`
+                  },
 
-        } catch (error) {
+                  body:
+                    JSON.stringify({
 
-          console.error(error);
+                      title:
+                        $("ytTitle")
+                          .value
+                          .trim(),
 
-          $("youtubeStatus")
-            .textContent =
-            error.message;
+                      artist:
+                        $("ytArtist")
+                          .value
+                          .trim(),
+
+                      category:
+                        $("ytCategory")
+                          .value
+                          .trim(),
+
+                      cover:
+                        $("ytCover")
+                          .value
+                          .trim(),
+
+                      type:
+                        "youtube",
+
+                      source:
+                        "youtube",
+
+                      youtube_url:
+                        url,
+
+                      youtubeUrl:
+                        url,
+
+                      youtube_id:
+                        videoId
+                    })
+                }
+              );
+
+            const data =
+              await response.json();
+
+            if (!response.ok) {
+
+              throw new Error(
+                data.message ||
+                "Upload failed"
+              );
+            }
+
+            $("youtubeStatus")
+              .textContent =
+              "YouTube song added successfully.";
+
+            event.target.reset();
+
+            $("ytCategory")
+              .value =
+              "Music";
+
+            await loadSongs();
+
+          } catch (error) {
+
+            console.error(error);
+
+            $("youtubeStatus")
+              .textContent =
+              error.message;
+          }
         }
-
-      }
-    );
-
+      );
+  }
 
   /*
    * ----------------------------------------------------
@@ -1667,131 +1583,118 @@
    * ----------------------------------------------------
    */
 
-  $("mp3Form")
-    .addEventListener(
-      "submit",
-      async event => {
+  if ($("mp3Form")) {
 
-        event.preventDefault();
+    $("mp3Form")
+      .addEventListener(
+        "submit",
+        async event => {
 
+          event.preventDefault();
 
-        if (!state.adminKey) {
+          if (!state.adminKey) {
 
-          $("mp3Status")
-            .textContent =
-            "Admin authentication required.";
+            $("mp3Status")
+              .textContent =
+              "Admin authentication required.";
 
-          return;
-        }
-
-
-        const file =
-          $("mp3File")
-            .files[0];
-
-
-        if (!file) {
-
-          $("mp3Status")
-            .textContent =
-            "Select an MP3 file.";
-
-          return;
-        }
-
-
-        try {
-
-          const formData =
-            new FormData();
-
-
-          formData.append(
-            "title",
-            $("mp3Title")
-              .value
-              .trim()
-          );
-
-
-          formData.append(
-            "artist",
-            $("mp3Artist")
-              .value
-              .trim()
-          );
-
-
-          formData.append(
-            "category",
-            $("mp3Category")
-              .value
-              .trim()
-          );
-
-
-          formData.append(
-            "file",
-            file
-          );
-
-
-          const response =
-            await fetch(
-              "/api/admin/upload",
-              {
-                method: "POST",
-
-                headers: {
-                  "Authorization":
-                    `Bearer ${state.adminKey}`
-                },
-
-                body: formData
-              }
-            );
-
-
-          const data =
-            await response.json();
-
-
-          if (!response.ok) {
-
-            throw new Error(
-              data.message ||
-              "MP3 upload failed"
-            );
+            return;
           }
 
+          const file =
+            $("mp3File")
+              .files[0];
 
-          $("mp3Status")
-            .textContent =
-            "MP3 uploaded successfully.";
+          if (!file) {
 
+            $("mp3Status")
+              .textContent =
+              "Select an MP3 file.";
 
-          event.target.reset();
+            return;
+          }
 
+          try {
 
-          $("mp3Category").value =
-            "Music";
+            const formData =
+              new FormData();
 
+            formData.append(
+              "title",
+              $("mp3Title")
+                .value
+                .trim()
+            );
 
-          await loadSongs();
+            formData.append(
+              "artist",
+              $("mp3Artist")
+                .value
+                .trim()
+            );
 
+            formData.append(
+              "category",
+              $("mp3Category")
+                .value
+                .trim()
+            );
 
-        } catch (error) {
+            formData.append(
+              "file",
+              file
+            );
 
-          console.error(error);
+            const response =
+              await fetch(
+                "/api/admin/upload",
+                {
+                  method: "POST",
 
-          $("mp3Status")
-            .textContent =
-            error.message;
+                  headers: {
+                    "Authorization":
+                      `Bearer ${state.adminKey}`
+                  },
+
+                  body:
+                    formData
+                }
+              );
+
+            const data =
+              await response.json();
+
+            if (!response.ok) {
+
+              throw new Error(
+                data.message ||
+                "MP3 upload failed"
+              );
+            }
+
+            $("mp3Status")
+              .textContent =
+              "MP3 uploaded successfully.";
+
+            event.target.reset();
+
+            $("mp3Category")
+              .value =
+              "Music";
+
+            await loadSongs();
+
+          } catch (error) {
+
+            console.error(error);
+
+            $("mp3Status")
+              .textContent =
+              error.message;
+          }
         }
-
-      }
-    );
-
+      );
+  }
 
   /*
    * ----------------------------------------------------
@@ -1802,33 +1705,27 @@
   function escapeHtml(value) {
 
     return String(value ?? "")
-
       .replaceAll(
         "&",
         "&amp;"
       )
-
       .replaceAll(
         "<",
         "&lt;"
       )
-
       .replaceAll(
         ">",
         "&gt;"
       )
-
       .replaceAll(
         '"',
         "&quot;"
       )
-
       .replaceAll(
         "'",
         "&#039;"
       );
   }
-
 
   /*
    * ----------------------------------------------------

@@ -4,18 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#070711">
-
   <title>स्वरAJ — Music</title>
-
   <link rel="stylesheet" href="/styles.css">
-
-  <script>
-    window.YTReady = new Promise(resolve => {
-      window.onYouTubeIframeAPIReady = () => resolve();
-    });
-  </script>
-
-  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 
 <body>
@@ -23,65 +13,64 @@
 <div class="liquid-bg"></div>
 <div class="noise"></div>
 
-<!-- MOBILE MENU -->
-<button id="mobileMenuBtn" class="mobile-menu">☰</button>
+<!-- MOBILE OVERLAY -->
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
 
 <!-- SIDEBAR -->
 <aside id="sidebar" class="sidebar">
 
   <div class="brand">
-
     <div class="brand-orbit">
-      <div class="brand-logo">स्वरAJ</div>
+      <div class="brand-logo">स्वर</div>
     </div>
 
     <div class="brand-text">
       <strong>SwarAJ</strong>
-      <span>Music</span>
+      <span>Music • Video • You</span>
     </div>
-
   </div>
 
-  <nav>
+  <nav class="main-nav">
 
     <button class="nav-item active" data-page="home">
       <span>⌂</span>
-      Home
+      <b>Home</b>
     </button>
 
     <button class="nav-item" data-page="songs">
       <span>♫</span>
-      All Songs
+      <b>All Songs</b>
     </button>
 
-    <button class="nav-item" data-page="categories">
-      <span>▦</span>
-      Categories
+    <button class="nav-item" data-page="audio">
+      <span>🎧</span>
+      <b>Audio</b>
     </button>
 
-    <button class="nav-item" data-page="favorites">
+    <button class="nav-item" data-page="video">
+      <span>▶</span>
+      <b>Video</b>
+    </button>
+
+    <button class="nav-item" data-page="liked">
       <span>♡</span>
-      Favorites
+      <b>Liked</b>
     </button>
 
     <button class="nav-item" data-page="admin">
       <span>⚙</span>
-      Admin
+      <b>Admin</b>
     </button>
 
   </nav>
 
   <div class="sidebar-bottom">
-
-    <div class="server-status">
-      <i id="statusDot"></i>
-      <span id="serverStatus">Connecting...</span>
+    <div id="serverStatus" class="server-status">
+      <i></i>
+      <span>Checking server...</span>
     </div>
 
-    <small>
-      स्वरAJ Music Platform
-    </small>
-
+    <small>स्वरAJ Music Platform</small>
   </div>
 
 </aside>
@@ -92,21 +81,18 @@
   <!-- TOPBAR -->
   <header class="topbar">
 
-    <button id="desktopMenuBtn" class="icon-btn">
+    <button id="mobileMenu" class="icon-btn mobile-menu">
       ☰
     </button>
 
     <div class="search-box">
-
       <span>⌕</span>
-
       <input
         id="searchInput"
         type="search"
         placeholder="Search songs, artists, albums..."
         autocomplete="off"
       >
-
     </div>
 
     <div class="top-actions">
@@ -114,6 +100,7 @@
       <button
         id="audioModeBtn"
         class="mode-btn active"
+        type="button"
       >
         🎧 Audio
       </button>
@@ -121,41 +108,38 @@
       <button
         id="videoModeBtn"
         class="mode-btn"
+        type="button"
       >
-        🎬 Video
+        ▶ Video
       </button>
 
     </div>
 
   </header>
 
-
   <!-- CONTENT -->
   <section id="content" class="content">
 
     <!-- HOME -->
-    <div id="page-home" class="page">
+    <section id="page-home" class="page">
 
-      <section class="hero">
+      <div class="hero">
 
         <div class="hero-content">
 
           <div class="eyebrow">
             <span></span>
-            YOUR MUSIC • YOUR VIBE
+            YOUR PERSONAL MUSIC SPACE
           </div>
 
           <h1>
-            Listen.
-            <br>
-            Feel.
-            <br>
-            <em>SwarAJ.</em>
+            Feel the
+            <em>Music.</em>
           </h1>
 
           <p>
-            Your personal music universe.
-            MP3, YouTube and video songs in one place.
+            Listen to your complete SwarAJ music collection,
+            YouTube songs and uploaded videos from one beautiful player.
           </p>
 
           <div class="hero-buttons">
@@ -163,15 +147,17 @@
             <button
               id="heroPlayAll"
               class="primary-btn"
+              type="button"
             >
               ▶ Play All
             </button>
 
             <button
-              id="heroSongs"
+              id="heroExplore"
               class="secondary-btn"
+              type="button"
             >
-              Browse Songs
+              Explore Music
             </button>
 
           </div>
@@ -183,478 +169,326 @@
           <div class="hero-orbit orbit-one"></div>
           <div class="hero-orbit orbit-two"></div>
 
-          <div class="hero-logo">
-            <span>स्वर</span><b>AJ</b>
+          <div class="hero-big-logo">
+            <span>स्वर</span>
+            <small>AJ</small>
           </div>
 
         </div>
-
-      </section>
-
-
-      <section class="section">
-
-        <div class="section-heading">
-
-          <div>
-            <span class="eyebrow">DISCOVER</span>
-            <h2>Quick Picks</h2>
-          </div>
-
-          <button
-            class="text-btn"
-            data-page="songs"
-          >
-            Show All →
-          </button>
-
-        </div>
-
-        <div
-          id="quickSongs"
-          class="song-grid"
-        ></div>
-
-      </section>
-
-
-      <section class="section">
-
-        <div class="section-heading">
-
-          <div>
-            <span class="eyebrow">EXPLORE</span>
-            <h2>Categories</h2>
-          </div>
-
-        </div>
-
-        <div
-          id="homeCategories"
-          class="category-grid"
-        ></div>
-
-      </section>
-
-    </div>
-
-
-    <!-- SONGS -->
-    <div id="page-songs" class="page hidden">
-
-      <div class="page-header">
-
-        <span class="eyebrow">LIBRARY</span>
-
-        <h1>All Songs</h1>
-
-        <p>
-          Every MP3, YouTube and uploaded video song.
-        </p>
 
       </div>
 
-      <div class="library-actions">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">DISCOVER</span>
+          <h2>Quick Picks</h2>
+        </div>
 
         <button
-          id="playAllBtn"
+          class="text-btn"
+          data-page="songs"
+        >
+          Show all →
+        </button>
+      </div>
+
+      <div id="homeSongs" class="song-grid"></div>
+
+    </section>
+
+
+    <!-- ALL SONGS -->
+    <section id="page-songs" class="page hidden">
+
+      <div class="page-title">
+        <div>
+          <span class="section-kicker">LIBRARY</span>
+          <h2>All Songs</h2>
+          <p id="allSongsCount">Loading...</p>
+        </div>
+
+        <button
+          id="allPlayAll"
           class="primary-btn"
+          type="button"
+        >
+          ▶ Play All
+        </button>
+      </div>
+
+      <div id="allSongs" class="song-list"></div>
+
+    </section>
+
+
+    <!-- AUDIO -->
+    <section id="page-audio" class="page hidden">
+
+      <div class="page-title">
+
+        <div>
+          <span class="section-kicker">LISTEN</span>
+          <h2>Audio</h2>
+          <p>
+            MP3 and YouTube songs
+          </p>
+        </div>
+
+        <button
+          id="audioPlayAll"
+          class="primary-btn"
+          type="button"
         >
           ▶ Play All
         </button>
 
-        <span id="songCount">
-          0 songs
-        </span>
-
       </div>
 
-      <div
-        id="songsList"
-        class="song-list"
-      ></div>
+      <div id="audioSongs" class="song-list"></div>
 
-    </div>
+    </section>
 
 
-    <!-- CATEGORIES -->
-    <div id="page-categories" class="page hidden">
+    <!-- VIDEO -->
+    <section id="page-video" class="page hidden">
 
-      <div class="page-header">
+      <div class="page-title">
 
-        <span class="eyebrow">BROWSE</span>
-
-        <h1>Categories</h1>
-
-        <p>
-          Browse your music collection.
-        </p>
-
-      </div>
-
-      <div
-        id="categoriesGrid"
-        class="category-grid"
-      ></div>
-
-    </div>
-
-
-    <!-- FAVORITES -->
-    <div id="page-favorites" class="page hidden">
-
-      <div class="page-header">
-
-        <span class="eyebrow">YOUR COLLECTION</span>
-
-        <h1>Favorites</h1>
-
-      </div>
-
-      <div
-        id="favoritesList"
-        class="song-list"
-      ></div>
-
-    </div>
-
-
-    <!-- ADMIN -->
-    <div id="page-admin" class="page hidden">
-
-      <div class="page-header">
-
-        <span class="eyebrow">CONTROL CENTER</span>
-
-        <h1>Admin</h1>
-
-        <p>
-          Manage your SwarAJ music library.
-        </p>
-
-      </div>
-
-
-      <!-- LOGIN -->
-      <div
-        id="adminLogin"
-        class="admin-card"
-      >
-
-        <div class="admin-icon">
-          🔐
+        <div>
+          <span class="section-kicker">WATCH</span>
+          <h2>Video</h2>
+          <p id="videoCount">
+            YouTube and uploaded videos
+          </p>
         </div>
 
-        <h2>Admin Access</h2>
+      </div>
 
-        <p>
-          Enter your configured Render admin key.
-        </p>
+      <div id="videoPlayerArea" class="video-player-area hidden">
 
-        <div class="admin-input">
+        <div class="video-header">
 
-          <input
-            id="adminKey"
-            type="password"
-            placeholder="Admin key"
+          <div>
+            <span class="section-kicker">NOW PLAYING</span>
+            <h3 id="videoTitle">Video</h3>
+          </div>
+
+          <button
+            id="closeVideo"
+            class="icon-btn"
+            type="button"
           >
-
-          <button id="adminLoginBtn">
-            Login
+            ×
           </button>
 
         </div>
 
-        <div
-          id="adminError"
-          class="form-error"
-        ></div>
+        <div id="videoFrame" class="video-frame"></div>
+
+        <div class="video-controls">
+
+          <button id="videoPrevious" class="control-btn">
+            ⏮
+          </button>
+
+          <button id="videoStop" class="control-btn">
+            ■
+          </button>
+
+          <button id="videoNext" class="control-btn">
+            ⏭
+          </button>
+
+        </div>
 
       </div>
 
+      <div id="videoSongs" class="video-grid"></div>
 
-      <!-- ADMIN PANEL -->
-      <div
-        id="adminPanel"
-        class="hidden"
-      >
+    </section>
 
-        <div class="admin-grid">
 
-          <!-- AUDIO -->
-          <div class="admin-card">
+    <!-- LIKED -->
+    <section id="page-liked" class="page hidden">
 
-            <div class="admin-icon">
-              🎵
-            </div>
+      <div class="page-title">
 
-            <h2>Upload MP3</h2>
+        <div>
+          <span class="section-kicker">YOUR MUSIC</span>
+          <h2>Liked Songs</h2>
+        </div>
 
-            <p>
-              Upload one or multiple audio files.
-            </p>
+      </div>
 
-            <input
-              id="audioUpload"
-              type="file"
-              accept="audio/*,.mp3,.m4a,.wav"
-              multiple
-            >
+      <div id="likedSongs" class="song-list"></div>
 
-            <button
-              id="uploadAudioBtn"
-              class="primary-btn full"
-            >
-              Upload Audio
-            </button>
+    </section>
 
+
+    <!-- ADMIN -->
+    <section id="page-admin" class="page hidden">
+
+      <div class="admin-panel">
+
+        <div class="page-title">
+          <div>
+            <span class="section-kicker">MANAGEMENT</span>
+            <h2>Admin</h2>
+            <p>Manage your SwarAJ music database</p>
           </div>
+        </div>
 
+        <div id="adminLoginBox">
 
-          <!-- VIDEO -->
           <div class="admin-card">
 
-            <div class="admin-icon">
-              🎬
-            </div>
-
-            <h2>Upload Video</h2>
+            <h3>Admin Login</h3>
 
             <p>
-              Upload MP4 or supported video files.
+              Enter your configured admin key.
             </p>
 
-            <input
-              id="videoUpload"
-              type="file"
-              accept="video/*,.mp4,.webm,.mov"
-              multiple
-            >
+            <div class="admin-input">
 
-            <button
-              id="uploadVideoBtn"
-              class="primary-btn full"
-            >
-              Upload Video
-            </button>
+              <input
+                id="adminKeyInput"
+                type="password"
+                placeholder="Admin key"
+              >
 
-          </div>
+              <button
+                id="adminLoginBtn"
+                class="primary-btn"
+              >
+                Login
+              </button>
 
-
-          <!-- YOUTUBE -->
-          <div class="admin-card">
-
-            <div class="admin-icon">
-              ▶
             </div>
 
-            <h2>Add YouTube</h2>
-
-            <p>
-              Add a YouTube song to the database.
-            </p>
-
-            <input
-              id="youtubeUrl"
-              type="url"
-              placeholder="YouTube URL"
-            >
-
-            <input
-              id="youtubeTitle"
-              type="text"
-              placeholder="Song title"
-            >
-
-            <input
-              id="youtubeArtist"
-              type="text"
-              placeholder="Artist"
-            >
-
-            <input
-              id="youtubeCategory"
-              type="text"
-              placeholder="Category"
-            >
-
-            <button
-              id="addYoutubeBtn"
-              class="primary-btn full"
-            >
-              Add YouTube Song
-            </button>
+            <div
+              id="adminMessage"
+              class="admin-message"
+            ></div>
 
           </div>
 
         </div>
 
         <div
-          id="adminMessage"
-          class="admin-message"
-        ></div>
+          id="adminDashboard"
+          class="hidden"
+        >
+
+          <div class="admin-card">
+
+            <h3>Admin Dashboard</h3>
+
+            <div class="admin-stat-grid">
+
+              <div>
+                <strong id="adminTotalSongs">0</strong>
+                <span>Total Songs</span>
+              </div>
+
+              <div>
+                <strong id="adminYoutubeSongs">0</strong>
+                <span>YouTube</span>
+              </div>
+
+              <div>
+                <strong id="adminMp3Songs">0</strong>
+                <span>MP3</span>
+              </div>
+
+              <div>
+                <strong id="adminVideoSongs">0</strong>
+                <span>Videos</span>
+              </div>
+
+            </div>
+
+            <button
+              id="adminLogout"
+              class="secondary-btn"
+            >
+              Logout
+            </button>
+
+          </div>
+
+        </div>
 
       </div>
 
-    </div>
+    </section>
 
   </section>
 
 </main>
 
 
-<!-- AUDIO PLAYER -->
+<!-- REAL AUDIO PLAYER -->
 <audio
   id="audioPlayer"
   preload="auto"
+  playsinline
 ></audio>
 
 
-<!-- VIDEO PLAYER -->
-<div
-  id="videoOverlay"
-  class="video-overlay hidden"
->
-
-  <div class="video-box">
-
-    <div class="video-header">
-
-      <strong id="videoTitle">
-        Video
-      </strong>
-
-      <button
-        id="closeVideo"
-        class="close-video"
-      >
-        ×
-      </button>
-
-    </div>
-
-    <div class="video-stage">
-
-      <div
-        id="youtubeContainer"
-        class="youtube-container"
-      ></div>
-
-      <video
-        id="uploadedVideo"
-        class="uploaded-video"
-        controls
-        playsinline
-      ></video>
-
-      <div
-        id="videoEmpty"
-        class="video-empty"
-      >
-        <div class="video-empty-icon">
-          ▶
-        </div>
-
-        <strong>No video playing</strong>
-
-      </div>
-
-    </div>
-
-  </div>
-
+<!-- YOUTUBE PLAYER HOST -->
+<div id="youtubeAudioHost" class="youtube-audio-host">
+  <div id="youtubeAudioPlayer"></div>
 </div>
 
 
 <!-- MINI PLAYER -->
-<div
-  id="miniPlayer"
-  class="mini-player"
->
+<div id="miniPlayer" class="mini-player hidden">
 
-  <div class="mini-progress">
-    <div id="miniProgress"></div>
+  <div class="mini-info">
+
+    <div
+      id="miniImage"
+      class="mini-image"
+    >
+      ♪
+    </div>
+
+    <div class="mini-text">
+      <strong id="miniTitle">Nothing playing</strong>
+      <span id="miniArtist">SwarAJ</span>
+    </div>
+
   </div>
 
-  <div class="mini-inner">
+  <div class="mini-controls">
 
-    <div class="mini-song">
+    <button id="miniPrevious">
+      ⏮
+    </button>
 
-      <div
-        id="miniCover"
-        class="mini-cover"
-      >
-        ♪
-      </div>
+    <button id="miniPlay">
+      ▶
+    </button>
 
-      <div class="mini-details">
+    <button id="miniStop">
+      ■
+    </button>
 
-        <strong id="miniTitle">
-          Nothing playing
-        </strong>
+    <button id="miniNext">
+      ⏭
+    </button>
 
-        <span id="miniArtist">
-          SwarAJ
-        </span>
+  </div>
 
-      </div>
-
-    </div>
-
-
-    <div class="mini-controls">
-
-      <button
-        id="miniPrev"
-        title="Previous"
-      >
-        ⏮
-      </button>
-
-      <button
-        id="miniPlay"
-        class="mini-play"
-        title="Play"
-      >
-        ▶
-      </button>
-
-      <button
-        id="miniStop"
-        title="Stop"
-      >
-        ■
-      </button>
-
-      <button
-        id="miniNext"
-        title="Next"
-      >
-        ⏭
-      </button>
-
-    </div>
-
+  <div class="mini-progress">
+    <span id="miniProgress"></span>
   </div>
 
 </div>
 
 
 <!-- TOAST -->
-<div
-  id="toast"
-  class="toast"
->
-
-  <span id="toastIcon">
-    ●
-  </span>
-
-  <span id="toastText">
-    Ready
-  </span>
-
-</div>
+<div id="toast" class="toast"></div>
 
 
 <script src="/script.js"></script>

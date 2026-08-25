@@ -3,147 +3,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#05050d">
+  <meta name="theme-color" content="#090914">
   <title>स्वरAJ — Music</title>
+
   <link rel="stylesheet" href="/styles.css">
 </head>
 
 <body>
 
-<div class="liquid-bg"></div>
-<div class="noise"></div>
+<div id="app">
 
-<div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <!-- MOBILE OVERLAY -->
+  <div id="sidebarOverlay"></div>
 
-<aside id="sidebar" class="sidebar">
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
 
-  <div class="brand">
+    <div class="brand">
+      <div class="brand-logo">
+        <span>स्वर</span>
+      </div>
 
-    <div class="brand-orbit">
-      <div class="brand-logo">स्वर</div>
+      <div class="brand-text">
+        <strong>SwarAJ</strong>
+        <small>Music</small>
+      </div>
     </div>
 
-    <div class="brand-text">
-      <strong>SwarAJ</strong>
-      <span>Music • Video • You</span>
+    <nav>
+
+      <button class="nav-item active" data-page="home">
+        <span>⌂</span>
+        <b>Home</b>
+      </button>
+
+      <button class="nav-item" data-page="songs">
+        <span>♫</span>
+        <b>All Songs</b>
+      </button>
+
+      <button class="nav-item" data-page="audio">
+        <span>🎧</span>
+        <b>Audio</b>
+      </button>
+
+      <button class="nav-item" data-page="video">
+        <span>▶</span>
+        <b>Video</b>
+      </button>
+
+      <button class="nav-item" data-page="liked">
+        <span>♥</span>
+        <b>Liked</b>
+      </button>
+
+      <button class="nav-item" data-page="admin">
+        <span>⚙</span>
+        <b>Admin</b>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div id="serverStatus" class="server-status">
+        <i></i>
+        <span>Connecting...</span>
+      </div>
     </div>
 
-  </div>
-
-  <nav class="main-nav">
-
-    <button class="nav-item active" data-page="home">
-      <span>⌂</span>
-      <b>Home</b>
-    </button>
-
-    <button class="nav-item" data-page="songs">
-      <span>♫</span>
-      <b>All Songs</b>
-    </button>
-
-    <button class="nav-item" data-page="audio">
-      <span>🎧</span>
-      <b>Audio</b>
-    </button>
-
-    <button class="nav-item" data-page="video">
-      <span>▶</span>
-      <b>Video</b>
-    </button>
-
-    <button class="nav-item" data-page="liked">
-      <span>♥</span>
-      <b>Liked</b>
-    </button>
-
-    <button class="nav-item" data-page="admin">
-      <span>⚙</span>
-      <b>Admin</b>
-    </button>
-
-  </nav>
-
-  <div class="sidebar-bottom">
-
-    <div id="serverStatus" class="server-status">
-      <i></i>
-      <span>Checking server...</span>
-    </div>
-
-    <small>स्वरAJ Music Platform</small>
-
-  </div>
-
-</aside>
+  </aside>
 
 
-<main class="main">
+  <!-- MAIN -->
+  <main>
 
-  <header class="topbar">
+    <!-- HEADER -->
+    <header class="topbar">
 
-    <button id="mobileMenu" class="icon-btn mobile-menu">
-      ☰
-    </button>
+      <button id="mobileMenu" class="icon-btn">
+        ☰
+      </button>
 
-    <div class="search-box">
-      <span>⌕</span>
-      <input
-        id="searchInput"
-        type="search"
-        placeholder="Search songs, artists, albums..."
-        autocomplete="off"
+      <div class="search-box">
+        <span>⌕</span>
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search songs, artists..."
+        >
+      </div>
+
+      <button
+        id="audioModeBtn"
+        class="mode-btn active"
       >
-    </div>
-
-    <div class="top-actions">
-
-      <button id="audioModeBtn" class="mode-btn active">
         🎧 Audio
       </button>
 
-      <button id="videoModeBtn" class="mode-btn">
+      <button
+        id="videoModeBtn"
+        class="mode-btn"
+      >
         ▶ Video
       </button>
 
-    </div>
+    </header>
 
-  </header>
-
-
-  <section id="content" class="content">
 
     <!-- HOME -->
-
     <section id="page-home" class="page">
 
-      <div class="hero">
+      <section class="hero">
 
         <div class="hero-content">
 
-          <div class="eyebrow">
-            <span></span>
-            YOUR PERSONAL MUSIC SPACE
-          </div>
+          <span class="eyebrow">
+            YOUR MUSIC • YOUR WORLD
+          </span>
 
           <h1>
-            Feel the
-            <em>Music.</em>
+            Welcome to
+            <span>स्वरAJ</span>
           </h1>
 
           <p>
-            Listen to your complete SwarAJ collection,
-            YouTube songs and uploaded videos from one
-            beautiful player.
+            Your personal music universe.
+            Play MP3, YouTube and video songs
+            from one beautiful player.
           </p>
 
           <div class="hero-buttons">
 
-            <button id="heroPlayAll" class="primary-btn">
+            <button
+              id="heroPlayAll"
+              class="primary-btn"
+            >
               ▶ Play All
             </button>
 
-            <button id="heroExplore" class="secondary-btn">
+            <button
+              id="heroExplore"
+              class="secondary-btn"
+            >
               Explore Music
             </button>
 
@@ -151,33 +152,28 @@
 
         </div>
 
-
-        <div class="hero-logo-wrap">
-
-          <div class="hero-orbit orbit-one"></div>
-          <div class="hero-orbit orbit-two"></div>
-
-          <div class="hero-big-logo">
+        <div class="hero-logo">
+          <div class="hero-logo-inner">
             <span>स्वर</span>
             <small>AJ</small>
           </div>
-
         </div>
 
-      </div>
+      </section>
 
 
-      <div class="section-head">
-
+      <div class="section-header">
         <div>
-          <span class="section-kicker">DISCOVER</span>
+          <span class="eyebrow">LIBRARY</span>
           <h2>Quick Picks</h2>
         </div>
 
-        <button class="text-btn" data-page="songs">
-          Show all →
+        <button
+          class="text-btn"
+          data-page="songs"
+        >
+          View all →
         </button>
-
       </div>
 
       <div id="homeSongs" class="song-grid"></div>
@@ -186,19 +182,28 @@
 
 
     <!-- ALL SONGS -->
-
     <section id="page-songs" class="page hidden">
 
-      <div class="page-title">
+      <div class="page-heading">
+        <span class="eyebrow">LIBRARY</span>
+        <h1>All Songs</h1>
+        <p>Everything available in your SwarAJ database.</p>
+      </div>
 
-        <div>
-          <span class="section-kicker">LIBRARY</span>
-          <h2>All Songs</h2>
-          <p id="allSongsCount">Loading...</p>
-        </div>
+      <div class="toolbar">
 
-        <button id="allPlayAll" class="primary-btn">
+        <button
+          id="playAllBtn"
+          class="primary-btn"
+        >
           ▶ Play All
+        </button>
+
+        <button
+          id="shuffleBtn"
+          class="secondary-btn"
+        >
+          🔀 Shuffle
         </button>
 
       </div>
@@ -209,19 +214,28 @@
 
 
     <!-- AUDIO -->
-
     <section id="page-audio" class="page hidden">
 
-      <div class="page-title">
+      <div class="page-heading">
+        <span class="eyebrow">LISTEN</span>
+        <h1>Audio</h1>
+        <p>MP3 and YouTube songs played as audio.</p>
+      </div>
 
-        <div>
-          <span class="section-kicker">LISTEN</span>
-          <h2>Audio</h2>
-          <p>MP3 and YouTube songs</p>
-        </div>
+      <div class="toolbar">
 
-        <button id="audioPlayAll" class="primary-btn">
-          ▶ Play All
+        <button
+          id="audioPlayAll"
+          class="primary-btn"
+        >
+          ▶ Play All Audio
+        </button>
+
+        <button
+          id="audioShuffle"
+          class="secondary-btn"
+        >
+          🔀 Shuffle
         </button>
 
       </div>
@@ -232,81 +246,72 @@
 
 
     <!-- VIDEO -->
-
     <section id="page-video" class="page hidden">
 
-      <div class="page-title">
-
-        <div>
-          <span class="section-kicker">WATCH</span>
-          <h2>Video</h2>
-          <p id="videoCount">
-            YouTube and uploaded videos
-          </p>
-        </div>
-
+      <div class="page-heading">
+        <span class="eyebrow">WATCH</span>
+        <h1>Video</h1>
+        <p>YouTube and uploaded video songs.</p>
       </div>
 
+      <div id="videoStage" class="video-stage hidden">
 
-      <div id="videoPlayerArea" class="video-player-area hidden">
+        <div id="youtubeContainer" class="youtube-container"></div>
 
-        <div class="video-header">
+        <video
+          id="videoElement"
+          class="native-video hidden"
+          controls
+          playsinline
+          preload="metadata"
+        ></video>
 
+        <div class="video-info">
+          <img id="videoCover" src="/images/ganpati.jpg" alt="">
           <div>
-            <span class="section-kicker">
-              NOW PLAYING
-            </span>
-
-            <h3 id="videoTitle">
-              Video
-            </h3>
+            <strong id="videoTitle">No video selected</strong>
+            <span id="videoArtist">SwarAJ</span>
           </div>
-
-          <button id="closeVideo" class="icon-btn">
-            ×
-          </button>
-
-        </div>
-
-
-        <div id="videoFrame" class="video-frame"></div>
-
-
-        <div class="video-controls">
-
-          <button id="videoPrevious" class="control-btn">
-            ⏮
-          </button>
-
-          <button id="videoStop" class="control-btn">
-            ■
-          </button>
-
-          <button id="videoNext" class="control-btn">
-            ⏭
-          </button>
-
         </div>
 
       </div>
 
+      <div class="toolbar">
 
-      <div id="videoSongs" class="video-grid"></div>
+        <button
+          id="videoPlayAll"
+          class="primary-btn"
+        >
+          ▶ Play All Videos
+        </button>
+
+        <button
+          id="videoPrevious"
+          class="secondary-btn"
+        >
+          ⏮ Previous
+        </button>
+
+        <button
+          id="videoNext"
+          class="secondary-btn"
+        >
+          Next ⏭
+        </button>
+
+      </div>
+
+      <div id="videoSongs" class="song-list"></div>
 
     </section>
 
 
     <!-- LIKED -->
-
     <section id="page-liked" class="page hidden">
 
-      <div class="page-title">
-
-        <div>
-          <span class="section-kicker">YOUR MUSIC</span>
-          <h2>Liked Songs</h2>
-        </div>
-
+      <div class="page-heading">
+        <span class="eyebrow">YOUR COLLECTION</span>
+        <h1>Liked Songs</h1>
       </div>
 
       <div id="likedSongs" class="song-list"></div>
@@ -315,61 +320,44 @@
 
 
     <!-- ADMIN -->
-
     <section id="page-admin" class="page hidden">
 
-      <div class="page-title">
+      <div id="adminLogin" class="admin-card">
 
-        <div>
-          <span class="section-kicker">
-            MANAGEMENT
-          </span>
-
-          <h2>Admin</h2>
-
-          <p>
-            Manage your SwarAJ music database
-          </p>
+        <div class="page-heading">
+          <span class="eyebrow">SECURE AREA</span>
+          <h1>Admin</h1>
+          <p>Enter your configured admin key.</p>
         </div>
 
-      </div>
+        <form id="adminLoginForm">
 
+          <div class="form-field">
 
-      <!-- LOGIN -->
+            <label>Admin Key</label>
 
-      <div id="adminLoginBox" class="admin-card">
+            <input
+              id="adminKey"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Enter admin key"
+              required
+            >
 
-        <h3>Admin Login</h3>
+          </div>
 
-        <p>
-          Enter your configured Render admin key.
-        </p>
-
-        <div class="admin-input">
-
-          <input
-            id="adminKeyInput"
-            type="password"
-            placeholder="Admin key"
-            autocomplete="off"
-          >
-
-          <button
-            id="adminLoginBtn"
-            class="primary-btn"
-          >
-            Login
+          <button class="primary-btn" type="submit">
+            🔐 Login
           </button>
 
-        </div>
+        </form>
 
-        <div id="adminMessage" class="admin-message"></div>
+        <div id="adminLoginMessage" class="admin-message"></div>
 
       </div>
 
 
-      <!-- DASHBOARD -->
-
+      <!-- ADMIN DASHBOARD -->
       <div id="adminDashboard" class="hidden">
 
         <div class="admin-card">
@@ -377,15 +365,9 @@
           <div class="admin-dashboard-header">
 
             <div>
-              <span class="section-kicker">
-                CONTROL CENTER
-              </span>
-
-              <h3>Admin Dashboard</h3>
-
-              <p>
-                Manage your SwarAJ music database.
-              </p>
+              <span class="eyebrow">DATABASE</span>
+              <h2>Music Dashboard</h2>
+              <p>Manage your SwarAJ music library.</p>
             </div>
 
             <button
@@ -401,23 +383,23 @@
           <div class="admin-stat-grid">
 
             <div>
-              <strong id="adminTotalSongs">0</strong>
-              <span>Total Songs</span>
+              <strong id="statTotal">0</strong>
+              <span>Total</span>
             </div>
 
             <div>
-              <strong id="adminYoutubeSongs">0</strong>
-              <span>YouTube</span>
-            </div>
-
-            <div>
-              <strong id="adminMp3Songs">0</strong>
+              <strong id="statMp3">0</strong>
               <span>MP3</span>
             </div>
 
             <div>
-              <strong id="adminVideoSongs">0</strong>
-              <span>Videos</span>
+              <strong id="statYoutube">0</strong>
+              <span>YouTube</span>
+            </div>
+
+            <div>
+              <strong id="statVideo">0</strong>
+              <span>Video</span>
             </div>
 
           </div>
@@ -426,22 +408,16 @@
 
 
         <!-- UPLOAD -->
-
-        <div class="admin-card admin-upload-card">
+        <div class="admin-card">
 
           <div class="admin-upload-header">
 
             <div>
-              <span class="section-kicker">
-                MUSIC MANAGEMENT
-              </span>
-
-              <h3>
-                Upload Music
-              </h3>
-
+              <span class="eyebrow">MUSIC MANAGEMENT</span>
+              <h2>Add Music</h2>
               <p>
-                Upload MP3, WAV, OGG, M4A or AAC.
+                Upload a file or add an external audio,
+                video or YouTube URL.
               </p>
             </div>
 
@@ -453,6 +429,30 @@
             class="admin-upload-form"
           >
 
+            <div class="form-field">
+
+              <label>Media Type</label>
+
+              <select id="uploadType">
+
+                <option value="audio">
+                  🎧 Audio
+                </option>
+
+                <option value="video">
+                  ▶ Video
+                </option>
+
+                <option value="youtube">
+                  ▶ YouTube
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- LOCAL FILE -->
             <div class="upload-file-box">
 
               <label for="adminUploadFile">
@@ -462,22 +462,30 @@
                 </span>
 
                 <strong>
-                  Select Audio File
+                  Select Audio / Video File
                 </strong>
 
                 <small>
-                  MP3, WAV, OGG, M4A or AAC
-                  • Maximum 100 MB
+                  MP3, WAV, OGG, M4A, MP4, WEBM, MOV
                 </small>
 
               </label>
 
               <input
                 id="adminUploadFile"
-                name="file"
                 type="file"
-                accept=".mp3,.wav,.ogg,.m4a,.aac,audio/*"
-                required
+                accept="
+                  audio/*,
+                  video/*,
+                  .mp3,
+                  .wav,
+                  .ogg,
+                  .m4a,
+                  .aac,
+                  .mp4,
+                  .webm,
+                  .mov
+                "
               >
 
             </div>
@@ -493,15 +501,13 @@
 
             <div class="admin-form-grid">
 
+              <!-- TITLE -->
               <div class="form-field">
 
-                <label>
-                  Song Title *
-                </label>
+                <label>Title *</label>
 
                 <input
                   id="uploadTitle"
-                  name="title"
                   type="text"
                   placeholder="Song title"
                   required
@@ -510,50 +516,43 @@
               </div>
 
 
+              <!-- ARTIST -->
               <div class="form-field">
 
-                <label>
-                  Artist
-                </label>
+                <label>Artist</label>
 
                 <input
                   id="uploadArtist"
-                  name="artist"
                   type="text"
-                  value="SwarAJ"
                   placeholder="Artist"
+                  value="SwarAJ"
                 >
 
               </div>
 
 
+              <!-- ALBUM -->
               <div class="form-field">
 
-                <label>
-                  Album
-                </label>
+                <label>Album</label>
 
                 <input
                   id="uploadAlbum"
-                  name="album"
                   type="text"
-                  value="Singles"
                   placeholder="Album"
+                  value="Singles"
                 >
 
               </div>
 
 
+              <!-- CATEGORY -->
               <div class="form-field">
 
-                <label>
-                  Category
-                </label>
+                <label>Category</label>
 
-                <select
-                  id="uploadCategory"
-                  name="category"
-                >
+                <select id="uploadCategory">
+
                   <option value="Other">Other</option>
                   <option value="Bhakti">Bhakti</option>
                   <option value="Marathi">Marathi</option>
@@ -562,20 +561,81 @@
                   <option value="Emotional">Emotional</option>
                   <option value="Devotional">Devotional</option>
                   <option value="Bollywood">Bollywood</option>
+
                 </select>
 
               </div>
 
 
+              <!-- AUDIO URL -->
               <div class="form-field full-width">
 
                 <label>
-                  Cover Image URL
+                  🎧 Audio URL
+                </label>
+
+                <input
+                  id="uploadAudioUrl"
+                  type="url"
+                  placeholder="https://example.com/song.mp3"
+                >
+
+                <small>
+                  Direct audio file URL.
+                </small>
+
+              </div>
+
+
+              <!-- VIDEO URL -->
+              <div class="form-field full-width">
+
+                <label>
+                  ▶ Video URL
+                </label>
+
+                <input
+                  id="uploadVideoUrl"
+                  type="url"
+                  placeholder="https://example.com/video.mp4"
+                >
+
+                <small>
+                  Direct MP4/WebM video URL.
+                </small>
+
+              </div>
+
+
+              <!-- YOUTUBE URL -->
+              <div class="form-field full-width">
+
+                <label>
+                  ▶ YouTube URL
+                </label>
+
+                <input
+                  id="uploadYoutubeUrl"
+                  type="url"
+                  placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX"
+                >
+
+                <small>
+                  YouTube watch, youtu.be, Shorts or embed URL.
+                </small>
+
+              </div>
+
+
+              <!-- COVER -->
+              <div class="form-field full-width">
+
+                <label>
+                  🖼 Cover Image URL
                 </label>
 
                 <input
                   id="uploadCover"
-                  name="coverUrl"
                   type="url"
                   placeholder="https://example.com/cover.jpg"
                 >
@@ -586,11 +646,17 @@
 
 
             <div
+              id="mediaPreview"
+              class="media-preview hidden"
+            ></div>
+
+
+            <div
               id="uploadProgress"
               class="upload-progress hidden"
             >
 
-              <div class="upload-progress-bar">
+              <div class="progress-track">
                 <span id="uploadProgressBar"></span>
               </div>
 
@@ -612,43 +678,10 @@
               class="primary-btn upload-submit-btn"
               type="submit"
             >
-              ⬆ Upload Song
+              ⬆ Add / Upload Music
             </button>
 
           </form>
-
-        </div>
-
-
-        <!-- DATABASE -->
-
-        <div class="admin-card">
-
-          <div class="admin-upload-header">
-
-            <div>
-              <span class="section-kicker">
-                DATABASE
-              </span>
-
-              <h3>
-                Uploaded Songs
-              </h3>
-            </div>
-
-            <button
-              id="adminRefreshSongs"
-              class="secondary-btn"
-            >
-              ↻ Refresh
-            </button>
-
-          </div>
-
-          <div
-            id="adminSongList"
-            class="admin-song-list"
-          ></div>
 
         </div>
 
@@ -656,54 +689,69 @@
 
     </section>
 
-  </section>
-
-</main>
+  </main>
 
 
-<!-- MP3 PLAYER -->
+  <!-- PLAYER -->
+  <div id="miniPlayer" class="mini-player hidden">
 
-<audio
-  id="audioPlayer"
-  preload="auto"
-  playsinline
-></audio>
+    <div class="mini-info">
 
+      <img
+        id="miniCover"
+        src="/images/ganpati.jpg"
+        alt=""
+      >
 
-<!-- YOUTUBE AUDIO -->
+      <div>
+        <strong id="miniTitle">
+          No song
+        </strong>
 
-<div
-  id="youtubeAudioHost"
-  class="youtube-audio-host"
->
-  <div id="youtubeAudioPlayer"></div>
-</div>
+        <span id="miniArtist">
+          SwarAJ
+        </span>
+      </div>
 
-
-<!-- MINI PLAYER -->
-
-<div
-  id="miniPlayer"
-  class="mini-player hidden"
->
-
-  <div class="mini-info">
-
-    <div
-      id="miniImage"
-      class="mini-image"
-    >
-      ♪
     </div>
 
-    <div class="mini-text">
 
-      <strong id="miniTitle">
-        Nothing playing
-      </strong>
+    <div class="player-controls">
 
-      <span id="miniArtist">
-        SwarAJ
+      <button id="previousBtn">
+        ⏮
+      </button>
+
+      <button
+        id="stopBtn"
+        class="player-main"
+      >
+        ■
+      </button>
+
+      <button id="nextBtn">
+        ⏭
+      </button>
+
+    </div>
+
+
+    <div class="player-progress">
+
+      <span id="currentTime">
+        0:00
+      </span>
+
+      <input
+        id="progressBar"
+        type="range"
+        min="0"
+        max="100"
+        value="0"
+      >
+
+      <span id="duration">
+        0:00
       </span>
 
     </div>
@@ -711,37 +759,20 @@
   </div>
 
 
-  <div class="mini-controls">
-
-    <button id="miniPrevious">
-      ⏮
-    </button>
-
-    <button id="miniPlay">
-      ▶
-    </button>
-
-    <button id="miniStop">
-      ■
-    </button>
-
-    <button id="miniNext">
-      ⏭
-    </button>
-
-  </div>
+  <!-- NATIVE AUDIO -->
+  <audio
+    id="audioElement"
+    preload="auto"
+  ></audio>
 
 
-  <div class="mini-progress">
-    <span id="miniProgress"></span>
-  </div>
+  <!-- TOAST -->
+  <div id="toast"></div>
+
 
 </div>
 
-
-<div id="toast" class="toast"></div>
-
-
+<script src="https://www.youtube.com/iframe_api"></script>
 <script src="/script.js"></script>
 
 </body>

@@ -1,2860 +1,1659 @@
 (() => {
-
   "use strict";
 
   const state = {
     songs: [],
+    filteredSongs: [],
     currentIndex: -1,
-    currentSong: null,
-
     youtubePlayer: null,
     youtubeReady: false,
-    youtubeId: null,
-
-    videoVisible: false,
+    youtubeApiLoading: false,
+    youtubeVisible: false,
+    adminUnlocked: false,
     isPlaying: false,
-
-    adminKey:
-      localStorage.getItem("swarajAdminKey") || null,
-
-    favorites:
-      JSON.parse(
-        localStorage.getItem("swarajFavorites") || "[]"
-      )
+    progressTimer: null,
+    searchTimer: null
   };
 
+  const $ = id => document.getElementById(id);
 
-  const $ = id =>
-    document.getElementById(id);
+  const audio = $("audioPlayer");
 
+  /* --------------------------------------------------
+     BASIC HELPERS
+  -------------------------------------------------- */
 
-  let audio = null;
-
-
-  /* =====================================================
-     INIT
-  ===================================================== */
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    init
-  );
-
-
-  async function init() {
-
-    setupAudio();
-
-    setupNavigation();
-
-    setupSearch();
-
-    setupControls();
-
-    setupAdmin();
-
-    setupHero();
-
-    await loadSongs();
-
-    loadYouTubeAPI();
-
-    restoreAdmin();
-
+  function escapeHTML(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
-
-  /* =====================================================
-     AUDIO
-  ===================================================== */
-
-  function setupAudio() {
-
-    audio = $("audioPlayer");
-
-    if (!audio) {
-
-      audio =
-        document.createElement("audio");
-
-      audio.id = "audioPlayer";
-
-      audio.preload = "metadata";
-
-      document.body.appendChild(audio);
-
+  function formatTime(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) {
+      return "0:00";
     }
 
+    const min = Math.floor(seconds / 60);
+    const sec = Math.floor(seconds % 60);
 
-    audio.addEventListener(
-      "play",
-      () => {
-
-        state.isPlaying = true;
-
-        updatePlayButtons(true);
-
-        updateMiniPlayer();
-
-      }
-    );
-
-
-    audio.addEventListener(
-      "pause",
-      () => {
-
-        state.isPlaying = false;
-
-        updatePlayButtons(false);
-
-        updateMiniPlayer();
-
-      }
-    );
-
-
-    audio.addEventListener(
-      "ended",
-      nextSong
-    );
-
-
-    audio.addEventListener(
-      "error",
-      () => {
-
-        showToast(
-          "Unable to play MP3"
-        );
-
-      }
-    );
-
+    return `${min}:${String(sec).padStart(2, "0")}`;
   }
 
-
-  /* =====================================================
-     LOAD SONGS
-  ===================================================== */
-
-  async function loadSongs() {
-
-    try {
-
-      const response =
-        await fetch(
-          "/api/songs",
-          {
-            cache: "no-store"
-          }
-        );
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          `HTTP ${response.status}`
-        );
-
-      }
-
-
-      const data =
-        await response.json();
-
-
-      const list =
-        Array.isArray(data)
-          ? data
-          : (
-              data.songs ||
-              data.data ||
-              []
-            );
-
-
-      state.songs =
-        list
-          .map(normalizeSong)
-          .filter(Boolean);
-
-
-      updateStats();
-
-      renderHome();
-
-      renderPlaylist();
-
-      renderCategories();
-
-      renderFavorites();
-
-      renderAdminSongs();
-
-
-    } catch (error) {
-
-      console.error(
-        "Songs:",
-        error
-      );
-
-      showToast(
-        "Unable to load songs"
-      );
-
-    }
-
+  function getCover(song) {
+    return (
+      song.cover ||
+      song.image ||
+      song.thumbnail ||
+      song.artwork ||
+      ""
+    );
   }
 
-
-  /* =====================================================
-     NORMALIZE
-  ===================================================== */
-
-  function normalizeSong(raw) {
-
-    if (!raw) return null;
-
-
-    const youtubeUrl =
-      raw.youtube_url ||
-      raw.youtubeUrl ||
-      raw.youtube ||
-      raw.video_url ||
-      raw.videoUrl ||
-      "";
-
-
-    const sourceType =
-      String(
-        raw.source_type ||
-        raw.sourceType ||
-        raw.type ||
-        ""
-      ).toLowerCase();
-
-
-    const normalAudio =
-      raw.audio_url ||
-      raw.audioUrl ||
-      raw.audio ||
-      raw.url ||
-      raw.path ||
-      "";
-
-
-    const isYoutube =
-      sourceType === "youtube" ||
-      Boolean(youtubeUrl) ||
-      isYoutubeUrl(normalAudio);
-
-
-    const finalYoutubeUrl =
-      youtubeUrl ||
-      (
-        isYoutube
-          ? normalAudio
-          : ""
-      );
-
-
-    const youtubeId =
-      raw.youtube_video_id ||
-      raw.youtubeVideoId ||
-      getYoutubeId(
-        finalYoutubeUrl
-      );
-
-
-    let cover =
-      raw.cover_url ||
-      raw.coverUrl ||
-      raw.cover ||
-      raw.image ||
-      raw.imageUrl ||
-      raw.thumbnail ||
-      raw.thumbnailUrl ||
-      "";
-
-
-    if (
-      isYoutube &&
-      !cover &&
-      youtubeId
-    ) {
-
-      cover =
-        `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
-
-    }
-
-
-    if (!cover) {
-
-      cover =
-        "/images/ganpati.jpg";
-
-    }
-
-
-    return {
-
-      id:
-        String(
-          raw.id ||
-          raw._id ||
-          `${Date.now()}-${Math.random()}`
-        ),
-
-      title:
-        raw.title ||
-        raw.name ||
-        "Untitled",
-
-      artist:
-        raw.artist ||
-        raw.singer ||
-        raw.author ||
-        "SwarAJ",
-
-      album:
-        raw.album ||
-        "Singles",
-
-      category:
-        raw.category ||
-        raw.genre ||
-        raw.folder ||
-        "Other",
-
-      type:
-        isYoutube
-          ? "youtube"
-          : "mp3",
-
-      audioUrl:
-        isYoutube
-          ? ""
-          : normalAudio,
-
-      youtubeUrl:
-        finalYoutubeUrl,
-
-      youtubeId:
-
-        youtubeId || "",
-
-      cover,
-
-      raw
-
-    };
-
+  function getTitle(song) {
+    return song.title || song.name || "Unknown Song";
   }
 
+  function getArtist(song) {
+    return song.artist || song.author || "SwarAJ";
+  }
 
-  /* =====================================================
-     YOUTUBE ID
-  ===================================================== */
-
-  function isYoutubeUrl(url) {
+  function isYouTube(song) {
+    const type = String(
+      song.type ||
+      song.source ||
+      song.platform ||
+      ""
+    ).toLowerCase();
 
     return (
-      /youtube\.com/i.test(
-        String(url || "")
+      type.includes("youtube") ||
+      type === "video" ||
+      Boolean(
+        song.youtubeId ||
+        song.youtube_id ||
+        song.videoId ||
+        song.video_id
       ) ||
-      /youtu\.be/i.test(
-        String(url || "")
+      /(?:youtube\.com|youtu\.be)/i.test(
+        song.url || song.src || song.audioUrl || ""
       )
     );
-
   }
 
+  function getYouTubeId(song) {
+    if (song.youtubeId) return song.youtubeId;
+    if (song.youtube_id) return song.youtube_id;
+    if (song.videoId) return song.videoId;
+    if (song.video_id) return song.video_id;
 
-  function getYoutubeId(url) {
-
-    if (!url) return "";
-
-
-    const text =
-      String(url).trim();
-
-
-    if (
-      /^[A-Za-z0-9_-]{11}$/.test(
-        text
-      )
-    ) {
-
-      return text;
-
-    }
-
+    const value =
+      song.url ||
+      song.src ||
+      song.audioUrl ||
+      song.videoUrl ||
+      "";
 
     try {
+      const url = new URL(value);
 
-      const parsed =
-        new URL(text);
-
-
-      if (
-        parsed.hostname ===
-        "youtu.be"
-      ) {
-
-        return (
-          parsed.pathname
-            .split("/")
-            .filter(Boolean)[0] ||
-          ""
-        );
-
+      if (url.hostname.includes("youtu.be")) {
+        return url.pathname.substring(1).split("/")[0];
       }
 
-
-      const v =
-        parsed.searchParams.get(
-          "v"
-        );
-
-
-      if (v) return v;
-
-
-      const parts =
-        parsed.pathname
-          .split("/")
-          .filter(Boolean);
-
-
-      const index =
-        parts.findIndex(
-          x =>
-            [
-              "embed",
-              "shorts",
-              "live"
-            ].includes(x)
-        );
-
-
-      if (
-        index >= 0 &&
-        parts[index + 1]
-      ) {
-
-        return parts[index + 1];
-
-      }
-
-    } catch {}
-
-    return "";
-
-  }
-
-
-  /* =====================================================
-     YOUTUBE API
-  ===================================================== */
-
-  function loadYouTubeAPI() {
-
-    if (
-      window.YT &&
-      window.YT.Player
-    ) {
-
-      state.youtubeReady = true;
-
-      createYoutubePlayer();
-
-      return;
-
-    }
-
-
-    if (
-      document.getElementById(
-        "youtube-api"
-      )
-    ) {
-
-      return;
-
-    }
-
-
-    const script =
-      document.createElement("script");
-
-
-    script.id =
-      "youtube-api";
-
-
-    script.src =
-      "https://www.youtube.com/iframe_api";
-
-
-    document.head.appendChild(
-      script
-    );
-
-
-    window.onYouTubeIframeAPIReady =
-      () => {
-
-        state.youtubeReady = true;
-
-        createYoutubePlayer();
-
-      };
-
-  }
-
-
-  /* =====================================================
-     CREATE YOUTUBE PLAYER
-     
-     IMPORTANT:
-     PLAYER IS CREATED ONLY IN MEMORY.
-     
-     NO VIDEO CONTAINER IS SHOWN.
-  ===================================================== */
-
-  function createYoutubePlayer() {
-
-    if (
-      !state.youtubeReady ||
-      state.youtubePlayer
-    ) {
-
-      return;
-
-    }
-
-
-    /*
-      Do NOT create a visible iframe here.
-
-      YouTube player is created only when
-      Watch Video is clicked.
-    */
-
-  }
-
-
-  function createVisibleYoutubePlayer(
-    videoId
-  ) {
-
-    const frame =
-      $("youtubeFrame");
-
-
-    if (!frame) return;
-
-
-    frame.innerHTML = "";
-
-
-    frame.hidden = false;
-
-    frame.style.display = "block";
-
-
-    const div =
-      document.createElement("div");
-
-
-    div.id =
-      "youtube-player";
-
-
-    frame.appendChild(div);
-
-
-    state.youtubePlayer =
-      new YT.Player(
-        div,
-        {
-
-          width: "100%",
-
-          height: "100%",
-
-          videoId,
-
-          playerVars: {
-
-            autoplay: 1,
-
-            controls: 1,
-
-            rel: 0,
-
-            modestbranding: 1,
-
-            playsinline: 1
-
-          },
-
-          events: {
-
-            onReady:
-              event => {
-
-                state.youtubeReady = true;
-
-                event.target.playVideo();
-
-              },
-
-
-            onStateChange:
-              handleYoutubeState,
-
-
-            onError:
-              () => {
-
-                showToast(
-                  "YouTube video cannot be played"
-                );
-
-              }
-
-          }
-
+      if (url.hostname.includes("youtube.com")) {
+        if (url.searchParams.get("v")) {
+          return url.searchParams.get("v");
         }
-      );
 
+        const parts = url.pathname.split("/");
+
+        const index = parts.indexOf("embed");
+
+        if (index >= 0 && parts[index + 1]) {
+          return parts[index + 1];
+        }
+
+        const shortIndex = parts.indexOf("shorts");
+
+        if (shortIndex >= 0 && parts[shortIndex + 1]) {
+          return parts[shortIndex + 1];
+        }
+      }
+    } catch (_) {}
+
+    const match = String(value).match(
+      /(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{6,})/
+    );
+
+    return match ? match[1] : "";
   }
 
-
-  /* =====================================================
-     PLAY SONG
-  ===================================================== */
-
-  function playSong(index) {
-
-    if (
-      index < 0 ||
-      index >= state.songs.length
-    ) {
-
-      return;
-
-    }
-
-
-    const song =
-      state.songs[index];
-
-
-    state.currentIndex =
-      index;
-
-
-    state.currentSong =
-      song;
-
-
-    /*
-      ALWAYS HIDE VIDEO WHEN
-      CHANGING SONG.
-    */
-
-    hideVideo();
-
-
-    if (
-      song.type === "youtube"
-    ) {
-
-      playYoutubeAudio(song);
-
-    } else {
-
-      playMp3(song);
-
-    }
-
-
-    updateCurrentSong();
-
-    updateMiniPlayer();
-
+  function getAudioUrl(song) {
+    return (
+      song.audioUrl ||
+      song.audio_url ||
+      song.fileUrl ||
+      song.file_url ||
+      song.path ||
+      song.url ||
+      song.src ||
+      ""
+    );
   }
 
+  /* --------------------------------------------------
+     NORMALIZE SONG
+  -------------------------------------------------- */
 
-  /* =====================================================
-     MP3
-  ===================================================== */
+  function normalizeSong(song, index) {
+    const youtube = isYouTube(song);
 
-  async function playMp3(song) {
+    return {
+      ...song,
+      id: song.id ?? song.song_id ?? `song-${index}`,
+      title: getTitle(song),
+      artist: getArtist(song),
+      cover: getCover(song),
+      type: youtube ? "youtube" : "mp3",
+      youtubeId: youtube ? getYouTubeId(song) : "",
+      audioUrl: youtube ? "" : getAudioUrl(song),
+      category: song.category || "All Songs"
+    };
+  }
 
-    stopYoutube();
+  /* --------------------------------------------------
+     LOAD SONGS
+  -------------------------------------------------- */
 
-    hideVideo();
-
-
-    if (!song.audioUrl) {
-
-      showToast(
-        "MP3 URL is missing"
-      );
-
-      return;
-
-    }
-
-
-    audio.src =
-      song.audioUrl;
-
-
-    audio.load();
-
-
+  async function loadSongs() {
     try {
+      const response = await fetch("/api/songs", {
+        cache: "no-store"
+      });
 
-      await audio.play();
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
-      state.isPlaying = true;
+      const data = await response.json();
 
-      updatePlayButtons(true);
+      let songs = Array.isArray(data)
+        ? data
+        : (
+          data.songs ||
+          data.data ||
+          data.items ||
+          []
+        );
+
+      state.songs = songs.map(normalizeSong);
+
+      state.filteredSongs = [...state.songs];
+
+      renderAll();
+
+      restorePlaylist();
 
     } catch (error) {
+      console.error("Song loading error:", error);
 
-      console.error(
-        error
-      );
+      $("homeSongs").innerHTML =
+        `<div class="empty">Unable to load songs</div>`;
 
-      showToast(
-        "Unable to play MP3"
-      );
-
+      $("songsList").innerHTML =
+        `<div class="empty">Unable to load songs</div>`;
     }
-
   }
 
+  /* --------------------------------------------------
+     RENDER
+  -------------------------------------------------- */
 
-  /* =====================================================
-     YOUTUBE AUDIO
-     
-     IMPORTANT:
-     YouTube iframe is NOT shown.
-  ===================================================== */
-
-  function playYoutubeAudio(song) {
-
-    stopMp3();
-
-
-    const id =
-      song.youtubeId ||
-      getYoutubeId(
-        song.youtubeUrl
-      );
-
-
-    if (!id) {
-
-      showToast(
-        "Invalid YouTube URL"
-      );
-
-      return;
-
-    }
-
-
-    state.youtubeId =
-      id;
-
-
-    state.videoVisible =
-      false;
-
-
-    /*
-      Completely remove iframe.
-    */
-
-    hideVideo();
-
-
-    /*
-      YouTube audio-only playback
-      requires the YouTube player internally,
-      but we keep its visual container hidden.
-    */
-
-    if (
-      !window.YT ||
-      !window.YT.Player
-    ) {
-
-      loadYoutubeAudioHidden(
-        id
-      );
-
-      return;
-
-    }
-
-
-    loadYoutubeAudioHidden(
-      id
-    );
-
-
-    showWatchButton();
-
+  function renderAll() {
+    renderHome();
+    renderSongs();
+    renderPlaylist();
+    renderLiked();
   }
 
-
-  function loadYoutubeAudioHidden(
-    id
-  ) {
-
-    let holder =
-      $("youtubeAudioHolder");
-
-
-    if (!holder) {
-
-      holder =
-        document.createElement(
-          "div"
-        );
-
-      holder.id =
-        "youtubeAudioHolder";
-
-
-      holder.style.position =
-        "fixed";
-
-      holder.style.width =
-        "1px";
-
-      holder.style.height =
-        "1px";
-
-      holder.style.left =
-        "-10000px";
-
-      holder.style.top =
-        "-10000px";
-
-      holder.style.opacity =
-        "0";
-
-      holder.style.pointerEvents =
-        "none";
-
-      document.body.appendChild(
-        holder
-      );
-
-    }
-
-
-    holder.innerHTML =
-      `<div id="youtube-audio-player"></div>`;
-
-
-    try {
-
-      state.youtubePlayer =
-        new YT.Player(
-          "youtube-audio-player",
-          {
-
-            width: "1",
-
-            height: "1",
-
-            videoId: id,
-
-            playerVars: {
-
-              autoplay: 1,
-
-              controls: 0,
-
-              rel: 0,
-
-              playsinline: 1
-
-            },
-
-            events: {
-
-              onReady:
-                event => {
-
-                  event.target.playVideo();
-
-                },
-
-              onStateChange:
-                handleYoutubeState,
-
-              onError:
-                () => {
-
-                  showToast(
-                    "YouTube playback failed"
-                  );
-
-                }
-
-            }
-
-          }
-        );
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-      showToast(
-        "YouTube player failed"
-      );
-
-    }
-
-  }
-
-
-  /* =====================================================
-     WATCH VIDEO
-  ===================================================== */
-
-  function watchVideo() {
-
-    const song =
-      state.currentSong;
-
-
-    if (
-      !song ||
-      song.type !== "youtube"
-    ) {
-
-      return;
-
-    }
-
-
-    const id =
-      song.youtubeId ||
-      getYoutubeId(
-        song.youtubeUrl
-      );
-
-
-    if (!id) return;
-
-
-    /*
-      Stop hidden audio player.
-    */
-
-    stopYoutube();
-
-
-    /*
-      Now and ONLY now show video.
-    */
-
-    const area =
-      $("videoPlayerArea");
-
-
-    const frame =
-      $("youtubeFrame");
-
-
-    if (!area || !frame) return;
-
-
-    area.hidden = false;
-
-    area.style.display =
-      "block";
-
-
-    frame.hidden = false;
-
-    frame.style.display =
-      "block";
-
-
-    state.videoVisible =
-      true;
-
-
-    const label =
-      $("playerModeLabel");
-
-
-    if (label) {
-
-      label.textContent =
-        "WATCHING VIDEO";
-
-    }
-
-
-    const button =
-      $("watchVideoButton");
-
-
-    if (button) {
-
-      button.style.display =
-        "none";
-
-    }
-
-
-    if (
-      window.YT &&
-      window.YT.Player
-    ) {
-
-      createVisibleYoutubePlayer(
-        id
-      );
-
-    }
-
-  }
-
-
-  /* =====================================================
-     HIDE VIDEO
-  ===================================================== */
-
-  function hideVideo() {
-
-    state.videoVisible =
-      false;
-
-
-    const area =
-      $("videoPlayerArea");
-
-
-    const frame =
-      $("youtubeFrame");
-
-
-    if (frame) {
-
-      frame.innerHTML =
-        "";
-
-      frame.hidden =
-        true;
-
-      frame.style.display =
-        "none";
-
-    }
-
-
-    if (area) {
-
-      area.hidden =
-        true;
-
-      area.style.display =
-        "none";
-
-    }
-
-
-    const button =
-      $("watchVideoButton");
-
-
-    if (button) {
-
-      button.style.display =
-        "inline-flex";
-
-    }
-
-
-    const label =
-      $("playerModeLabel");
-
-
-    if (label) {
-
-      label.textContent =
-        "PLAYING AS AUDIO";
-
-    }
-
-  }
-
-
-  /* =====================================================
-     WATCH BUTTON
-  ===================================================== */
-
-  function showWatchButton() {
-
-    const button =
-      $("watchVideoButton");
-
-
-    if (!button) return;
-
-
-    button.style.display =
-      "inline-flex";
-
-
-    button.textContent =
-      "▶ Watch Video";
-
-  }
-
-
-  /* =====================================================
-     YOUTUBE STATE
-  ===================================================== */
-
-  function handleYoutubeState(
-    event
-  ) {
-
-    if (!window.YT) return;
-
-
-    if (
-      event.data ===
-      YT.PlayerState.PLAYING
-    ) {
-
-      state.isPlaying =
-        true;
-
-      updatePlayButtons(
-        true
-      );
-
-      updateMiniPlayer();
-
-    }
-
-
-    if (
-      event.data ===
-      YT.PlayerState.PAUSED
-    ) {
-
-      state.isPlaying =
-        false;
-
-      updatePlayButtons(
-        false
-      );
-
-    }
-
-
-    if (
-      event.data ===
-      YT.PlayerState.ENDED
-    ) {
-
-      nextSong();
-
-    }
-
-  }
-
-
-  /* =====================================================
-     STOP
-  ===================================================== */
-
-  function stopMp3() {
-
-    if (!audio) return;
-
-
-    try {
-
-      audio.pause();
-
-      audio.currentTime =
-        0;
-
-    } catch {}
-
-  }
-
-
-  function stopYoutube() {
-
-    if (
-      state.youtubePlayer
-    ) {
-
-      try {
-
-        state.youtubePlayer.stopVideo();
-
-      } catch {}
-
-    }
-
-
-    const holder =
-      $("youtubeAudioHolder");
-
-
-    if (holder) {
-
-      holder.innerHTML =
-        "";
-
-    }
-
-
-    state.youtubePlayer =
-      null;
-
-  }
-
-
-  /* =====================================================
-     NEXT
-  ===================================================== */
-
-  function nextSong() {
-
-    if (!state.songs.length) {
-      return;
-    }
-
-
-    let index =
-      state.currentIndex + 1;
-
-
-    if (
-      index >=
-      state.songs.length
-    ) {
-
-      index = 0;
-
-    }
-
-
-    playSong(index);
-
-  }
-
-
-  /* =====================================================
-     PREVIOUS
-  ===================================================== */
-
-  function previousSong() {
-
-    if (!state.songs.length) {
-      return;
-    }
-
-
-    let index =
-      state.currentIndex - 1;
-
-
-    if (index < 0) {
-
-      index =
-        state.songs.length - 1;
-
-    }
-
-
-    playSong(index);
-
-  }
-
-
-  /* =====================================================
-     TOGGLE
-  ===================================================== */
-
-  function togglePlay() {
-
-    if (
-      !state.currentSong
-    ) {
-
-      if (state.songs.length) {
-        playSong(0);
-      }
-
-      return;
-
-    }
-
-
-    if (
-      state.currentSong.type ===
-      "youtube"
-    ) {
-
-      if (
-        !state.youtubePlayer
-      ) {
-
-        playSong(
-          state.currentIndex
-        );
-
-        return;
-
-      }
-
-
-      try {
-
-        if (
-          state.isPlaying
-        ) {
-
-          state.youtubePlayer.pauseVideo();
-
-        } else {
-
-          state.youtubePlayer.playVideo();
-
-        }
-
-      } catch {}
-
-      return;
-
-    }
-
-
-    if (
-      audio.paused
-    ) {
-
-      audio.play().catch(
-        console.error
-      );
-
-    } else {
-
-      audio.pause();
-
-    }
-
-  }
-
-
-  /* =====================================================
-     CONTROLS
-  ===================================================== */
-
-  function setupControls() {
-
-    $("watchVideoButton")
-      ?.addEventListener(
-        "click",
-        watchVideo
-      );
-
-
-    $("videoPrevButton")
-      ?.addEventListener(
-        "click",
-        previousSong
-      );
-
-
-    $("videoNextButton")
-      ?.addEventListener(
-        "click",
-        nextSong
-      );
-
-
-    $("videoPlayButton")
-      ?.addEventListener(
-        "click",
-        togglePlay
-      );
-
-
-    document
-      .querySelectorAll(
-        "[data-player='previous']"
-      )
-      .forEach(
-        button =>
-          button.addEventListener(
-            "click",
-            previousSong
-          )
-      );
-
-
-    document
-      .querySelectorAll(
-        "[data-player='next']"
-      )
-      .forEach(
-        button =>
-          button.addEventListener(
-            "click",
-            nextSong
-          )
-      );
-
-
-    document
-      .querySelectorAll(
-        "[data-player='play']"
-      )
-      .forEach(
-        button =>
-          button.addEventListener(
-            "click",
-            togglePlay
-          )
-      );
-
-  }
-
-
-  /* =====================================================
-     NAVIGATION
-  ===================================================== */
-
-  function setupNavigation() {
-
-    document
-      .querySelectorAll(
-        "[data-section]"
-      )
-      .forEach(
-        button => {
-
-          button.addEventListener(
-            "click",
-            () => {
-
-              showSection(
-                button.dataset.section
-              );
-
-            }
-          );
-
-        }
-      );
-
-
-    $("mobileMenuButton")
-      ?.addEventListener(
-        "click",
-        () => {
-
-          $("sidebar")
-            ?.classList.toggle(
-              "open"
-            );
-
-        }
-      );
-
-
-    $("mobileSearchButton")
-      ?.addEventListener(
-        "click",
-        () => {
-
-          $("searchInput")
-            ?.focus();
-
-        }
-      );
-
-
-    $("refreshButton")
-      ?.addEventListener(
-        "click",
-        loadSongs
-      );
-
-  }
-
-
-  function showSection(
-    section
-  ) {
-
-    /*
-      IMPORTANT:
-      Only ONE section gets active.
-      This prevents menu sections from
-      appearing underneath Home.
-    */
-
-    document
-      .querySelectorAll(
-        ".page-section"
-      )
-      .forEach(
-        item => {
-
-          item.classList.remove(
-            "active"
-          );
-
-        }
-      );
-
-
-    const target =
-      $(
-        `section-${section}`
-      );
-
-
-    if (target) {
-
-      target.classList.add(
-        "active"
-      );
-
-    }
-
-
-    document
-      .querySelectorAll(
-        ".nav-item"
-      )
-      .forEach(
-        item => {
-
-          item.classList.toggle(
-            "active",
-            item.dataset.section ===
-              section
-          );
-
-        }
-      );
-
-
-    $("sidebar")
-      ?.classList.remove(
-        "open"
-      );
-
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-
-  }
-
-
-  /* =====================================================
-     SEARCH
-  ===================================================== */
-
-  function setupSearch() {
-
-    $("searchInput")
-      ?.addEventListener(
-        "input",
-        event => {
-
-          const q =
-            event.target.value
-              .trim()
-              .toLowerCase();
-
-
-          if (!q) {
-
-            renderPlaylist();
-
-            return;
-
-          }
-
-
-          const results =
-            state.songs.filter(
-              song =>
-
-                song.title
-                  .toLowerCase()
-                  .includes(q) ||
-
-                song.artist
-                  .toLowerCase()
-                  .includes(q) ||
-
-                song.category
-                  .toLowerCase()
-                  .includes(q)
-
-            );
-
-
-          renderPlaylist(
-            results
-          );
-
-        }
-      );
-
-  }
-
-
-  /* =====================================================
-     PLAYLIST
-  ===================================================== */
-
-  function renderPlaylist(
-    songs = state.songs
-  ) {
-
-    const main =
-      $("mp3Playlist");
-
-
-    const youtube =
-      $("videoPlaylist");
-
-
-    if (main) {
-
-      main.innerHTML =
-        "";
-
-      songs.forEach(
-        song => {
-
-          main.appendChild(
-            createSongCard(
-              song
-            )
-          );
-
-        }
-      );
-
-    }
-
-
-    if (youtube) {
-
-      youtube.innerHTML =
-        "";
-
-      state.songs
-        .filter(
-          song =>
-            song.type ===
-            "youtube"
-        )
-        .forEach(
-          song => {
-
-            youtube.appendChild(
-              createSongCard(
-                song
-              )
-            );
-
-          }
-        );
-
-    }
-
-  }
-
-
-  /* =====================================================
-     SONG CARD
-  ===================================================== */
-
-  function createSongCard(
-    song
-  ) {
-
-    const index =
-      state.songs.indexOf(
-        song
-      );
-
-
-    const card =
-      document.createElement(
-        "article"
-      );
-
-
-    card.className =
-      "song-card";
-
-
-    card.innerHTML = `
-
-      <div class="song-cover">
-
+  function songCoverHTML(song) {
+    const cover = getCover(song);
+
+    if (cover) {
+      return `
         <img
-          src="${escapeAttr(song.cover)}"
-          alt="${escapeAttr(song.title)}"
+          src="${escapeHTML(cover)}"
+          alt="${escapeHTML(getTitle(song))}"
           loading="lazy"
+          onerror="this.style.display='none'"
         >
+      `;
+    }
 
-        <span class="song-type">
-          ${song.type === "youtube"
-            ? "YOUTUBE"
-            : "MP3"}
-        </span>
+    return `<span>♫</span>`;
+  }
+
+  function renderHome() {
+    const list = state.filteredSongs.slice(0, 12);
+
+    if (!list.length) {
+      $("homeSongs").innerHTML =
+        `<div class="empty">No songs found</div>`;
+      return;
+    }
+
+    $("homeSongs").innerHTML = list
+      .map((song, index) => `
+        <article class="song-card">
+
+          <div class="cover">
+            ${songCoverHTML(song)}
+          </div>
+
+          <div class="song-card-title">
+            ${escapeHTML(song.title)}
+          </div>
+
+          <div class="song-card-artist">
+            ${escapeHTML(song.artist)}
+          </div>
+
+          <button
+            class="card-play"
+            data-play-index="${state.songs.indexOf(song)}"
+            aria-label="Play"
+          >
+            ▶
+          </button>
+
+        </article>
+      `)
+      .join("");
+  }
+
+  function renderSongs() {
+    const list = state.filteredSongs;
+
+    if (!list.length) {
+      $("songsList").innerHTML =
+        `<div class="empty">No songs found</div>`;
+      return;
+    }
+
+    $("songsList").innerHTML = list
+      .map(song => songRowHTML(song))
+      .join("");
+  }
+
+  function songRowHTML(song) {
+    const index = state.songs.indexOf(song);
+
+    return `
+      <div class="song-row">
+
+        <div class="song-row-art">
+          ${songCoverHTML(song)}
+        </div>
+
+        <div class="song-row-info">
+
+          <div class="song-row-title">
+            ${escapeHTML(song.title)}
+          </div>
+
+          <div class="song-row-artist">
+            ${escapeHTML(song.artist)}
+          </div>
+
+        </div>
 
         <button
-          class="card-play"
-          type="button"
+          class="row-play"
+          data-play-index="${index}"
         >
           ▶
         </button>
 
       </div>
-
-      <h3>
-        ${escapeHtml(song.title)}
-      </h3>
-
-      <p>
-        ${escapeHtml(song.artist)}
-      </p>
-
-      <small>
-        ${escapeHtml(song.category)}
-      </small>
-
     `;
+  }
 
+  function renderPlaylist() {
+    const playlist = getPlaylist();
 
-    card.addEventListener(
-      "click",
-      () =>
-        playSong(index)
+    if (!playlist.length) {
+      $("playlistList").innerHTML =
+        `<div class="empty">Playlist is empty</div>`;
+      return;
+    }
+
+    $("playlistList").innerHTML =
+      playlist.map(song => songRowHTML(song)).join("");
+  }
+
+  function renderLiked() {
+    const likedIds = getLikedIds();
+
+    const liked = state.songs.filter(song =>
+      likedIds.includes(String(song.id))
     );
 
+    if (!liked.length) {
+      $("likedList").innerHTML =
+        `<div class="empty">No liked songs</div>`;
+      return;
+    }
 
-    card
-      .querySelector(
-        ".card-play"
-      )
-      ?.addEventListener(
-        "click",
-        event => {
-
-          event.stopPropagation();
-
-          playSong(index);
-
-        }
-      );
-
-
-    return card;
-
+    $("likedList").innerHTML =
+      liked.map(song => songRowHTML(song)).join("");
   }
 
+  /* --------------------------------------------------
+     PLAYLIST
+  -------------------------------------------------- */
 
-  /* =====================================================
-     HOME
-  ===================================================== */
-
-  function renderHome() {
-
-    const container =
-      $("recentSongs");
-
-
-    if (!container) return;
-
-
-    container.innerHTML =
-      "";
-
-
-    state.songs
-      .slice(0,8)
-      .forEach(
-        song => {
-
-          container.appendChild(
-            createSongCard(
-              song
-            )
-          );
-
-        }
-      );
-
+  function getPlaylist() {
+    return state.songs;
   }
 
+  function getLikedIds() {
+    try {
+      return JSON.parse(
+        localStorage.getItem("swarajLiked") || "[]"
+      ).map(String);
+    } catch (_) {
+      return [];
+    }
+  }
 
-  /* =====================================================
-     CATEGORIES
-  ===================================================== */
+  function isLiked(song) {
+    return getLikedIds().includes(String(song.id));
+  }
 
-  function renderCategories() {
+  function toggleLike() {
+    const song = state.songs[state.currentIndex];
 
-    const grid =
-      $("categoriesGrid");
+    if (!song) return;
 
+    let liked = getLikedIds();
 
-    if (!grid) return;
+    const id = String(song.id);
 
+    if (liked.includes(id)) {
+      liked = liked.filter(x => x !== id);
+    } else {
+      liked.push(id);
+    }
 
-    const groups =
-      {};
+    localStorage.setItem(
+      "swarajLiked",
+      JSON.stringify(liked)
+    );
 
+    updateLikeButton();
+    renderLiked();
+  }
 
-    state.songs.forEach(
-      song => {
+  function restorePlaylist() {
+    renderPlaylist();
+  }
 
-        const category =
-          song.category ||
-          "Other";
+  /* --------------------------------------------------
+     AUDIO PLAYER
+  -------------------------------------------------- */
 
+  async function playSong(index) {
+    if (
+      index < 0 ||
+      index >= state.songs.length
+    ) {
+      return;
+    }
 
-        if (!groups[category]) {
+    const song = state.songs[index];
 
-          groups[category] =
-            [];
+    state.currentIndex = index;
 
+    updatePlayerInfo(song);
+
+    /*
+      IMPORTANT:
+      Every new song starts in audio mode.
+      YouTube video is ALWAYS hidden until Watch Video
+      is clicked.
+    */
+
+    hideYouTubeVideo();
+
+    if (song.type === "youtube") {
+      await playYouTubeAudio(song);
+    } else {
+      await playMP3(song);
+    }
+
+    updateMediaSession(song);
+  }
+
+  async function playMP3(song) {
+    stopYouTube();
+
+    const url = getAudioUrl(song);
+
+    if (!url) {
+      console.error("No MP3 URL:", song);
+      return;
+    }
+
+    audio.pause();
+
+    audio.src = url;
+    audio.currentTime = 0;
+
+    audio.volume =
+      Number($("volumeBar").value) || 1;
+
+    try {
+      await audio.play();
+
+      state.isPlaying = true;
+
+      updatePlayButton();
+
+      startProgressTimer();
+
+    } catch (error) {
+      console.error("MP3 play error:", error);
+    }
+  }
+
+  async function playYouTubeAudio(song) {
+    const id = song.youtubeId;
+
+    if (!id) {
+      console.error("Invalid YouTube URL:", song);
+      return;
+    }
+
+    /*
+      YouTube video is loaded but visually hidden.
+      The player remains the actual YouTube player so that
+      playback is handled by YouTube.
+    */
+
+    await loadYouTubeAPI();
+
+    createYouTubePlayer(id);
+
+    if (state.youtubePlayer) {
+      state.youtubePlayer.loadVideoById(id);
+      state.youtubePlayer.playVideo();
+
+      state.isPlaying = true;
+
+      updatePlayButton();
+
+      startProgressTimer();
+    }
+  }
+
+  /* --------------------------------------------------
+     YOUTUBE API
+  -------------------------------------------------- */
+
+  function loadYouTubeAPI() {
+    return new Promise(resolve => {
+
+      if (window.YT && window.YT.Player) {
+        state.youtubeReady = true;
+        resolve();
+        return;
+      }
+
+      if (state.youtubeApiLoading) {
+        const timer = setInterval(() => {
+          if (window.YT && window.YT.Player) {
+            clearInterval(timer);
+            state.youtubeReady = true;
+            resolve();
+          }
+        }, 100);
+
+        return;
+      }
+
+      state.youtubeApiLoading = true;
+
+      const oldCallback = window.onYouTubeIframeAPIReady;
+
+      window.onYouTubeIframeAPIReady = () => {
+        if (typeof oldCallback === "function") {
+          oldCallback();
         }
 
+        state.youtubeReady = true;
+        resolve();
+      };
 
-        groups[category].push(
-          song
-        );
+      const script = document.createElement("script");
 
+      script.src =
+        "https://www.youtube.com/iframe_api";
+
+      script.async = true;
+
+      document.head.appendChild(script);
+    });
+  }
+
+  function createYouTubePlayer(videoId) {
+    if (!state.youtubeReady) return;
+
+    if (state.youtubePlayer) {
+      try {
+        state.youtubePlayer.loadVideoById(videoId);
+        return;
+      } catch (_) {}
+    }
+
+    state.youtubePlayer = new YT.Player(
+      "youtubePlayer",
+      {
+        videoId,
+
+        playerVars: {
+          autoplay: 1,
+          controls: 1,
+          rel: 0,
+          playsinline: 1,
+          modestbranding: 1
+        },
+
+        events: {
+          onReady: event => {
+            event.target.setVolume(
+              Number($("volumeBar").value) * 100
+            );
+
+            event.target.playVideo();
+
+            startProgressTimer();
+          },
+
+          onStateChange: event => {
+
+            if (
+              event.data === YT.PlayerState.PLAYING
+            ) {
+              state.isPlaying = true;
+              updatePlayButton();
+            }
+
+            if (
+              event.data === YT.PlayerState.PAUSED
+            ) {
+              state.isPlaying = false;
+              updatePlayButton();
+            }
+
+            if (
+              event.data === YT.PlayerState.ENDED
+            ) {
+              playNext();
+            }
+          }
+        }
       }
     );
-
-
-    grid.innerHTML =
-      "";
-
-
-    Object.entries(groups)
-      .forEach(
-        ([name,songs]) => {
-
-          const button =
-            document.createElement(
-              "button"
-            );
-
-
-          button.className =
-            "category-card";
-
-
-          button.innerHTML = `
-            <strong>
-              ${escapeHtml(name)}
-            </strong>
-
-            <span>
-              ${songs.length} songs
-            </span>
-          `;
-
-
-          button.addEventListener(
-            "click",
-            () => {
-
-              const container =
-                $("categorySongs");
-
-
-              if (!container) return;
-
-
-              container.innerHTML =
-                "";
-
-
-              songs.forEach(
-                song => {
-
-                  container.appendChild(
-                    createSongCard(
-                      song
-                    )
-                  );
-
-                }
-              );
-
-            }
-          );
-
-
-          grid.appendChild(
-            button
-          );
-
-        }
-      );
-
   }
 
+  function stopYouTube() {
+    if (!state.youtubePlayer) return;
 
-  /* =====================================================
-     FAVORITES
-  ===================================================== */
-
-  function renderFavorites() {
-
-    const container =
-      $("favoritesList");
-
-
-    if (!container) return;
-
-
-    container.innerHTML =
-      "";
-
-
-    state.songs
-      .filter(
-        song =>
-          state.favorites.includes(
-            song.id
-          )
-      )
-      .forEach(
-        song => {
-
-          container.appendChild(
-            createSongCard(
-              song
-            )
-          );
-
-        }
-      );
-
+    try {
+      state.youtubePlayer.stopVideo();
+    } catch (_) {}
   }
 
+  /* --------------------------------------------------
+     WATCH VIDEO
+  -------------------------------------------------- */
 
-  /* =====================================================
-     STATS
-  ===================================================== */
+  function showYouTubeVideo() {
+    const song = state.songs[state.currentIndex];
 
-  function updateStats() {
-
-    const mp3 =
-      state.songs.filter(
-        song =>
-          song.type === "mp3"
-      ).length;
-
-
-    const youtube =
-      state.songs.filter(
-        song =>
-          song.type === "youtube"
-      ).length;
-
-
-    const categories =
-      new Set(
-        state.songs.map(
-          song =>
-            song.category
-        )
-      ).size;
-
-
-    if ($("mp3Count")) {
-
-      $("mp3Count").textContent =
-        mp3;
-
+    if (!song || song.type !== "youtube") {
+      return;
     }
 
+    $("videoContainer").classList.remove("hidden");
 
-    if ($("videoCount")) {
+    $("watchVideoBtn").textContent =
+      "✕ Hide Video";
 
-      $("videoCount").textContent =
-        youtube;
-
-    }
-
-
-    if ($("categoryCount")) {
-
-      $("categoryCount").textContent =
-        categories;
-
-    }
-
-  }
-
-
-  /* =====================================================
-     CURRENT SONG
-  ===================================================== */
-
-  function updateCurrentSong() {
-
-    const song =
-      state.currentSong;
-
-
-    if (!song) return;
-
-
-    const title =
-      $("videoPlayerTitle");
-
-
-    if (title) {
-
-      title.textContent =
-        song.title;
-
-    }
-
-
-    document
-      .querySelectorAll(
-        "[data-current-title]"
-      )
-      .forEach(
-        el =>
-          el.textContent =
-            song.title
-      );
-
-  }
-
-
-  /* =====================================================
-     MINI PLAYER
-  ===================================================== */
-
-  function updateMiniPlayer() {
-
-    const song =
-      state.currentSong;
-
-
-    if (!song) return;
-
-
-    const mini =
-      $("miniPlayer");
-
-
-    if (!mini) return;
-
-
-    mini.classList.remove(
-      "hidden"
-    );
-
-
-    const image =
-      mini.querySelector(
-        "[data-mini-image]"
-      );
-
-
-    const title =
-      mini.querySelector(
-        "[data-mini-title]"
-      );
-
-
-    const artist =
-      mini.querySelector(
-        "[data-mini-artist]"
-      );
-
-
-    if (image) {
-
-      image.src =
-        song.cover;
-
-    }
-
-
-    if (title) {
-
-      title.textContent =
-        song.title;
-
-    }
-
-
-    if (artist) {
-
-      artist.textContent =
-        song.artist;
-
-    }
-
-  }
-
-
-  function updatePlayButtons(
-    playing
-  ) {
-
-    document
-      .querySelectorAll(
-        "[data-player='play'],#videoPlayButton"
-      )
-      .forEach(
-        button => {
-
-          button.textContent =
-            playing
-              ? "❚❚"
-              : "▶";
-
-        }
-      );
-
-  }
-
-
-  /* =====================================================
-     HERO
-  ===================================================== */
-
-  function setupHero() {
-
-    $("heroPlayButton")
-      ?.addEventListener(
-        "click",
-        () => {
-
-          if (
-            state.songs.length
-          ) {
-
-            playSong(0);
-
-          }
-
-        }
-      );
-
-
-    $("heroVideoButton")
-      ?.addEventListener(
-        "click",
-        () => {
-
-          const index =
-            state.songs.findIndex(
-              song =>
-                song.type ===
-                "youtube"
-            );
-
-
-          if (index >= 0) {
-
-            showSection(
-              "youtube"
-            );
-
-            playSong(
-              index
-            );
-
-          } else {
-
-            showToast(
-              "No YouTube songs available"
-            );
-
-          }
-
-        }
-      );
-
-  }
-
-
-  /* =====================================================
-     ADMIN
-  ===================================================== */
-
-  function setupAdmin() {
-
-    $("adminLoginForm")
-      ?.addEventListener(
-        "submit",
-        loginAdmin
-      );
-
-
-    $("adminLogoutButton")
-      ?.addEventListener(
-        "click",
-        logoutAdmin
-      );
-
-
-    $("adminRefreshButton")
-      ?.addEventListener(
-        "click",
-        loadAdminSongs
-      );
-
-
-    $("youtubeUploadForm")
-      ?.addEventListener(
-        "submit",
-        uploadYoutube
-      );
-
-
-    $("mp3UploadForm")
-      ?.addEventListener(
-        "submit",
-        uploadMp3
-      );
-
-  }
-
-
-  function restoreAdmin() {
+    state.youtubeVisible = true;
 
     if (
-      state.adminKey
+      state.youtubePlayer &&
+      song.youtubeId
     ) {
-
-      verifyAdmin();
-
+      state.youtubePlayer.playVideo();
     }
-
   }
 
+  function hideYouTubeVideo() {
+    $("videoContainer").classList.add("hidden");
 
-  async function verifyAdmin() {
+    $("watchVideoBtn").classList.add("hidden");
 
-    try {
+    $("watchVideoBtn").textContent =
+      "▶ Watch Video";
 
-      const response =
-        await fetch(
-          "/api/admin/songs",
-          {
-            headers: {
-              "x-admin-key":
-                state.adminKey
-            }
-          }
-        );
+    state.youtubeVisible = false;
+  }
 
+  function toggleYouTubeVideo() {
+    const song = state.songs[state.currentIndex];
 
-      if (!response.ok) {
+    if (!song || song.type !== "youtube") {
+      return;
+    }
 
-        throw new Error();
+    if (state.youtubeVisible) {
+      hideYouTubeVideo();
+    } else {
+      showYouTubeVideo();
+    }
+  }
 
+  /* --------------------------------------------------
+     PLAYER INFO
+  -------------------------------------------------- */
+
+  function updatePlayerInfo(song) {
+    $("playerTitle").textContent =
+      song.title || "Unknown Song";
+
+    $("playerArtist").textContent =
+      song.artist || "SwarAJ";
+
+    const cover = getCover(song);
+
+    if (cover) {
+      $("playerArtwork").innerHTML =
+        `<img src="${escapeHTML(cover)}" alt="">`;
+    } else {
+      $("playerArtwork").innerHTML =
+        `<span>♫</span>`;
+    }
+
+    if (song.type === "youtube") {
+      $("watchVideoBtn").classList.remove("hidden");
+    } else {
+      $("watchVideoBtn").classList.add("hidden");
+    }
+
+    updateLikeButton();
+  }
+
+  function updateLikeButton() {
+    const song = state.songs[state.currentIndex];
+
+    $("likeBtn").textContent =
+      song && isLiked(song)
+        ? "♥"
+        : "♡";
+  }
+
+  /* --------------------------------------------------
+     PLAY / PAUSE
+  -------------------------------------------------- */
+
+  async function togglePlayPause() {
+    const song = state.songs[state.currentIndex];
+
+    if (!song) {
+      if (state.songs.length) {
+        await playSong(0);
       }
 
-
-      showAdminContent();
-
-
-    } catch {
-
-      logoutAdmin();
-
+      return;
     }
 
+    if (song.type === "youtube") {
+
+      if (!state.youtubePlayer) {
+        await playYouTubeAudio(song);
+        return;
+      }
+
+      const playerState =
+        state.youtubePlayer.getPlayerState();
+
+      if (
+        playerState === YT.PlayerState.PLAYING
+      ) {
+        state.youtubePlayer.pauseVideo();
+      } else {
+        state.youtubePlayer.playVideo();
+      }
+
+    } else {
+
+      if (audio.paused) {
+        try {
+          await audio.play();
+          state.isPlaying = true;
+        } catch (error) {
+          console.error(error);
+        }
+      } else {
+        audio.pause();
+        state.isPlaying = false;
+      }
+
+      updatePlayButton();
+    }
   }
 
+  function updatePlayButton() {
+    $("playPauseBtn").textContent =
+      state.isPlaying ? "❚❚" : "▶";
+  }
 
-  async function loginAdmin(
-    event
-  ) {
+  /* --------------------------------------------------
+     NEXT / PREVIOUS
+  -------------------------------------------------- */
 
-    event.preventDefault();
+  function playNext() {
+    if (!state.songs.length) return;
 
+    let next =
+      state.currentIndex + 1;
 
-    const key =
-      $("adminKey")
-        ?.value
-        .trim();
+    if (next >= state.songs.length) {
+      next = 0;
+    }
 
+    playSong(next);
+  }
 
-    if (!key) return;
+  function playPrevious() {
+    if (!state.songs.length) return;
 
+    let previous =
+      state.currentIndex - 1;
+
+    if (previous < 0) {
+      previous = state.songs.length - 1;
+    }
+
+    playSong(previous);
+  }
+
+  /* --------------------------------------------------
+     PROGRESS
+  -------------------------------------------------- */
+
+  function startProgressTimer() {
+    clearInterval(state.progressTimer);
+
+    state.progressTimer = setInterval(
+      updateProgress,
+      500
+    );
+  }
+
+  function updateProgress() {
+    const song =
+      state.songs[state.currentIndex];
+
+    if (!song) return;
+
+    let current = 0;
+    let duration = 0;
+
+    if (
+      song.type === "youtube" &&
+      state.youtubePlayer
+    ) {
+      try {
+        current =
+          state.youtubePlayer.getCurrentTime() || 0;
+
+        duration =
+          state.youtubePlayer.getDuration() || 0;
+      } catch (_) {}
+    } else {
+      current = audio.currentTime || 0;
+      duration = audio.duration || 0;
+    }
+
+    $("currentTime").textContent =
+      formatTime(current);
+
+    $("duration").textContent =
+      formatTime(duration);
+
+    $("progressBar").value =
+      duration
+        ? (current / duration) * 100
+        : 0;
+  }
+
+  function seek(value) {
+    const song =
+      state.songs[state.currentIndex];
+
+    if (!song) return;
+
+    const percent =
+      Number(value) / 100;
+
+    if (
+      song.type === "youtube" &&
+      state.youtubePlayer
+    ) {
+      const duration =
+        state.youtubePlayer.getDuration();
+
+      if (duration) {
+        state.youtubePlayer.seekTo(
+          duration * percent,
+          true
+        );
+      }
+    } else if (
+      Number.isFinite(audio.duration)
+    ) {
+      audio.currentTime =
+        audio.duration * percent;
+    }
+  }
+
+  /* --------------------------------------------------
+     MEDIA SESSION / BACKGROUND CONTROLS
+  -------------------------------------------------- */
+
+  function updateMediaSession(song) {
+
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
 
     try {
+      navigator.mediaSession.metadata =
+        new MediaMetadata({
+          title: song.title,
+          artist: song.artist,
+          album: "SwarAJ Music",
+          artwork: getCover(song)
+            ? [
+                {
+                  src: getCover(song),
+                  sizes: "512x512",
+                  type: "image/jpeg"
+                }
+              ]
+            : []
+        });
 
-      const response =
-        await fetch(
-          "/api/admin/login",
+      navigator.mediaSession.setActionHandler(
+        "play",
+        () => togglePlayPause()
+      );
+
+      navigator.mediaSession.setActionHandler(
+        "pause",
+        () => togglePlayPause()
+      );
+
+      navigator.mediaSession.setActionHandler(
+        "previoustrack",
+        () => playPrevious()
+      );
+
+      navigator.mediaSession.setActionHandler(
+        "nexttrack",
+        () => playNext()
+      );
+
+      navigator.mediaSession.setActionHandler(
+        "seekbackward",
+        () => {
+          seekRelative(-10);
+        }
+      );
+
+      navigator.mediaSession.setActionHandler(
+        "seekforward",
+        () => {
+          seekRelative(10);
+        }
+      );
+
+    } catch (error) {
+      console.warn(
+        "Media Session not fully supported",
+        error
+      );
+    }
+  }
+
+  function seekRelative(seconds) {
+    const song =
+      state.songs[state.currentIndex];
+
+    if (!song) return;
+
+    if (
+      song.type === "youtube" &&
+      state.youtubePlayer
+    ) {
+      const current =
+        state.youtubePlayer.getCurrentTime();
+
+      state.youtubePlayer.seekTo(
+        Math.max(0,current + seconds),
+        true
+      );
+
+    } else {
+      audio.currentTime =
+        Math.max(
+          0,
+          audio.currentTime + seconds
+        );
+    }
+  }
+
+  /* --------------------------------------------------
+     SEARCH
+  -------------------------------------------------- */
+
+  function searchSongs(value) {
+    const query =
+      String(value || "")
+        .trim()
+        .toLowerCase();
+
+    if (!query) {
+      state.filteredSongs =
+        [...state.songs];
+    } else {
+      state.filteredSongs =
+        state.songs.filter(song =>
+          [
+            song.title,
+            song.artist,
+            song.category
+          ]
+            .join(" ")
+            .toLowerCase()
+            .includes(query)
+        );
+    }
+
+    renderHome();
+    renderSongs();
+  }
+
+  /* --------------------------------------------------
+     NAVIGATION
+  -------------------------------------------------- */
+
+  function openSection(section) {
+
+    document
+      .querySelectorAll(".page-section")
+      .forEach(el =>
+        el.classList.remove("active")
+      );
+
+    const target =
+      $(`${section}Section`);
+
+    if (target) {
+      target.classList.add("active");
+    }
+
+    document
+      .querySelectorAll(".menu-item")
+      .forEach(btn =>
+        btn.classList.toggle(
+          "active",
+          btn.dataset.section === section
+        )
+      );
+
+    if (
+      window.innerWidth <= 900
+    ) {
+      $("sidebar").classList.remove("open");
+    }
+  }
+
+  /* --------------------------------------------------
+     ADMIN
+  -------------------------------------------------- */
+
+  async function adminLogin() {
+    const key =
+      $("adminKeyInput").value.trim();
+
+    if (!key) {
+      $("adminLoginMessage").textContent =
+        "Enter admin key.";
+      return;
+    }
+
+    $("adminLoginMessage").textContent =
+      "Checking...";
+
+    /*
+      Keeps backend admin protection.
+      Supports common endpoint names.
+    */
+
+    const endpoints = [
+      "/api/admin/login",
+      "/api/admin/auth",
+      "/api/admin/verify"
+    ];
+
+    let success = false;
+
+    for (const endpoint of endpoints) {
+
+      try {
+
+        const response = await fetch(
+          endpoint,
           {
-
-            method:
-              "POST",
-
+            method: "POST",
             headers: {
               "Content-Type":
                 "application/json"
             },
-
-            body:
-              JSON.stringify({
-                adminKey:
-                  key
-              })
-
+            body: JSON.stringify({
+              key
+            })
           }
         );
 
+        if (!response.ok) {
+          continue;
+        }
 
-      const data =
-        await response.json();
+        const data =
+          await response.json()
+            .catch(() => ({}));
 
+        if (
+          data.success !== false &&
+          data.authenticated !== false
+        ) {
+          success = true;
+          break;
+        }
 
-      if (!response.ok) {
-
-        throw new Error(
-          data.error ||
-          "Invalid admin key"
-        );
-
-      }
-
-
-      state.adminKey =
-        key;
-
-
-      localStorage.setItem(
-        "swarajAdminKey",
-        key
-      );
-
-
-      showAdminContent();
-
-      await loadAdminSongs();
-
-
-      showToast(
-        "Admin unlocked"
-      );
-
-
-    } catch (error) {
-
-      $("adminLoginMessage")
-        .textContent =
-          error.message;
-
+      } catch (_) {}
     }
 
-  }
+    if (!success) {
+      $("adminLoginMessage").textContent =
+        "Invalid admin key.";
+      return;
+    }
 
+    state.adminUnlocked = true;
 
-  function showAdminContent() {
-
-    $("adminLogin")
-      ?.classList.add(
-        "hidden"
-      );
-
-
-    $("adminContent")
-      ?.classList.remove(
-        "hidden"
-      );
-
-  }
-
-
-  function logoutAdmin() {
-
-    state.adminKey =
-      null;
-
-
-    localStorage.removeItem(
-      "swarajAdminKey"
+    sessionStorage.setItem(
+      "swarajAdmin",
+      "true"
     );
 
+    $("adminLoginBox")
+      .classList.add("hidden");
 
-    $("adminLogin")
-      ?.classList.remove(
-        "hidden"
-      );
+    $("adminPanel")
+      .classList.remove("hidden");
 
+    $("adminLoginMessage").textContent = "";
 
-    $("adminContent")
-      ?.classList.add(
-        "hidden"
-      );
-
+    openSection("admin");
   }
 
+  function restoreAdmin() {
+    if (
+      sessionStorage.getItem(
+        "swarajAdmin"
+      ) === "true"
+    ) {
+      state.adminUnlocked = true;
 
-  /* =====================================================
-     YOUTUBE UPLOAD
-  ===================================================== */
+      $("adminLoginBox")
+        .classList.add("hidden");
 
-  async function uploadYoutube(
-    event
-  ) {
-
-    event.preventDefault();
-
-
-    if (!state.adminKey) {
-
-      showToast(
-        "Admin key required"
-      );
-
-      return;
-
+      $("adminPanel")
+        .classList.remove("hidden");
     }
-
-
-    try {
-
-      const response =
-        await fetch(
-          "/api/admin/songs/youtube",
-          {
-
-            method:
-              "POST",
-
-            headers: {
-
-              "Content-Type":
-                "application/json",
-
-              "x-admin-key":
-                state.adminKey
-
-            },
-
-            body:
-              JSON.stringify({
-
-                title:
-                  $("youtubeTitle").value.trim(),
-
-                artist:
-                  $("youtubeArtist").value.trim(),
-
-                category:
-                  $("youtubeCategory").value.trim(),
-
-                coverUrl:
-                  $("youtubeCover").value.trim(),
-
-                youtubeUrl:
-                  $("youtubeUrl").value.trim()
-
-              })
-
-          }
-        );
-
-
-      const data =
-        await response.json();
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.error ||
-          "Upload failed"
-        );
-
-      }
-
-
-      event.target.reset();
-
-
-      $("youtubeArtist").value =
-        "YouTube";
-
-
-      $("youtubeCategory").value =
-        "Other";
-
-
-      showToast(
-        "YouTube song added"
-      );
-
-
-      await loadSongs();
-
-
-    } catch (error) {
-
-      showToast(
-        error.message
-      );
-
-    }
-
   }
 
+  /* --------------------------------------------------
+     ADMIN TABS
+  -------------------------------------------------- */
 
-  /* =====================================================
-     MP3 UPLOAD
-  ===================================================== */
+  function setupAdminTabs() {
 
-  async function uploadMp3(
-    event
-  ) {
+    document
+      .querySelectorAll(".admin-tab")
+      .forEach(button => {
 
-    event.preventDefault();
+        button.addEventListener(
+          "click",
+          () => {
 
+            document
+              .querySelectorAll(".admin-tab")
+              .forEach(btn =>
+                btn.classList.remove("active")
+              );
 
-    if (!state.adminKey) {
+            document
+              .querySelectorAll(
+                ".admin-tab-content"
+              )
+              .forEach(tab =>
+                tab.classList.remove("active")
+              );
 
-      showToast(
-        "Admin key required"
-      );
+            button.classList.add("active");
 
-      return;
+            const name =
+              button.dataset.adminTab;
 
-    }
-
-
-    try {
-
-      const response =
-        await fetch(
-          "/api/admin/songs/mp3-url",
-          {
-
-            method:
-              "POST",
-
-            headers: {
-
-              "Content-Type":
-                "application/json",
-
-              "x-admin-key":
-                state.adminKey
-
-            },
-
-            body:
-              JSON.stringify({
-
-                title:
-                  $("uploadTitle").value.trim(),
-
-                artist:
-                  $("uploadArtist").value.trim(),
-
-                category:
-                  $("uploadCategory").value.trim(),
-
-                coverUrl:
-                  $("uploadCover").value.trim(),
-
-                audioUrl:
-                  $("uploadAudioUrl").value.trim()
-
-              })
-
-          }
-        );
-
-
-      const data =
-        await response.json();
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.error ||
-          "Upload failed"
-        );
-
-      }
-
-
-      event.target.reset();
-
-
-      $("uploadArtist").value =
-        "SwarAJ";
-
-
-      $("uploadCategory").value =
-        "Other";
-
-
-      showToast(
-        "MP3 song added"
-      );
-
-
-      await loadSongs();
-
-
-    } catch (error) {
-
-      showToast(
-        error.message
-      );
-
-    }
-
-  }
-
-
-  /* =====================================================
-     ADMIN LIST
-  ===================================================== */
-
-  async function loadAdminSongs() {
-
-    if (!state.adminKey) return;
-
-
-    try {
-
-      const response =
-        await fetch(
-          "/api/admin/songs",
-          {
-            headers: {
-              "x-admin-key":
-                state.adminKey
+            if (name === "upload") {
+              $("uploadAdminTab")
+                .classList.add("active");
             }
+
+            if (name === "youtube") {
+              $("youtubeAdminTab")
+                .classList.add("active");
+            }
+
           }
         );
 
-
-      if (!response.ok) return;
-
-
-      const data =
-        await response.json();
-
-
-      renderAdminSongs(
-        data.songs || []
-      );
-
-    } catch {}
-
+      });
   }
 
+  /* --------------------------------------------------
+     MP3 UPLOAD
+  -------------------------------------------------- */
 
-  function renderAdminSongs(
-    songs = []
-  ) {
+  async function uploadMP3(event) {
 
-    const container =
-      $("adminSongList");
+    event.preventDefault();
 
+    const form =
+      $("uploadForm");
 
-    if (!container) return;
+    const file =
+      $("uploadFile").files[0];
 
+    if (!file) {
+      $("uploadMessage").textContent =
+        "Select an MP3 file.";
+      return;
+    }
 
-    container.innerHTML =
-      "";
+    const formData =
+      new FormData(form);
 
+    $("uploadMessage").textContent =
+      "Uploading...";
 
-    songs.forEach(
-      song => {
+    try {
 
-        const row =
-          document.createElement(
-            "div"
+      const response =
+        await fetch(
+          "/api/admin/upload",
+          {
+            method: "POST",
+            body: formData,
+            headers: getAdminHeaders()
+          }
+        );
+
+      const data =
+        await response.json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          `Upload failed (${response.status})`
+        );
+      }
+
+      $("uploadMessage").textContent =
+        data.message ||
+        "Song uploaded successfully.";
+
+      form.reset();
+
+      await loadSongs();
+
+    } catch (error) {
+
+      console.error(error);
+
+      $("uploadMessage").textContent =
+        error.message ||
+        "Upload failed.";
+
+    }
+  }
+
+  /* --------------------------------------------------
+     YOUTUBE ADD
+  -------------------------------------------------- */
+
+  async function addYouTubeSong(event) {
+
+    event.preventDefault();
+
+    const title =
+      $("youtubeTitle").value.trim();
+
+    const artist =
+      $("youtubeArtist").value.trim();
+
+    const category =
+      $("youtubeCategory").value.trim();
+
+    const url =
+      $("youtubeUrl").value.trim();
+
+    const cover =
+      $("youtubeCover").value.trim();
+
+    if (!title || !url) {
+      $("youtubeMessage").textContent =
+        "Title and YouTube URL are required.";
+      return;
+    }
+
+    const youtubeId =
+      extractYouTubeId(url);
+
+    if (!youtubeId) {
+      $("youtubeMessage").textContent =
+        "Invalid YouTube URL.";
+      return;
+    }
+
+    $("youtubeMessage").textContent =
+      "Adding YouTube song...";
+
+    try {
+
+      const response =
+        await fetch(
+          "/api/admin/youtube",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+
+              ...getAdminHeaders()
+            },
+
+            body: JSON.stringify({
+              title,
+              artist,
+              category,
+              url,
+              cover,
+              youtubeId,
+              type: "youtube"
+            })
+          }
+        );
+
+      const data =
+        await response.json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          `Request failed (${response.status})`
+        );
+      }
+
+      $("youtubeMessage").textContent =
+        data.message ||
+        "YouTube song added successfully.";
+
+      $("youtubeForm").reset();
+
+      await loadSongs();
+
+    } catch (error) {
+
+      console.error(error);
+
+      $("youtubeMessage").textContent =
+        error.message ||
+        "Unable to add YouTube song.";
+
+    }
+  }
+
+  function extractYouTubeId(urlString) {
+
+    try {
+
+      const url =
+        new URL(urlString);
+
+      if (
+        url.hostname === "youtu.be" ||
+        url.hostname === "www.youtu.be"
+      ) {
+        return url.pathname
+          .substring(1)
+          .split("/")[0];
+      }
+
+      if (
+        url.hostname.includes("youtube.com")
+      ) {
+
+        const v =
+          url.searchParams.get("v");
+
+        if (v) return v;
+
+        const parts =
+          url.pathname.split("/");
+
+        const embed =
+          parts.indexOf("embed");
+
+        if (
+          embed >= 0 &&
+          parts[embed + 1]
+        ) {
+          return parts[embed + 1];
+        }
+
+        const shorts =
+          parts.indexOf("shorts");
+
+        if (
+          shorts >= 0 &&
+          parts[shorts + 1]
+        ) {
+          return parts[shorts + 1];
+        }
+      }
+
+    } catch (_) {}
+
+    return "";
+  }
+
+  function getAdminHeaders() {
+
+    const key =
+      $("adminKeyInput").value.trim();
+
+    return key
+      ? {
+          "X-Admin-Key": key
+        }
+      : {};
+  }
+
+  /* --------------------------------------------------
+     EVENTS
+  -------------------------------------------------- */
+
+  function setupEvents() {
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        const play =
+          event.target.closest(
+            "[data-play-index]"
           );
 
+        if (play) {
 
-        row.className =
-          "admin-song-row";
+          const index =
+            Number(
+              play.dataset.playIndex
+            );
 
-
-        row.innerHTML = `
-
-          <img
-            src="${escapeAttr(
-              song.cover_url ||
-              song.cover ||
-              "/images/ganpati.jpg"
-            )}"
-            alt=""
-          >
-
-          <div class="admin-song-info">
-
-            <strong>
-              ${escapeHtml(
-                song.title ||
-                song.name ||
-                "Untitled"
-              )}
-            </strong>
-
-            <small>
-              ${escapeHtml(
-                song.artist ||
-                "SwarAJ"
-              )}
-            </small>
-
-          </div>
-
-        `;
-
-
-        container.appendChild(
-          row
-        );
-
+          playSong(index);
+        }
       }
     );
 
-  }
+    document
+      .querySelectorAll(".menu-item")
+      .forEach(button => {
 
+        button.addEventListener(
+          "click",
+          () =>
+            openSection(
+              button.dataset.section
+            )
+        );
 
-  /* =====================================================
-     HELPERS
-  ===================================================== */
+      });
 
-  function escapeHtml(
-    value
-  ) {
-
-    return String(
-      value || ""
-    )
-      .replaceAll(
-        "&",
-        "&amp;"
-      )
-      .replaceAll(
-        "<",
-        "&lt;"
-      )
-      .replaceAll(
-        ">",
-        "&gt;"
-      )
-      .replaceAll(
-        '"',
-        "&quot;"
-      )
-      .replaceAll(
-        "'",
-        "&#039;"
+    $("menuToggle")
+      .addEventListener(
+        "click",
+        () =>
+          $("sidebar")
+            .classList.toggle("open")
       );
 
-  }
+    $("adminTopBtn")
+      .addEventListener(
+        "click",
+        () => openSection("admin")
+      );
 
+    $("playPauseBtn")
+      .addEventListener(
+        "click",
+        togglePlayPause
+      );
 
-  function escapeAttr(
-    value
-  ) {
+    $("nextBtn")
+      .addEventListener(
+        "click",
+        playNext
+      );
 
-    return escapeHtml(
-      value
-    );
+    $("prevBtn")
+      .addEventListener(
+        "click",
+        playPrevious
+      );
 
-  }
+    $("likeBtn")
+      .addEventListener(
+        "click",
+        toggleLike
+      );
 
+    $("watchVideoBtn")
+      .addEventListener(
+        "click",
+        toggleYouTubeVideo
+      );
 
-  function showToast(
-    message
-  ) {
+    $("progressBar")
+      .addEventListener(
+        "input",
+        event =>
+          seek(event.target.value)
+      );
 
-    const toast =
-      $("swarajToast");
+    $("volumeBar")
+      .addEventListener(
+        "input",
+        event => {
 
+          const volume =
+            Number(event.target.value);
 
-    if (!toast) return;
+          audio.volume = volume;
 
+          if (state.youtubePlayer) {
+            try {
+              state.youtubePlayer.setVolume(
+                volume * 100
+              );
+            } catch (_) {}
+          }
 
-    toast.textContent =
-      message;
+        }
+      );
 
+    $("searchInput")
+      .addEventListener(
+        "input",
+        event => {
 
-    toast.classList.add(
-      "show"
-    );
+          clearTimeout(
+            state.searchTimer
+          );
 
+          state.searchTimer =
+            setTimeout(
+              () =>
+                searchSongs(
+                  event.target.value
+                ),
+              150
+            );
+        }
+      );
 
-    clearTimeout(
-      showToast.timer
-    );
-
-
-    showToast.timer =
-      setTimeout(
+    $("playAllBtn")
+      .addEventListener(
+        "click",
         () => {
 
-          toast.classList.remove(
-            "show"
-          );
+          if (state.songs.length) {
+            playSong(0);
+          }
 
-        },
-        3000
+        }
       );
 
+    $("shuffleBtn")
+      .addEventListener(
+        "click",
+        () => {
+
+          if (!state.songs.length) return;
+
+          const random =
+            Math.floor(
+              Math.random() *
+              state.songs.length
+            );
+
+          playSong(random);
+
+        }
+      );
+
+    $("adminLoginBtn")
+      .addEventListener(
+        "click",
+        adminLogin
+      );
+
+    $("uploadForm")
+      .addEventListener(
+        "submit",
+        uploadMP3
+      );
+
+    $("youtubeForm")
+      .addEventListener(
+        "submit",
+        addYouTubeSong
+      );
+
+    audio.addEventListener(
+      "play",
+      () => {
+        state.isPlaying = true;
+        updatePlayButton();
+      }
+    );
+
+    audio.addEventListener(
+      "pause",
+      () => {
+        state.isPlaying = false;
+        updatePlayButton();
+      }
+    );
+
+    audio.addEventListener(
+      "ended",
+      playNext
+    );
+
+    audio.addEventListener(
+      "loadedmetadata",
+      updateProgress
+    );
+
   }
+
+  /* --------------------------------------------------
+     INITIALIZE
+  -------------------------------------------------- */
+
+  function init() {
+
+    setupEvents();
+
+    setupAdminTabs();
+
+    restoreAdmin();
+
+    loadSongs();
+
+  }
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    init
+  );
 
 })();

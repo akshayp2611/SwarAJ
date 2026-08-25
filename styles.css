@@ -6,10 +6,15 @@
   --bg: #060812;
   --panel: rgba(17, 21, 38, .78);
   --panel2: rgba(25, 31, 54, .75);
+
   --text: #fff;
   --muted: #9298ad;
+
   --accent: #7c5cff;
   --accent2: #00e5ff;
+
+  --pink: #ff3cac;
+
   --border: rgba(255,255,255,.08);
 }
 
@@ -18,20 +23,29 @@ body {
   margin: 0;
   width: 100%;
   min-height: 100%;
+
   background:
+
     radial-gradient(
       circle at 70% 10%,
       rgba(124,92,255,.18),
       transparent 30%
     ),
+
     radial-gradient(
       circle at 10% 90%,
       rgba(0,229,255,.10),
       transparent 30%
     ),
+
     var(--bg);
+
   color: var(--text);
-  font-family: Inter, Arial, sans-serif;
+
+  font-family:
+    Inter,
+    Arial,
+    sans-serif;
 }
 
 body {
@@ -57,7 +71,9 @@ button {
 ===================================================== */
 
 .sidebar {
+
   position: fixed;
+
   left: 0;
   top: 0;
   bottom: 90px;
@@ -66,11 +82,14 @@ button {
 
   padding: 25px 18px;
 
-  background: rgba(7,9,20,.88);
+  background:
+    rgba(7,9,20,.88);
 
-  backdrop-filter: blur(25px);
+  backdrop-filter:
+    blur(25px);
 
-  border-right: 1px solid var(--border);
+  border-right:
+    1px solid var(--border);
 
   z-index: 100;
 
@@ -81,17 +100,22 @@ button {
 
 
 /* =====================================================
-   3D LIQUID SWARAJ LOGO
+   SMALL SWARAJ LOGO
 ===================================================== */
 
 .brand {
+
   display: flex;
+
   align-items: center;
+
   gap: 13px;
+
   margin-bottom: 45px;
 }
 
 .logo-disc {
+
   width: 58px;
   height: 58px;
 
@@ -100,32 +124,42 @@ button {
   position: relative;
 
   display: grid;
+
   place-items: center;
 
   overflow: hidden;
 
   border-radius:
-    42% 58% 55% 45%;
+    46% 54% 52% 48%;
 
   background:
+
     radial-gradient(
       circle at 28% 20%,
-      rgba(255,255,255,.95) 0 4%,
-      transparent 10%
+      rgba(255,255,255,.95),
+      transparent 8%
     ),
+
     linear-gradient(
       135deg,
-      #00e5ff 0%,
-      #5b5cff 42%,
-      #8b45ff 68%,
-      #ff3cac 100%
+      #00e5ff,
+      #7c5cff 48%,
+      #ff3cac
     );
 
   box-shadow:
-    0 0 20px rgba(124,92,255,.45),
-    0 8px 25px rgba(0,0,0,.35),
-    inset 7px 7px 18px rgba(255,255,255,.25),
-    inset -8px -8px 18px rgba(0,0,0,.18);
+
+    0 0 20px
+      rgba(124,92,255,.55),
+
+    0 0 45px
+      rgba(0,229,255,.15),
+
+    inset 7px 7px 18px
+      rgba(255,255,255,.28),
+
+    inset -10px -12px 22px
+      rgba(0,0,0,.22);
 
   animation:
     swarajLogoMorph 6s ease-in-out infinite,
@@ -133,6 +167,31 @@ button {
 }
 
 .logo-disc::before {
+
+  content: "";
+
+  position: absolute;
+
+  width: 34px;
+  height: 34px;
+
+  left: -7px;
+  bottom: -10px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255,255,255,.18);
+
+  filter:
+    blur(3px);
+
+  animation:
+    swarajLiquid1 3s ease-in-out infinite alternate;
+}
+
+.logo-disc::after {
+
   content: "";
 
   position: absolute;
@@ -140,43 +199,23 @@ button {
   width: 28px;
   height: 28px;
 
-  left: -5px;
-  bottom: -6px;
+  right: -5px;
+  top: 4px;
 
   border-radius: 50%;
 
   background:
     rgba(255,255,255,.18);
 
-  filter: blur(3px);
+  filter:
+    blur(3px);
 
   animation:
-    swarajLiquidOne 3s ease-in-out infinite alternate;
-}
-
-.logo-disc::after {
-  content: "";
-
-  position: absolute;
-
-  width: 22px;
-  height: 22px;
-
-  right: -4px;
-  top: 3px;
-
-  border-radius: 50%;
-
-  background:
-    rgba(255,255,255,.20);
-
-  filter: blur(3px);
-
-  animation:
-    swarajLiquidTwo 4s ease-in-out infinite alternate;
+    swarajLiquid2 4s ease-in-out infinite alternate;
 }
 
 .logo-disc span {
+
   position: relative;
 
   z-index: 5;
@@ -189,30 +228,37 @@ button {
 
   text-shadow:
     0 3px 8px rgba(0,0,0,.45);
-
-  user-select: none;
 }
 
 .brand strong {
+
   display: block;
+
   font-size: 21px;
 }
 
 .brand small {
-  color: var(--muted);
+
+  color:
+    var(--muted);
 }
+
+
+/* =====================================================
+   SMALL LOGO ANIMATION
+===================================================== */
 
 @keyframes swarajLogoMorph {
 
   0%,
   100% {
     border-radius:
-      42% 58% 55% 45%;
+      46% 54% 52% 48%;
   }
 
   50% {
     border-radius:
-      58% 42% 42% 58%;
+      60% 40% 42% 58%;
   }
 }
 
@@ -228,13 +274,13 @@ button {
 
   50% {
     transform:
-      translateY(-4px)
+      translateY(-5px)
       rotate(5deg)
       scale(1.05);
   }
 }
 
-@keyframes swarajLiquidOne {
+@keyframes swarajLiquid1 {
 
   from {
     transform:
@@ -244,12 +290,12 @@ button {
 
   to {
     transform:
-      translate(17px,-13px)
+      translate(18px,-12px)
       scale(1.35);
   }
 }
 
-@keyframes swarajLiquidTwo {
+@keyframes swarajLiquid2 {
 
   from {
     transform:
@@ -259,22 +305,25 @@ button {
 
   to {
     transform:
-      translate(-12px,12px)
-      scale(1.3);
+      translate(-12px,16px)
+      scale(1.25);
   }
 }
 
 
 /* =====================================================
-   SIDE MENU
+   MENU
 ===================================================== */
 
 .menu {
+
   display: grid;
+
   gap: 8px;
 }
 
 .menu-item {
+
   position: relative;
 
   overflow: hidden;
@@ -283,7 +332,8 @@ button {
 
   background: transparent;
 
-  color: var(--muted);
+  color:
+    var(--muted);
 
   text-align: left;
 
@@ -302,6 +352,7 @@ button {
 
 .menu-item:hover,
 .menu-item.active {
+
   background:
     rgba(124,92,255,.15);
 
@@ -309,6 +360,7 @@ button {
 }
 
 .menu-item::before {
+
   content: "";
 
   position: absolute;
@@ -323,6 +375,7 @@ button {
   border-radius: 5px;
 
   background:
+
     linear-gradient(
       180deg,
       var(--accent2),
@@ -338,11 +391,13 @@ button {
 
 .menu-item:hover::before,
 .menu-item.active::before {
+
   transform:
     scaleY(1);
 }
 
 .sidebar-footer {
+
   position: absolute;
 
   left: 18px;
@@ -354,34 +409,40 @@ button {
   border-top:
     1px solid var(--border);
 
-  color: var(--muted);
+  color:
+    var(--muted);
 }
 
 .sidebar-footer strong {
+
   display: block;
+
   color: white;
 }
 
 .sidebar-footer small {
+
   display: block;
+
   margin-top: 4px;
 }
 
 
 /* =====================================================
-   DRAWER OVERLAY
+   DRAWER
 ===================================================== */
 
 .drawer-overlay {
+
   position: fixed;
 
   inset: 0;
 
   background:
-    rgba(0,0,0,.55);
+    rgba(0,0,0,.62);
 
   backdrop-filter:
-    blur(4px);
+    blur(5px);
 
   opacity: 0;
 
@@ -389,12 +450,15 @@ button {
 
   pointer-events: none;
 
-  transition: .25s;
+  transition:
+    opacity .25s ease;
 
   z-index: 90;
 }
 
-.drawer-overlay.active {
+.drawer-overlay.active,
+.drawer-overlay.show {
+
   opacity: 1;
 
   visibility: visible;
@@ -403,6 +467,7 @@ button {
 }
 
 body.drawer-open {
+
   overflow: hidden;
 }
 
@@ -412,15 +477,23 @@ body.drawer-open {
 ===================================================== */
 
 .main {
+
   margin-left: 250px;
 
   padding-bottom: 120px;
 }
 
+
+/* =====================================================
+   TOP BAR
+===================================================== */
+
 .topbar {
+
   height: 76px;
 
-  padding: 15px 30px;
+  padding:
+    15px 30px;
 
   display: flex;
 
@@ -442,6 +515,7 @@ body.drawer-open {
 }
 
 .search-box {
+
   flex: 1;
 
   max-width: 650px;
@@ -463,6 +537,7 @@ body.drawer-open {
 }
 
 .search-box input {
+
   width: 100%;
 
   border: 0;
@@ -478,6 +553,7 @@ body.drawer-open {
 
 .icon-btn,
 .mobile-menu {
+
   border: 0;
 
   background:
@@ -497,6 +573,7 @@ body.drawer-open {
 ===================================================== */
 
 .page {
+
   display: none;
 
   padding:
@@ -504,21 +581,26 @@ body.drawer-open {
 }
 
 .page.active {
+
   display: block;
 }
 
 .page-title {
+
   margin:
     25px 0;
 }
 
 .page-title h1 {
+
   margin:
     0 0 7px;
 }
 
 .page-title p {
-  color: var(--muted);
+
+  color:
+    var(--muted);
 }
 
 
@@ -527,6 +609,7 @@ body.drawer-open {
 ===================================================== */
 
 .hero {
+
   min-height: 410px;
 
   margin:
@@ -545,24 +628,53 @@ body.drawer-open {
   padding: 50px;
 
   background:
+
     linear-gradient(
       120deg,
       rgba(124,92,255,.3),
       rgba(0,229,255,.08)
     ),
+
     rgba(255,255,255,.035);
 
   border:
     1px solid var(--border);
 }
 
+.hero::before {
+
+  content: "";
+
+  position: absolute;
+
+  width: 400px;
+  height: 400px;
+
+  right: 0;
+  top: -180px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(124,92,255,.08);
+
+  filter:
+    blur(50px);
+
+  pointer-events: none;
+}
+
 .hero-content {
+
   position: relative;
-  z-index: 2;
+
+  z-index: 5;
 }
 
 .eyebrow {
-  color: var(--accent2);
+
+  color:
+    var(--accent2);
 
   letter-spacing: 4px;
 
@@ -570,6 +682,7 @@ body.drawer-open {
 }
 
 .hero h1 {
+
   font-size:
     clamp(50px, 8vw, 100px);
 
@@ -577,162 +690,655 @@ body.drawer-open {
     10px 0;
 
   line-height: .9;
+
+  letter-spacing:
+    -4px;
 }
 
 .hero p {
-  color: var(--muted);
-}
 
-.hero-logo {
-  margin-left: auto;
+  color:
+    var(--muted);
+
+  max-width: 480px;
+
+  line-height: 1.6;
 }
 
 
 /* =====================================================
-   LIQUID HERO ORB
+   FRONT PAGE LOGO
 ===================================================== */
 
-.liquid-orb {
-  width: 300px;
-  height: 300px;
+.hero-logo {
 
-  border-radius:
-    44% 56% 55% 45%;
-
-  position: relative;
-
-  background:
-    radial-gradient(
-      circle at 30% 25%,
-      #fff,
-      transparent 5%
-    ),
-    linear-gradient(
-      135deg,
-      #00e5ff,
-      #7c5cff 45%,
-      #ff3cac
-    );
-
-  box-shadow:
-    0 30px 90px rgba(124,92,255,.4),
-    inset 20px 20px 40px
-      rgba(255,255,255,.18);
-
-  animation:
-    orbMorph 7s ease-in-out infinite,
-    orbFloat 5s ease-in-out infinite;
-}
-
-.orb-letter {
-  position: absolute;
-
-  inset: 0;
+  width: 390px;
+  height: 390px;
 
   display: grid;
 
   place-items: center;
 
-  font-size: 110px;
+  position: relative;
 
-  font-weight: 1000;
+  margin-left: auto;
 
-  color: white;
+  perspective: 1000px;
 
-  text-shadow:
-    0 10px 25px rgba(0,0,0,.35);
-
-  z-index: 5;
+  z-index: 4;
 }
 
-.liquid-orb i {
+
+/* Circular motion holder */
+
+.hero-liquid-orbit {
+
+  width: 330px;
+  height: 330px;
+
+  position: relative;
+
+  display: grid;
+
+  place-items: center;
+
+  transform-style:
+    preserve-3d;
+
+  animation:
+    swarajCircularMotion 8s linear infinite;
+}
+
+
+/* Main liquid sphere/blob */
+
+.hero-liquid-logo {
+
+  width: 250px;
+  height: 250px;
+
+  position: relative;
+
+  display: grid;
+
+  place-items: center;
+
+  overflow: hidden;
+
+  border-radius:
+    47% 53% 58% 42%;
+
+  background:
+
+    radial-gradient(
+      circle at 28% 18%,
+      rgba(255,255,255,.95) 0%,
+      rgba(255,255,255,.28) 5%,
+      transparent 15%
+    ),
+
+    radial-gradient(
+      circle at 72% 76%,
+      rgba(255,0,170,.38),
+      transparent 35%
+    ),
+
+    linear-gradient(
+      135deg,
+      #00e5ff 0%,
+      #247cff 25%,
+      #7c5cff 52%,
+      #b83cff 76%,
+      #ff3cac 100%
+    );
+
+  box-shadow:
+
+    0 30px 80px
+      rgba(124,92,255,.45),
+
+    0 0 70px
+      rgba(0,229,255,.20),
+
+    0 0 110px
+      rgba(255,60,172,.08),
+
+    inset 18px 18px 40px
+      rgba(255,255,255,.30),
+
+    inset -25px -30px 45px
+      rgba(0,0,0,.25);
+
+  transform-style:
+    preserve-3d;
+
+  animation:
+    liquidMorph 6s ease-in-out infinite,
+    liquidFloat 3.5s ease-in-out infinite;
+}
+
+
+/* Liquid shine */
+
+.liquid-shine {
+
   position: absolute;
 
-  display: block;
+  width: 180px;
+  height: 80px;
+
+  left: -40px;
+  top: 20px;
 
   border-radius: 50%;
 
-  filter: blur(3px);
+  background:
+    rgba(255,255,255,.20);
+
+  filter:
+    blur(12px);
+
+  transform:
+    rotate(-25deg);
+
+  animation:
+    shineMove 3s ease-in-out infinite alternate;
+
+  pointer-events: none;
+}
+
+
+/* Internal liquid bubbles */
+
+.liquid-bubble {
+
+  position: absolute;
+
+  border-radius: 50%;
 
   background:
+    rgba(255,255,255,.16);
+
+  filter:
+    blur(5px);
+
+  pointer-events: none;
+}
+
+.bubble-one {
+
+  width: 115px;
+  height: 115px;
+
+  left: -15px;
+  bottom: -30px;
+
+  animation:
+    bubbleMoveOne 3s ease-in-out infinite alternate;
+}
+
+.bubble-two {
+
+  width: 85px;
+  height: 85px;
+
+  right: -10px;
+  top: -15px;
+
+  animation:
+    bubbleMoveTwo 4s ease-in-out infinite alternate;
+}
+
+.bubble-three {
+
+  width: 55px;
+  height: 55px;
+
+  right: 35px;
+  bottom: 15px;
+
+  background:
+    rgba(255,255,255,.12);
+
+  animation:
+    bubbleMoveThree 2.5s ease-in-out infinite alternate;
+}
+
+
+/* =====================================================
+   LOGO TEXT
+===================================================== */
+
+.hero-logo-text {
+
+  position: relative;
+
+  z-index: 20;
+
+  display: flex;
+
+  align-items: center;
+
+  color: white;
+
+  font-weight: 1000;
+
+  letter-spacing: -5px;
+
+  transform:
+    translateZ(45px);
+
+  text-shadow:
+
+    0 5px 8px
+      rgba(0,0,0,.35),
+
+    0 12px 25px
+      rgba(0,0,0,.35),
+
+    0 0 20px
+      rgba(255,255,255,.18);
+}
+
+.hero-logo-text span {
+
+  font-size:
+    72px;
+
+  line-height: 1;
+}
+
+.hero-logo-text b {
+
+  font-size:
+    58px;
+
+  line-height: 1;
+
+  font-weight:
+    1000;
+}
+
+
+/* =====================================================
+   ORBIT RINGS
+===================================================== */
+
+.orbit-ring {
+
+  position: absolute;
+
+  border-radius: 50%;
+
+  pointer-events: none;
+
+  border:
+    1px solid
     rgba(255,255,255,.18);
+
+  transform-style:
+    preserve-3d;
 }
 
-.liquid-orb i:nth-child(2) {
-  width: 100px;
-  height: 100px;
+.orbit-ring-1 {
 
-  left: 5px;
-  bottom: 20px;
+  width: 310px;
+  height: 120px;
+
+  border-color:
+    rgba(0,229,255,.40);
+
+  transform:
+    rotateX(68deg);
+
+  box-shadow:
+    0 0 20px
+    rgba(0,229,255,.15);
 
   animation:
-    liquidMove 3s infinite alternate;
+    ringRotate1 5s linear infinite;
 }
 
-.liquid-orb i:nth-child(3) {
-  width: 80px;
-  height: 80px;
+.orbit-ring-2 {
 
-  right: 5px;
-  top: 15px;
+  width: 290px;
+  height: 150px;
+
+  border-color:
+    rgba(255,60,172,.32);
+
+  transform:
+    rotateY(68deg);
 
   animation:
-    liquidMove 4s infinite alternate-reverse;
+    ringRotate2 7s linear infinite reverse;
 }
 
-.liquid-orb i:nth-child(4) {
-  width: 60px;
-  height: 60px;
 
-  right: 40px;
-  bottom: 20px;
+/* =====================================================
+   ORBIT DOTS
+===================================================== */
+
+.orbit-dot {
+
+  position: absolute;
+
+  width: 12px;
+  height: 12px;
+
+  border-radius: 50%;
+
+  background:
+    white;
+
+  box-shadow:
+
+    0 0 10px
+      rgba(0,229,255,.8),
+
+    0 0 25px
+      rgba(0,229,255,.5);
+}
+
+.orbit-dot-1 {
+
+  top: 55px;
+  left: 38px;
 
   animation:
-    liquidMove 2s infinite alternate;
+    dotOrbitOne 5s linear infinite;
 }
 
-@keyframes orbMorph {
+.orbit-dot-2 {
 
-  0%,
-  100% {
-    border-radius:
-      44% 56% 55% 45%;
-  }
+  right: 42px;
+  bottom: 48px;
 
-  50% {
-    border-radius:
-      60% 40% 40% 60%;
-  }
+  width: 8px;
+  height: 8px;
+
+  background:
+    var(--pink);
+
+  box-shadow:
+
+    0 0 10px
+      rgba(255,60,172,.9),
+
+    0 0 25px
+      rgba(255,60,172,.5);
+
+  animation:
+    dotOrbitTwo 7s linear infinite reverse;
 }
 
-@keyframes orbFloat {
 
-  0%,
-  100% {
+/* =====================================================
+   CIRCULAR MOVEMENT
+===================================================== */
+
+@keyframes swarajCircularMotion {
+
+  0% {
+
     transform:
-      translateY(0)
+      rotate(0deg)
+      translateX(18px)
       rotate(0deg);
   }
 
-  50% {
+  25% {
+
     transform:
-      translateY(-15px)
-      rotate(8deg);
+      rotate(90deg)
+      translateX(18px)
+      rotate(-90deg);
+  }
+
+  50% {
+
+    transform:
+      rotate(180deg)
+      translateX(18px)
+      rotate(-180deg);
+  }
+
+  75% {
+
+    transform:
+      rotate(270deg)
+      translateX(18px)
+      rotate(-270deg);
+  }
+
+  100% {
+
+    transform:
+      rotate(360deg)
+      translateX(18px)
+      rotate(-360deg);
   }
 }
 
-@keyframes liquidMove {
+
+/* =====================================================
+   LIQUID MORPH
+===================================================== */
+
+@keyframes liquidMorph {
+
+  0%,
+  100% {
+
+    border-radius:
+      47% 53% 58% 42%;
+  }
+
+  25% {
+
+    border-radius:
+      58% 42% 47% 53%;
+  }
+
+  50% {
+
+    border-radius:
+      42% 58% 53% 47%;
+  }
+
+  75% {
+
+    border-radius:
+      53% 47% 42% 58%;
+  }
+}
+
+
+/* =====================================================
+   LIQUID FLOAT / 3D
+===================================================== */
+
+@keyframes liquidFloat {
+
+  0%,
+  100% {
+
+    transform:
+      translateY(0)
+      rotateX(0deg)
+      rotateY(0deg)
+      scale(1);
+  }
+
+  50% {
+
+    transform:
+      translateY(-12px)
+      rotateX(5deg)
+      rotateY(8deg)
+      scale(1.045);
+  }
+}
+
+
+/* =====================================================
+   SHINE
+===================================================== */
+
+@keyframes shineMove {
 
   from {
+
+    transform:
+      translate(0,0)
+      rotate(-25deg)
+      scale(1);
+  }
+
+  to {
+
+    transform:
+      translate(80px,45px)
+      rotate(-15deg)
+      scale(1.3);
+  }
+}
+
+
+/* =====================================================
+   BUBBLE ANIMATIONS
+===================================================== */
+
+@keyframes bubbleMoveOne {
+
+  from {
+
     transform:
       translate(0,0)
       scale(1);
   }
 
   to {
+
     transform:
-      translate(25px,-20px)
-      scale(1.3);
+      translate(85px,-55px)
+      scale(1.45);
+  }
+}
+
+@keyframes bubbleMoveTwo {
+
+  from {
+
+    transform:
+      translate(0,0)
+      scale(1);
+  }
+
+  to {
+
+    transform:
+      translate(-60px,65px)
+      scale(1.35);
+  }
+}
+
+@keyframes bubbleMoveThree {
+
+  from {
+
+    transform:
+      translate(0,0)
+      scale(1);
+  }
+
+  to {
+
+    transform:
+      translate(-25px,-35px)
+      scale(1.25);
+  }
+}
+
+
+/* =====================================================
+   ORBIT RINGS ANIMATION
+===================================================== */
+
+@keyframes ringRotate1 {
+
+  from {
+
+    transform:
+      rotateX(68deg)
+      rotateZ(0deg);
+  }
+
+  to {
+
+    transform:
+      rotateX(68deg)
+      rotateZ(360deg);
+  }
+}
+
+@keyframes ringRotate2 {
+
+  from {
+
+    transform:
+      rotateY(68deg)
+      rotateZ(0deg);
+  }
+
+  to {
+
+    transform:
+      rotateY(68deg)
+      rotateZ(360deg);
+  }
+}
+
+
+/* =====================================================
+   DOT ORBITS
+===================================================== */
+
+@keyframes dotOrbitOne {
+
+  from {
+
+    transform:
+      rotate(0deg)
+      translateX(155px)
+      rotate(0deg);
+  }
+
+  to {
+
+    transform:
+      rotate(360deg)
+      translateX(155px)
+      rotate(-360deg);
+  }
+}
+
+@keyframes dotOrbitTwo {
+
+  from {
+
+    transform:
+      rotate(0deg)
+      translateX(145px)
+      rotate(0deg);
+  }
+
+  to {
+
+    transform:
+      rotate(360deg)
+      translateX(145px)
+      rotate(-360deg);
   }
 }
 
@@ -742,6 +1348,7 @@ body.drawer-open {
 ===================================================== */
 
 .primary-btn {
+
   border: 0;
 
   border-radius: 25px;
@@ -752,6 +1359,7 @@ body.drawer-open {
   color: white;
 
   background:
+
     linear-gradient(
       135deg,
       var(--accent),
@@ -759,15 +1367,33 @@ body.drawer-open {
     );
 
   box-shadow:
+
     0 10px 30px
       rgba(124,92,255,.25);
 
   font-weight: 700;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease;
+}
+
+.primary-btn:hover {
+
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+
+    0 15px 35px
+      rgba(124,92,255,.4);
 }
 
 .watch-btn {
+
   border:
-    1px solid rgba(0,229,255,.35);
+    1px solid
+    rgba(0,229,255,.35);
 
   background:
     rgba(0,229,255,.1);
@@ -781,7 +1407,9 @@ body.drawer-open {
 }
 
 .hidden {
-  display: none !important;
+
+  display:
+    none !important;
 }
 
 
@@ -790,6 +1418,7 @@ body.drawer-open {
 ===================================================== */
 
 .section-title {
+
   display: flex;
 
   justify-content:
@@ -800,18 +1429,23 @@ body.drawer-open {
 }
 
 .section-title span {
-  color: var(--muted);
 
-  font-size: 13px;
+  color:
+    var(--muted);
+
+  font-size:
+    13px;
 }
 
 .song-list {
+
   display: grid;
 
   gap: 8px;
 }
 
 .song {
+
   display: grid;
 
   grid-template-columns:
@@ -833,11 +1467,13 @@ body.drawer-open {
 
 .song:hover,
 .song.playing {
+
   background:
     rgba(124,92,255,.13);
 }
 
 .song-cover {
+
   width: 55px;
   height: 55px;
 
@@ -850,26 +1486,34 @@ body.drawer-open {
 }
 
 .song-name {
+
   font-weight: 700;
 }
 
 .song-artist {
-  color: var(--muted);
 
-  font-size: 13px;
+  color:
+    var(--muted);
+
+  font-size:
+    13px;
 
   margin-top: 4px;
 }
 
 .song-type {
-  color: var(--accent2);
 
-  font-size: 11px;
+  color:
+    var(--accent2);
+
+  font-size:
+    11px;
 
   margin-top: 5px;
 }
 
 .song-play {
+
   border: 0;
 
   width: 42px;
@@ -883,12 +1527,83 @@ body.drawer-open {
     rgba(124,92,255,.25);
 }
 
+.song-actions {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content:
+    flex-end;
+
+  gap: 8px;
+}
+
+.song-details {
+
+  min-width: 0;
+}
+
+.watch-song-btn {
+
+  border:
+    1px solid
+    rgba(0,229,255,.35);
+
+  background:
+
+    linear-gradient(
+      135deg,
+      rgba(0,229,255,.16),
+      rgba(124,92,255,.16)
+    );
+
+  color: white;
+
+  border-radius: 20px;
+
+  padding:
+    8px 12px;
+
+  font-size:
+    12px;
+
+  font-weight:
+    700;
+
+  white-space:
+    nowrap;
+
+  transition:
+    transform .2s ease,
+    background .2s ease,
+    border-color .2s ease;
+}
+
+.watch-song-btn:hover {
+
+  transform:
+    translateY(-2px);
+
+  background:
+
+    linear-gradient(
+      135deg,
+      rgba(0,229,255,.28),
+      rgba(124,92,255,.28)
+    );
+
+  border-color:
+    rgba(0,229,255,.7);
+}
+
 
 /* =====================================================
    ADMIN
 ===================================================== */
 
 .admin-content {
+
   display: grid;
 
   gap: 20px;
@@ -897,6 +1612,7 @@ body.drawer-open {
 }
 
 .admin-card {
+
   background:
     var(--panel);
 
@@ -911,12 +1627,14 @@ body.drawer-open {
 }
 
 .admin-card form {
+
   display: grid;
 
   gap: 10px;
 }
 
 .admin-card input {
+
   background:
     rgba(255,255,255,.06);
 
@@ -933,22 +1651,27 @@ body.drawer-open {
 }
 
 .admin-card label {
-  color: var(--muted);
+
+  color:
+    var(--muted);
 
   margin-top: 8px;
 }
 
 .admin-key-row {
+
   display: flex;
 
   gap: 10px;
 }
 
 .admin-key-row input {
+
   flex: 1;
 }
 
 .error {
+
   color:
     #ff6b81;
 
@@ -961,6 +1684,7 @@ body.drawer-open {
 ===================================================== */
 
 .player {
+
   position: fixed;
 
   bottom: 0;
@@ -995,6 +1719,7 @@ body.drawer-open {
 }
 
 .now-playing {
+
   display: flex;
 
   align-items: center;
@@ -1005,15 +1730,18 @@ body.drawer-open {
 }
 
 .cover-wrap {
+
   width: 58px;
   height: 58px;
 
-  flex: 0 0 auto;
+  flex:
+    0 0 auto;
 
   position: relative;
 }
 
 .cover-wrap img {
+
   width: 100%;
   height: 100%;
 
@@ -1023,11 +1751,13 @@ body.drawer-open {
 }
 
 .track-info {
+
   min-width: 0;
 }
 
 .track-info strong,
 .track-info span {
+
   display: block;
 
   overflow: hidden;
@@ -1038,74 +1768,98 @@ body.drawer-open {
 }
 
 .track-info span {
-  color: var(--muted);
 
-  font-size: 12px;
+  color:
+    var(--muted);
 
-  margin-top: 5px;
+  font-size:
+    12px;
+
+  margin-top:
+    5px;
 }
 
 .controls {
-  max-width: 650px;
 
-  width: 100%;
+  max-width:
+    650px;
 
-  margin: auto;
+  width:
+    100%;
+
+  margin:
+    auto;
 }
 
 .control-buttons {
+
   display: flex;
 
-  justify-content: center;
+  justify-content:
+    center;
 
-  align-items: center;
+  align-items:
+    center;
 
   gap: 20px;
 }
 
 .control-buttons button {
+
   border: 0;
 
-  background: transparent;
+  background:
+    transparent;
 
   color: white;
 
-  font-size: 18px;
+  font-size:
+    18px;
 }
 
 .control-buttons .play-btn {
+
   width: 40px;
   height: 40px;
 
   border-radius: 50%;
 
-  background: white;
+  background:
+    white;
 
-  color: black;
+  color:
+    black;
 }
 
 .progress-row {
+
   display: flex;
 
   align-items: center;
 
   gap: 10px;
 
-  margin-top: 7px;
+  margin-top:
+    7px;
 
-  font-size: 10px;
+  font-size:
+    10px;
 
-  color: var(--muted);
+  color:
+    var(--muted);
 }
 
 .progress-row input {
+
   flex: 1;
 }
 
 .player-actions {
+
   display: flex;
 
-  justify-content: flex-end;
+  justify-content:
+    flex-end;
 }
 
 
@@ -1114,6 +1868,7 @@ body.drawer-open {
 ===================================================== */
 
 .youtube-frame {
+
   position: fixed;
 
   right: 20px;
@@ -1126,22 +1881,28 @@ body.drawer-open {
   aspect-ratio:
     16 / 9;
 
-  background: black;
+  background:
+    black;
 
-  border-radius: 16px;
+  border-radius:
+    16px;
 
-  overflow: hidden;
+  overflow:
+    hidden;
 
-  z-index: 180;
+  z-index:
+    180;
 
   border:
     1px solid var(--border);
 
   box-shadow:
-    0 20px 60px rgba(0,0,0,.6);
+    0 20px 60px
+    rgba(0,0,0,.6);
 }
 
 .youtube-frame iframe {
+
   width: 100%;
   height: 100%;
 
@@ -1149,11 +1910,14 @@ body.drawer-open {
 }
 
 .hidden-video {
-  visibility: hidden;
+
+  visibility:
+    hidden;
 
   opacity: 0;
 
-  pointer-events: none;
+  pointer-events:
+    none;
 }
 
 
@@ -1162,12 +1926,19 @@ body.drawer-open {
 ===================================================== */
 
 .mobile-menu {
+
   display: none;
 }
+
+
+/* =====================================================
+   TABLET
+===================================================== */
 
 @media (max-width: 900px) {
 
   .sidebar {
+
     top: 0;
     bottom: 0;
 
@@ -1182,21 +1953,25 @@ body.drawer-open {
     z-index: 1000;
 
     box-shadow:
-      20px 0 60px rgba(0,0,0,.45);
+      20px 0 60px
+      rgba(0,0,0,.45);
 
     overflow-y: auto;
   }
 
   .sidebar.open {
+
     transform:
       translateX(0);
   }
 
   .main {
+
     margin-left: 0;
   }
 
   .player {
+
     left: 0;
 
     grid-template-columns:
@@ -1204,529 +1979,139 @@ body.drawer-open {
   }
 
   .player .controls {
+
     grid-column:
       1 / -1;
 
-    grid-row: 2;
+    grid-row:
+      2;
   }
 
   .player-actions {
-    grid-column: 2;
+
+    grid-column:
+      2;
   }
 
   .mobile-menu {
-    display: block;
+
+    display:
+      block;
   }
 
   .hero-logo {
-    display: none;
+
+    display:
+      none;
   }
 
   .hero {
-    padding: 30px;
+
+    padding:
+      30px;
   }
 
   .drawer-overlay {
-    display: block;
-  }
 
-  .logo-disc {
-    width: 62px;
-    height: 62px;
-
-    min-width: 62px;
-  }
-
-  .brand {
-    margin-bottom: 35px;
+    display:
+      block;
   }
 
 }
 
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
 @media (max-width: 600px) {
 
   .page {
-    padding: 18px;
+
+    padding:
+      18px;
   }
 
   .topbar {
+
     padding:
       12px 15px;
   }
 
   .hero {
-    min-height: 320px;
+
+    min-height:
+      320px;
+
+    padding:
+      25px;
   }
 
   .hero h1 {
-    font-size: 60px;
+
+    font-size:
+      60px;
+
+    letter-spacing:
+      -3px;
   }
 
   .song {
+
     grid-template-columns:
-      48px 1fr 42px;
+      48px 1fr auto;
   }
 
   .song-cover {
-    width: 48px;
-    height: 48px;
+
+    width:
+      48px;
+
+    height:
+      48px;
+  }
+
+  .song-name {
+
+    font-size:
+      14px;
+  }
+
+  .song-artist {
+
+    font-size:
+      11px;
   }
 
   .player {
-    min-height: 105px;
+
+    min-height:
+      105px;
 
     padding:
       8px 12px;
   }
 
   .now-playing {
-    grid-column: 1;
+
+    grid-column:
+      1;
   }
 
   .track-info {
-    max-width: 180px;
+
+    max-width:
+      180px;
   }
 
   .player-actions {
-    grid-column: 2;
+
+    grid-column:
+      2;
   }
-
-  .watch-btn {
-    font-size: 11px;
-
-    padding:
-      7px 9px;
-  }
-
-  .admin-key-row {
-    flex-direction: column;
-  }
-/* =====================================================
-   SWARAJ 3D LIQUID LOGO
-===================================================== */
-
-.logo-disc {
-  width: 58px;
-  height: 58px;
-  min-width: 58px;
-  position: relative;
-  display: grid;
-  place-items: center;
-  border-radius: 46% 54% 52% 48%;
-  overflow: hidden;
-
-  background:
-    radial-gradient(
-      circle at 28% 20%,
-      rgba(255,255,255,.95),
-      transparent 8%
-    ),
-    linear-gradient(
-      135deg,
-      #00e5ff 0%,
-      #7c5cff 48%,
-      #ff3cac 100%
-    );
-
-  box-shadow:
-    0 0 20px rgba(124,92,255,.55),
-    0 0 45px rgba(0,229,255,.15),
-    inset 7px 7px 18px rgba(255,255,255,.28),
-    inset -10px -12px 22px rgba(0,0,0,.22);
-
-  animation:
-    swarajLogoMorph 6s ease-in-out infinite,
-    swarajLogoFloat 4s ease-in-out infinite;
-}
-
-.logo-disc::before,
-.logo-disc::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255,255,255,.18);
-  filter: blur(3px);
-  pointer-events: none;
-}
-
-.logo-disc::before {
-  width: 34px;
-  height: 34px;
-  left: -7px;
-  bottom: -10px;
-  animation: swarajLiquid1 3s ease-in-out infinite alternate;
-}
-
-.logo-disc::after {
-  width: 28px;
-  height: 28px;
-  right: -5px;
-  top: 4px;
-  animation: swarajLiquid2 4s ease-in-out infinite alternate;
-}
-
-.logo-disc span {
-  position: relative;
-  z-index: 5;
-  color: #fff;
-  font-size: 25px;
-  font-weight: 900;
-  text-shadow:
-    0 3px 8px rgba(0,0,0,.45);
-}
-
-@keyframes swarajLogoMorph {
-  0%,
-  100% {
-    border-radius: 46% 54% 52% 48%;
-  }
-
-  50% {
-    border-radius: 60% 40% 42% 58%;
-  }
-}
-
-@keyframes swarajLogoFloat {
-  0%,
-  100% {
-    transform:
-      translateY(0)
-      rotate(0deg)
-      scale(1);
-  }
-
-  50% {
-    transform:
-      translateY(-5px)
-      rotate(5deg)
-      scale(1.05);
-  }
-}
-
-@keyframes swarajLiquid1 {
-  from {
-    transform:
-      translate(0,0)
-      scale(1);
-  }
-
-  to {
-    transform:
-      translate(18px,-12px)
-      scale(1.35);
-  }
-}
-
-@keyframes swarajLiquid2 {
-  from {
-    transform:
-      translate(0,0)
-      scale(1);
-  }
-
-  to {
-    transform:
-      translate(-12px,16px)
-      scale(1.25);
-  }
-}
-
-
-/* =====================================================
-   BIG 3D LIQUID SWARAJ LOGO - HOME
-===================================================== */
-
-.hero-logo {
-  width: 330px;
-  height: 330px;
-  display: grid;
-  place-items: center;
-  position: relative;
-  margin-left: auto;
-}
-
-.hero-liquid-logo {
-  width: 280px;
-  height: 280px;
-  position: relative;
-
-  display: grid;
-  place-items: center;
-
-  border-radius:
-    44% 56% 55% 45%;
-
-  background:
-    radial-gradient(
-      circle at 28% 20%,
-      rgba(255,255,255,.95),
-      transparent 6%
-    ),
-    linear-gradient(
-      135deg,
-      #00e5ff,
-      #7c5cff 45%,
-      #ff3cac
-    );
-
-  box-shadow:
-    0 30px 80px rgba(124,92,255,.4),
-    0 0 80px rgba(0,229,255,.15),
-    inset 20px 20px 45px rgba(255,255,255,.2),
-    inset -25px -30px 50px rgba(0,0,0,.22);
-
-  animation:
-    heroLiquidMorph 7s ease-in-out infinite,
-    heroLiquidFloat 5s ease-in-out infinite;
-}
-
-.hero-liquid-logo::before,
-.hero-liquid-logo::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255,255,255,.17);
-  filter: blur(5px);
-}
-
-.hero-liquid-logo::before {
-  width: 110px;
-  height: 110px;
-  left: 8px;
-  bottom: 20px;
-  animation:
-    heroBubble1 3s ease-in-out infinite alternate;
-}
-
-.hero-liquid-logo::after {
-  width: 85px;
-  height: 85px;
-  right: 10px;
-  top: 15px;
-  animation:
-    heroBubble2 4s ease-in-out infinite alternate;
-}
-
-.hero-logo-letter {
-  position: relative;
-  z-index: 10;
-
-  color: white;
-
-  font-size: 115px;
-  font-weight: 1000;
-
-  line-height: 1;
-
-  text-shadow:
-    0 10px 25px rgba(0,0,0,.35),
-    0 0 20px rgba(255,255,255,.18);
-}
-
-.hero-logo-name {
-  position: absolute;
-  bottom: -38px;
-
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 5px;
-
-  color: white;
-
-  text-shadow:
-    0 3px 10px rgba(0,0,0,.5);
-}
-
-@keyframes heroLiquidMorph {
-
-  0%,
-  100% {
-    border-radius:
-      44% 56% 55% 45%;
-  }
-
-  50% {
-    border-radius:
-      60% 40% 40% 60%;
-  }
-}
-
-@keyframes heroLiquidFloat {
-
-  0%,
-  100% {
-    transform:
-      translateY(0)
-      rotate(0deg);
-  }
-
-  50% {
-    transform:
-      translateY(-15px)
-      rotate(7deg);
-  }
-}
-
-@keyframes heroBubble1 {
-
-  from {
-    transform:
-      translate(0,0)
-      scale(1);
-  }
-
-  to {
-    transform:
-      translate(35px,-25px)
-      scale(1.25);
-  }
-}
-
-@keyframes heroBubble2 {
-
-  from {
-    transform:
-      translate(0,0)
-      scale(1);
-  }
-
-  to {
-    transform:
-      translate(-25px,25px)
-      scale(1.3);
-  }
-}
-
-
-/* =====================================================
-   SONG ACTIONS
-===================================================== */
-
-.song-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.watch-song-btn {
-  border: 1px solid rgba(0,229,255,.35);
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(0,229,255,.16),
-      rgba(124,92,255,.16)
-    );
-
-  color: white;
-
-  border-radius: 20px;
-
-  padding: 8px 12px;
-
-  font-size: 12px;
-  font-weight: 700;
-
-  white-space: nowrap;
-
-  transition:
-    transform .2s ease,
-    background .2s ease,
-    border-color .2s ease;
-}
-
-.watch-song-btn:hover {
-  transform: translateY(-2px);
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(0,229,255,.28),
-      rgba(124,92,255,.28)
-    );
-
-  border-color:
-    rgba(0,229,255,.7);
-}
-
-.song-details {
-  min-width: 0;
-}
-
-
-/* =====================================================
-   SIDE DRAWER
-===================================================== */
-
-.sidebar {
-  transition:
-    transform .3s ease,
-    box-shadow .3s ease;
-}
-
-.drawer-overlay {
-  display: none;
-}
-
-@media (max-width: 900px) {
-
-  .drawer-overlay {
-    position: fixed;
-    inset: 0;
-
-    background:
-      rgba(0,0,0,.62);
-
-    backdrop-filter:
-      blur(5px);
-
-    z-index: 90;
-
-    opacity: 0;
-    pointer-events: none;
-
-    transition:
-      opacity .25s ease;
-
-    display: block;
-  }
-
-  .drawer-overlay.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .sidebar {
-    z-index: 110;
-
-    box-shadow:
-      20px 0 70px
-      rgba(0,0,0,.55);
-  }
-
-  .sidebar.open {
-    transform:
-      translateX(0);
-  }
-
-  .main {
-    margin-left: 0;
-  }
-
-  .hero-logo {
-    display: none;
-  }
-}
-
-
-/* =====================================================
-   MOBILE WATCH BUTTON
-===================================================== */
-
-@media (max-width: 600px) {
 
   .watch-song-btn {
+
     padding:
       7px 9px;
 
@@ -1735,22 +2120,15 @@ body.drawer-open {
   }
 
   .song-actions {
-    gap: 5px;
+
+    gap:
+      5px;
   }
 
-  .song {
-    grid-template-columns:
-      48px 1fr auto;
+  .admin-key-row {
+
+    flex-direction:
+      column;
   }
 
-  .song-name {
-    font-size:
-      14px;
-  }
-
-  .song-artist {
-    font-size:
-      11px;
-  }
-}
 }

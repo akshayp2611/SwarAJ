@@ -5,15 +5,23 @@
 
   /* =====================================================
      STATE
-  ====================================================== */
+  ===================================================== */
 
   const state = {
 
     songs: [],
 
-    playlist: [],
+    mp3Playlist: [],
 
-    index: -1,
+    youtubePlaylist: [],
+
+    currentPlaylist: [],
+
+    currentIndex: -1,
+
+    currentSong: null,
+
+    currentMode: null,
 
     playing: false,
 
@@ -26,12 +34,11 @@
 
 
   /* =====================================================
-     ELEMENT HELPER
-  ====================================================== */
+     HELPERS
+  ===================================================== */
 
   const $ = id =>
     document.getElementById(id);
-
 
   const audio =
     $("audio");
@@ -45,18 +52,14 @@
     menuBtn:
       $("menuBtn"),
 
-    closeMenu:
-      $("closeMenu"),
-
-    nav:
-      [...document.querySelectorAll(
-        ".nav-btn"
-      )],
+    navButtons:
+      [...document.querySelectorAll(".nav-btn")],
 
     viewButtons:
-      [...document.querySelectorAll(
-        "[data-view]"
-      )],
+      [...document.querySelectorAll("[data-view]")],
+
+    search:
+      $("searchInput"),
 
     homeSongs:
       $("homeSongs"),
@@ -70,8 +73,26 @@
     librarySongs:
       $("librarySongs"),
 
-    adminSongs:
-      $("adminSongs"),
+    videoPlayer:
+      $("videoPlayer"),
+
+    videoFrame:
+      $("videoFrame"),
+
+    videoPlayerTitle:
+      $("videoPlayerTitle"),
+
+    videoPlayerArtist:
+      $("videoPlayerArtist"),
+
+    videoClose:
+      $("videoCloseBtn"),
+
+    audioCount:
+      $("audioPlaylistCount"),
+
+    songCount:
+      $("songCount"),
 
     playAll:
       $("playAllBtn"),
@@ -87,6 +108,9 @@
 
     playPause:
       $("playPauseBtn"),
+
+    watchVideo:
+      $("watchVideoBtn"),
 
     playerImage:
       $("playerImage"),
@@ -106,8 +130,23 @@
     progress:
       $("progress"),
 
-    search:
-      $("searchInput"),
+    toast:
+      $("toast"),
+
+    adminLock:
+      $("adminLock"),
+
+    adminPanel:
+      $("adminPanel"),
+
+    adminLoginForm:
+      $("adminLoginForm"),
+
+    adminKeyInput:
+      $("adminKeyInput"),
+
+    adminLogout:
+      $("adminLogout"),
 
     youtubeForm:
       $("youtubeForm"),
@@ -115,41 +154,21 @@
     mp3Form:
       $("mp3Form"),
 
-    videoForm:
-      $("videoForm"),
+    mp3UrlForm:
+      $("mp3UrlForm"),
 
     refreshAdmin:
       $("refreshAdmin"),
 
-    videoPlayer:
-      $("videoPlayer"),
-
-    videoFrame:
-      $("videoFrame"),
-
-    toast:
-      $("toast"),
-
-    count:
-      $("songCount")
+    adminSongs:
+      $("adminSongs")
 
   };
 
 
   /* =====================================================
-     YOUTUBE PLAYER
-  ====================================================== */
-
-  let youtubePlayer = null;
-
-  let youtubeAPIReady = false;
-
-  let youtubePendingId = null;
-
-
-  /* =====================================================
      TOAST
-  ====================================================== */
+  ===================================================== */
 
   function toast(message) {
 
@@ -178,40 +197,25 @@
 
   /* =====================================================
      HTML ESCAPE
-  ====================================================== */
+  ===================================================== */
 
   function escapeHTML(value) {
 
     return String(
       value ?? ""
     )
-      .replaceAll(
-        "&",
-        "&amp;"
-      )
-      .replaceAll(
-        "<",
-        "&lt;"
-      )
-      .replaceAll(
-        ">",
-        "&gt;"
-      )
-      .replaceAll(
-        '"',
-        "&quot;"
-      )
-      .replaceAll(
-        "'",
-        "&#039;"
-      );
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
 
   }
 
 
   /* =====================================================
      YOUTUBE ID
-  ====================================================== */
+  ===================================================== */
 
   function extractYouTubeId(value) {
 
@@ -219,37 +223,34 @@
       return null;
     }
 
-    value =
+    const text =
       String(value).trim();
 
 
-    /*
-     * Direct 11-character ID
-     */
-
     if (
-      /^[a-zA-Z0-9_-]{11}$/.test(
-        value
+      /^[A-Za-z0-9_-]{11}$/.test(
+        text
       )
     ) {
-      return value;
+
+      return text;
+
     }
 
 
     try {
 
       const url =
-        new URL(value);
+        new URL(text);
 
+      const host =
+        url.hostname
+          .toLowerCase();
 
-      /*
-       * youtu.be/VIDEO_ID
-       */
 
       if (
-        url.hostname.includes(
-          "youtu.be"
-        )
+        host === "youtu.be" ||
+        host === "www.youtu.be"
       ) {
 
         return (
@@ -262,25 +263,13 @@
       }
 
 
-      /*
-       * youtube.com/watch?v=VIDEO_ID
-       */
+      const v =
+        url.searchParams.get("v");
 
-      const queryId =
-        url.searchParams.get(
-          "v"
-        );
-
-      if (queryId) {
-        return queryId;
+      if (v) {
+        return v;
       }
 
-
-      /*
-       * /embed/VIDEO_ID
-       * /shorts/VIDEO_ID
-       * /live/VIDEO_ID
-       */
 
       const parts =
         url.pathname
@@ -288,7 +277,7 @@
           .filter(Boolean);
 
 
-      const index =
+      const markerIndex =
         parts.findIndex(
           part =>
             [
@@ -300,24 +289,22 @@
 
 
       if (
-        index !== -1 &&
-        parts[index + 1]
+        markerIndex >= 0 &&
+        parts[markerIndex + 1]
       ) {
 
         return parts[
-          index + 1
+          markerIndex + 1
         ];
 
       }
 
-    } catch (error) {
+    } catch {
 
-      console.warn(
-        "YouTube URL parse error:",
-        error
-      );
+      return null;
 
     }
+
 
     return null;
 
@@ -325,229 +312,49 @@
 
 
   /* =====================================================
-     YOUTUBE API
-  ====================================================== */
-
-  function loadYouTubeAPI() {
-
-    if (
-      window.YT &&
-      window.YT.Player
-    ) {
-
-      youtubeAPIReady =
-        true;
-
-      if (
-        youtubePendingId
-      ) {
-
-        createYouTubeAudioPlayer(
-          youtubePendingId
-        );
-
-      }
-
-      return;
-
-    }
-
-
-    if (
-      document.getElementById(
-        "youtube-iframe-api"
-      )
-    ) {
-      return;
-    }
-
-
-    const script =
-      document.createElement(
-        "script"
-      );
-
-    script.id =
-      "youtube-iframe-api";
-
-    script.src =
-      "https://www.youtube.com/iframe_api";
-
-    document.head.appendChild(
-      script
-    );
-
-  }
-
-
-  window.onYouTubeIframeAPIReady =
-    function () {
-
-      youtubeAPIReady =
-        true;
-
-
-      if (
-        youtubePendingId
-      ) {
-
-        createYouTubeAudioPlayer(
-          youtubePendingId
-        );
-
-      }
-
-    };
-
-
-  /* =====================================================
-     API
-  ====================================================== */
-
-  async function api(
-    path,
-    options = {}
-  ) {
-
-    const opts = {
-      ...options
-    };
-
-
-    opts.headers = {
-      ...(options.headers || {})
-    };
-
-
-    if (
-      options.admin !== false &&
-      state.adminKey
-    ) {
-
-      opts.headers[
-        "x-admin-key"
-      ] =
-        state.adminKey;
-
-    }
-
-
-    const response =
-      await fetch(
-        path,
-        opts
-      );
-
-
-    const text =
-      await response.text();
-
-
-    let data;
-
-
-    try {
-
-      data =
-        text
-          ? JSON.parse(text)
-          : {};
-
-    } catch {
-
-      data = {
-        message: text
-      };
-
-    }
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        data.message ||
-        data.error ||
-        `${response.status} ${response.statusText}`
-      );
-
-    }
-
-
-    return data;
-
-  }
-
-
-  /* =====================================================
-     NORMALIZE SONG
-  ====================================================== */
+     NORMALIZE
+  ===================================================== */
 
   function normalizeSong(song) {
 
     const youtubeUrl =
-
       song.youtube_url ||
-
       song.youtubeUrl ||
-
       "";
 
-
     const youtubeId =
-
       song.youtube_video_id ||
-
       song.youtubeVideoId ||
-
       extractYouTubeId(
         youtubeUrl
       );
 
 
     let source =
+      String(
+        song.source_type ||
+        song.source ||
+        song.type ||
+        ""
+      ).toLowerCase();
 
-      song.source_type ||
-
-      song.source ||
-
-      song.type ||
-
-      "";
-
-
-    source =
-      String(source)
-        .toLowerCase();
-
-
-    /*
-     * Automatically identify YouTube.
-     */
 
     if (
-      youtubeId &&
-      (
-        !source ||
-        source.includes(
-          "youtube"
-        )
-      )
+      youtubeId
     ) {
 
       source =
         "youtube";
 
-    }
+    } else if (
+      source.includes("mp3")
+    ) {
 
+      source =
+        "mp3";
 
-    /*
-     * Automatically identify video.
-     */
-
-    if (
-      source.includes(
-        "video"
-      ) ||
+    } else if (
+      source.includes("video") ||
       source === "mp4"
     ) {
 
@@ -557,24 +364,14 @@
     }
 
 
-    /*
-     * Automatically identify MP3.
-     */
-
-    if (
-      !source &&
+    const audioUrl =
+      song.audio_url ||
+      song.audioUrl ||
       (
-        song.audio_url ||
-        song.audioUrl ||
-        song.file_url ||
-        song.fileUrl
-      )
-    ) {
-
-      source =
-        "mp3";
-
-    }
+        source === "mp3_file"
+          ? `/api/songs/${song.id}/audio`
+          : ""
+      );
 
 
     return {
@@ -598,45 +395,20 @@
         song.category ||
         "Other",
 
-      language:
-        song.language ||
-        "",
-
       source,
+
+      audioUrl,
 
       youtubeUrl,
 
       youtubeId,
 
-      url:
-
-        song.audio_url ||
-
-        song.audioUrl ||
-
-        song.video_url ||
-
-        song.videoUrl ||
-
-        song.file_url ||
-
-        song.fileUrl ||
-
-        song.url ||
-
-        "",
-
       cover:
-
         song.cover_url ||
-
         song.coverUrl ||
-
         (
           youtubeId
-
             ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`
-
             : "/images/ganpati.jpg"
         )
 
@@ -646,8 +418,86 @@
 
 
   /* =====================================================
+     API
+  ===================================================== */
+
+  async function api(
+    path,
+    options = {}
+  ) {
+
+    const config = {
+      ...options,
+
+      headers: {
+        ...(options.headers || {})
+      }
+
+    };
+
+
+    if (
+      state.adminKey
+    ) {
+
+      config.headers[
+        "x-admin-key"
+      ] =
+        state.adminKey;
+
+    }
+
+
+    const response =
+      await fetch(
+        path,
+        config
+      );
+
+
+    const text =
+      await response.text();
+
+
+    let data = {};
+
+    try {
+
+      data =
+        text
+          ? JSON.parse(text)
+          : {};
+
+    } catch {
+
+      data = {
+        message: text
+      };
+
+    }
+
+
+    if (
+      !response.ok
+    ) {
+
+      throw new Error(
+        data.error ||
+        data.message ||
+        `${response.status} ${response.statusText}`
+      );
+
+    }
+
+
+    return data;
+
+  }
+
+
+  /* =====================================================
      LOAD SONGS
-  ====================================================== */
+  ===================================================== */
 
   async function loadSongs() {
 
@@ -657,18 +507,14 @@
         await api(
           "/api/songs",
           {
-            method: "GET",
-            admin: false
+            method: "GET"
           }
         );
 
 
-      const songs =
-
+      const rows =
         Array.isArray(data)
-
           ? data
-
           : (
               data.songs ||
               data.data ||
@@ -677,8 +523,29 @@
 
 
       state.songs =
-        songs.map(
+        rows.map(
           normalizeSong
+        );
+
+
+      state.mp3Playlist =
+        state.songs.filter(
+          song =>
+            song.source === "mp3" ||
+            song.source === "mp3_file" ||
+            (
+              !song.youtubeId &&
+              song.audioUrl
+            )
+        );
+
+
+      state.youtubePlaylist =
+        state.songs.filter(
+          song =>
+            Boolean(
+              song.youtubeId
+            )
         );
 
 
@@ -688,16 +555,17 @@
     } catch (error) {
 
       console.error(
-        "Song loading error:",
+        "Songs error:",
         error
       );
 
-
       state.songs = [];
 
+      state.mp3Playlist = [];
+
+      state.youtubePlaylist = [];
 
       renderAll();
-
 
       toast(
         "Unable to load songs"
@@ -709,10 +577,10 @@
 
 
   /* =====================================================
-     RENDER ALL
-  ====================================================== */
+     FILTER
+  ===================================================== */
 
-  function renderAll() {
+  function getFilteredSongs() {
 
     const query =
       E.search.value
@@ -720,99 +588,96 @@
         .toLowerCase();
 
 
-    let songs =
-      state.songs;
+    if (!query) {
 
-
-    if (query) {
-
-      songs =
-        songs.filter(
-          song =>
-
-            [
-              song.title,
-              song.artist,
-              song.album,
-              song.category,
-              song.language
-            ]
-              .join(" ")
-              .toLowerCase()
-              .includes(query)
-        );
+      return state.songs;
 
     }
 
 
-    /*
-     * AUDIO:
-     * MP3 + YouTube
-     */
+    return state.songs.filter(
+      song =>
+        [
+          song.title,
+          song.artist,
+          song.album,
+          song.category
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(query)
+    );
 
-    const audioSongs =
+  }
+
+
+  /* =====================================================
+     RENDER
+  ===================================================== */
+
+  function renderAll() {
+
+    const songs =
+      getFilteredSongs();
+
+
+    const mp3 =
       songs.filter(
         song =>
-
-          song.source === "youtube" ||
-
-          song.source === "mp3" ||
-
-          (
-            !song.source ||
-            song.source === ""
+          state.mp3Playlist.some(
+            item =>
+              String(item.id) ===
+              String(song.id)
           )
       );
 
 
-    /*
-     * VIDEO:
-     * YouTube + uploaded video
-     */
-
-    const videoSongs =
+    const youtube =
       songs.filter(
         song =>
-
-          song.source === "youtube" ||
-
-          song.source === "video" ||
-
-          song.source === "mp4"
-
+          Boolean(
+            song.youtubeId
+          )
       );
 
 
     renderSongGrid(
       E.homeSongs,
-      songs
+      songs,
+      "home"
     );
 
 
     renderSongGrid(
       E.audioSongs,
-      audioSongs
+      mp3,
+      "audio"
     );
 
 
     renderVideoGrid(
-      videoSongs
+      youtube
     );
 
 
     renderSongGrid(
       E.librarySongs,
-      songs
+      songs,
+      "library"
     );
 
 
-    renderAdminSongs();
-
-
-    E.count.textContent =
-
+    E.songCount.textContent =
       `${state.songs.length} song${
         state.songs.length === 1
+          ? ""
+          : "s"
+      }`;
+
+
+    E.audioCount.textContent =
+      `${state.mp3Playlist.length} MP3 song${
+        state.mp3Playlist.length === 1
           ? ""
           : "s"
       }`;
@@ -821,22 +686,21 @@
 
 
   /* =====================================================
-     SONG GRID
-  ====================================================== */
+     SONG CARD
+  ===================================================== */
 
   function renderSongGrid(
     container,
-    songs
+    songs,
+    mode
   ) {
 
     if (!songs.length) {
 
       container.innerHTML =
-        `
-        <div class="empty">
-          No songs found
-        </div>
-        `;
+        `<div class="empty">
+          No MP3 songs found
+        </div>`;
 
       return;
 
@@ -844,53 +708,61 @@
 
 
     container.innerHTML =
-
       songs.map(
-        song => `
+        song => {
 
-          <article
-            class="song-card"
-          >
+          const isYouTube =
+            Boolean(
+              song.youtubeId
+            );
 
-            <img
-              class="song-cover"
-              src="${escapeHTML(song.cover)}"
-              alt=""
-              loading="lazy"
-              onerror="this.src='/images/ganpati.jpg'"
+
+          return `
+
+            <article
+              class="song-card"
             >
 
-            <div
-              class="song-info"
-            >
-
-              <strong>
-                ${escapeHTML(song.title)}
-              </strong>
-
-              <small>
-                ${escapeHTML(song.artist)}
-                ·
-                ${
-                  song.source === "youtube"
-                    ? "YouTube"
-                    : "MP3"
-                }
-              </small>
-
-              <button
-                class="song-play"
-                data-play-id="${escapeHTML(song.id)}"
-                type="button"
+              <img
+                class="song-cover"
+                src="${escapeHTML(song.cover)}"
+                alt=""
+                loading="lazy"
+                onerror="this.src='/images/ganpati.jpg'"
               >
-                ▶ Play
-              </button>
 
-            </div>
+              <div class="song-info">
 
-          </article>
+                <strong>
+                  ${escapeHTML(song.title)}
+                </strong>
 
-        `
+                <small>
+                  ${escapeHTML(song.artist)}
+                  ·
+                  ${
+                    isYouTube
+                      ? "YouTube"
+                      : "MP3"
+                  }
+                </small>
+
+                <button
+                  class="song-play"
+                  data-play-id="${escapeHTML(song.id)}"
+                  data-play-mode="${mode}"
+                  type="button"
+                >
+                  ▶ Play
+                </button>
+
+              </div>
+
+            </article>
+
+          `;
+
+        }
       ).join("");
 
 
@@ -915,9 +787,22 @@
                 );
 
 
-              if (song) {
+              if (!song) {
+                return;
+              }
 
-                playSong(
+
+              if (
+                song.youtubeId
+              ) {
+
+                startYouTubeAudio(
+                  song
+                );
+
+              } else {
+
+                startMP3(
                   song
                 );
 
@@ -934,7 +819,7 @@
 
   /* =====================================================
      VIDEO GRID
-  ====================================================== */
+  ===================================================== */
 
   function renderVideoGrid(
     songs
@@ -943,11 +828,9 @@
     if (!songs.length) {
 
       E.videoSongs.innerHTML =
-        `
-        <div class="empty">
-          No video songs found
-        </div>
-        `;
+        `<div class="empty">
+          No YouTube videos found
+        </div>`;
 
       return;
 
@@ -955,20 +838,13 @@
 
 
     E.videoSongs.innerHTML =
-
       songs.map(
         song => {
 
-          const thumbnail =
-
+          const thumb =
             song.youtubeId
-
               ? `https://i.ytimg.com/vi/${song.youtubeId}/hqdefault.jpg`
-
-              : (
-                  song.cover ||
-                  "/images/ganpati.jpg"
-                );
+              : song.cover;
 
 
           return `
@@ -977,33 +853,39 @@
               class="video-card"
             >
 
-              <img
-                class="video-thumb"
-                src="${escapeHTML(thumbnail)}"
-                alt=""
-                loading="lazy"
-                onerror="this.src='/images/ganpati.jpg'"
+              <div
+                class="video-thumb-wrap"
+                data-video-id="${escapeHTML(song.id)}"
               >
 
-              <div
-                class="video-card-body"
-              >
+                <img
+                  class="video-thumb"
+                  src="${escapeHTML(thumb)}"
+                  alt=""
+                  loading="lazy"
+                  onerror="this.src='/images/ganpati.jpg'"
+                >
+
+                <div class="video-play-overlay">
+
+                  <div class="video-play-circle">
+                    ▶
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="video-card-info">
 
                 <strong>
                   ${escapeHTML(song.title)}
                 </strong>
 
-                <p>
+                <small>
                   ${escapeHTML(song.artist)}
-                </p>
-
-                <button
-                  class="primary-btn video-open"
-                  data-video-id="${escapeHTML(song.id)}"
-                  type="button"
-                >
-                  ▶ Watch
-                </button>
+                </small>
 
               </div>
 
@@ -1017,12 +899,12 @@
 
     E.videoSongs
       .querySelectorAll(
-        ".video-open"
+        "[data-video-id]"
       )
       .forEach(
-        button => {
+        element => {
 
-          button.addEventListener(
+          element.addEventListener(
             "click",
             () => {
 
@@ -1031,14 +913,14 @@
                   item =>
                     String(item.id) ===
                     String(
-                      button.dataset.videoId
+                      element.dataset.videoId
                     )
                 );
 
 
               if (song) {
 
-                openVideo(
+                playYouTubeVideo(
                   song
                 );
 
@@ -1054,332 +936,110 @@
 
 
   /* =====================================================
-     ADMIN LIST
-  ====================================================== */
+     PLAYLIST POSITION
+  ===================================================== */
 
-  function renderAdminSongs() {
-
-    if (!state.songs.length) {
-
-      E.adminSongs.innerHTML =
-        `
-        <div class="empty">
-          No songs in database
-        </div>
-        `;
-
-      return;
-
-    }
-
-
-    E.adminSongs.innerHTML =
-
-      state.songs.map(
-        song => `
-
-          <div
-            class="admin-song"
-          >
-
-            <strong>
-              ${escapeHTML(song.title)}
-            </strong>
-
-            <br>
-
-            <small>
-
-              ${escapeHTML(song.artist)}
-
-              ·
-
-              ${escapeHTML(
-                song.source ||
-                "unknown"
-              )}
-
-            </small>
-
-          </div>
-
-        `
-      ).join("");
-
-  }
-
-
-  /* =====================================================
-     NAVIGATION
-  ====================================================== */
-
-  function showView(
-    name
-  ) {
-
-    document
-      .querySelectorAll(
-        ".page-view"
-      )
-      .forEach(
-        view => {
-
-          view.classList.remove(
-            "active"
-          );
-
-        }
-      );
-
-
-    const target =
-      $(`view-${name}`);
-
-
-    if (target) {
-
-      target.classList.add(
-        "active"
-      );
-
-    }
-
-
-    E.nav.forEach(
-      button => {
-
-        button.classList.toggle(
-          "active",
-          button.dataset.view ===
-          name
-        );
-
-      }
-    );
-
-
-    E.sidebar.classList.remove(
-      "open"
-    );
-
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-
-
-    if (
-      name === "admin"
-    ) {
-
-      loadAdminSongs();
-
-    }
-
-  }
-
-
-  /* =====================================================
-     PLAY SONG
-  ====================================================== */
-
-  function playSong(
+  function setPlaylist(
+    playlist,
     song
   ) {
 
-    /*
-     * Audio playlist contains:
-     * MP3 + YouTube
-     */
+    state.currentPlaylist =
+      playlist;
 
-    state.playlist =
-      state.songs.filter(
-        item =>
-
-          item.source === "youtube" ||
-
-          item.source === "mp3" ||
-
-          !item.source
-      );
-
-
-    state.index =
-      state.playlist.findIndex(
+    state.currentIndex =
+      playlist.findIndex(
         item =>
           String(item.id) ===
           String(song.id)
       );
 
-
-    if (
-      state.index < 0
-    ) {
-
-      state.playlist =
-        [song];
-
-      state.index = 0;
-
-    }
-
-
-    loadCurrent();
-
   }
 
 
   /* =====================================================
-     PLAY ALL
-  ====================================================== */
+     PLAYER UI
+  ===================================================== */
 
-  function playAll() {
-
-    state.playlist =
-      state.songs.filter(
-        song =>
-
-          song.source === "youtube" ||
-
-          song.source === "mp3" ||
-
-          !song.source
-      );
-
-
-    if (
-      !state.playlist.length
-    ) {
-
-      toast(
-        "No audio songs available"
-      );
-
-      return;
-
-    }
-
-
-    state.index = 0;
-
-
-    loadCurrent();
-
-  }
-
-
-  /* =====================================================
-     LOAD CURRENT
-  ====================================================== */
-
-  function loadCurrent() {
-
-    const song =
-      state.playlist[
-        state.index
-      ];
-
-
-    if (!song) {
-      return;
-    }
-
-
-    E.playerTitle.textContent =
-      song.title ||
-      "Untitled";
-
-
-    E.playerArtist.textContent =
-      song.artist ||
-      "SwarAJ";
-
+  function updatePlayer(
+    song
+  ) {
 
     E.playerImage.src =
       song.cover ||
       "/images/ganpati.jpg";
 
+    E.playerTitle.textContent =
+      song.title;
 
-    E.currentTime.textContent =
-      "0:00";
-
-
-    E.duration.textContent =
-      "0:00";
+    E.playerArtist.textContent =
+      song.artist;
 
 
-    E.progress.value =
-      0;
+    E.playerImage.onerror =
+      () => {
+
+        E.playerImage.src =
+          "/images/ganpati.jpg";
+
+      };
+
+  }
 
 
-    /*
-     * Stop old YouTube
-     */
+  function setPlayingUI(
+    playing
+  ) {
 
-    destroyYouTubePlayer();
+    state.playing =
+      playing;
 
-
-    /*
-     * YouTube
-     */
-
-    if (
-      song.source === "youtube" ||
-      song.youtubeId
-    ) {
-
-      playYouTubeAudio(
-        song
-      );
-
-      return;
-
-    }
-
-
-    /*
-     * MP3
-     */
-
-    if (
-      song.source === "mp3" ||
-      song.url
-    ) {
-
-      playMP3(
-        song
-      );
-
-      return;
-
-    }
-
-
-    toast(
-      "Song URL unavailable"
-    );
+    E.playPause.textContent =
+      playing
+        ? "❚❚"
+        : "▶";
 
   }
 
 
   /* =====================================================
-     MP3 PLAYBACK
-  ====================================================== */
+     MP3 PLAY
+  ===================================================== */
 
-  function playMP3(
+  async function startMP3(
     song
   ) {
 
-    if (!song.url) {
+    if (!song.audioUrl) {
 
       toast(
-        "MP3 URL unavailable"
+        "MP3 URL is not available"
       );
 
       return;
 
     }
+
+
+    setPlaylist(
+      state.mp3Playlist,
+      song
+    );
+
+
+    stopYouTube();
+
+
+    state.currentSong =
+      song;
+
+    state.currentMode =
+      "mp3";
+
+
+    updatePlayer(
+      song
+    );
 
 
     try {
@@ -1387,41 +1047,27 @@
       audio.pause();
 
       audio.src =
-        song.url;
+        song.audioUrl;
 
       audio.load();
 
+      await audio.play();
 
-      audio.play()
-        .then(
-          () => {
+      setPlayingUI(true);
 
-            state.playing =
-              true;
-
-            updatePlayButton();
-
-          }
-        )
-        .catch(
-          error => {
-
-            console.error(
-              "MP3 playback:",
-              error
-            );
-
-            toast(
-              "Unable to play MP3"
-            );
-
-          }
-        );
+      hideWatchVideo();
 
     } catch (error) {
 
       console.error(
+        "MP3 play error:",
         error
+      );
+
+      setPlayingUI(false);
+
+      toast(
+        "Unable to play this MP3"
       );
 
     }
@@ -1430,164 +1076,115 @@
 
 
   /* =====================================================
-     YOUTUBE AUDIO
-  ====================================================== */
+     YOUTUBE API
+  ===================================================== */
 
-  function playYouTubeAudio(
-    song
-  ) {
+  let ytPlayer =
+    null;
 
-    const youtubeId =
+  let ytReady =
+    false;
 
-      song.youtubeId ||
-
-      extractYouTubeId(
-        song.youtubeUrl
-      ) ||
-
-      extractYouTubeId(
-        song.url
-      );
+  let pendingYouTubeSong =
+    null;
 
 
-    if (!youtubeId) {
+  function loadYouTubeAPI() {
 
-      toast(
-        "Invalid YouTube URL"
-      );
+    if (
+      window.YT &&
+      window.YT.Player
+    ) {
 
-      return;
+      ytReady = true;
 
-    }
+      if (
+        pendingYouTubeSong
+      ) {
 
+        createYouTubePlayer();
 
-    youtubePendingId =
-      youtubeId;
-
-
-    /*
-     * Stop normal MP3.
-     */
-
-    try {
-
-      audio.pause();
-
-      audio.removeAttribute(
-        "src"
-      );
-
-      audio.load();
-
-    } catch (error) {
-
-      console.warn(
-        error
-      );
-
-    }
-
-
-    /*
-     * Hide the video completely
-     * during Audio mode.
-     */
-
-    E.videoPlayer.classList.remove(
-      "hidden"
-    );
-
-
-    E.videoPlayer.style.position =
-      "fixed";
-
-    E.videoPlayer.style.width =
-      "1px";
-
-    E.videoPlayer.style.height =
-      "1px";
-
-    E.videoPlayer.style.left =
-      "-10000px";
-
-    E.videoPlayer.style.top =
-      "-10000px";
-
-    E.videoPlayer.style.bottom =
-      "auto";
-
-    E.videoPlayer.style.opacity =
-      "0";
-
-    E.videoPlayer.style.pointerEvents =
-      "none";
-
-    E.videoPlayer.style.overflow =
-      "hidden";
-
-
-    /*
-     * Load YouTube API.
-     */
-
-    if (!youtubeAPIReady) {
-
-      loadYouTubeAPI();
-
-      toast(
-        "Loading YouTube..."
-      );
+      }
 
       return;
 
     }
 
 
-    createYouTubeAudioPlayer(
-      youtubeId
+    if (
+      document.getElementById(
+        "youtube-api"
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    const script =
+      document.createElement(
+        "script"
+      );
+
+    script.id =
+      "youtube-api";
+
+    script.src =
+      "https://www.youtube.com/iframe_api";
+
+    document.head.appendChild(
+      script
     );
 
   }
 
 
-  /* =====================================================
-     CREATE YOUTUBE AUDIO PLAYER
-  ====================================================== */
+  window.onYouTubeIframeAPIReady =
+    function () {
 
-  function createYouTubeAudioPlayer(
-    videoId
-  ) {
+      ytReady = true;
 
-    if (!videoId) {
+      if (
+        pendingYouTubeSong
+      ) {
+
+        createYouTubePlayer();
+
+      }
+
+    };
+
+
+  function createYouTubePlayer() {
+
+    if (!pendingYouTubeSong) {
       return;
     }
 
 
-    youtubePendingId =
-      videoId;
+    const song =
+      pendingYouTubeSong;
 
 
-    destroyYouTubePlayer();
+    const container =
+      $("youtubeAudioContainer");
 
 
-    E.videoFrame.innerHTML =
-      `
-      <div
-        id="youtubeAudioPlayer"
-      ></div>
-      `;
+    container.innerHTML =
+      `<div id="youtubeAudioPlayer"></div>`;
 
 
-    youtubePlayer =
+    ytPlayer =
       new YT.Player(
         "youtubeAudioPlayer",
         {
 
           width: "1",
-
           height: "1",
 
-          videoId: videoId,
+          videoId:
+            song.youtubeId,
 
           playerVars: {
 
@@ -1595,9 +1192,9 @@
 
             controls: 0,
 
-            rel: 0,
-
             playsinline: 1,
+
+            rel: 0,
 
             modestbranding: 1,
 
@@ -1605,152 +1202,28 @@
 
           },
 
-
           events: {
 
             onReady:
-              function(event) {
+              event => {
 
-                try {
+                event.target.playVideo();
 
-                  event.target.setVolume(
-                    100
-                  );
-
-                  event.target.playVideo();
-
-
-                  state.playing =
-                    true;
-
-
-                  updatePlayButton();
-
-                } catch (error) {
-
-                  console.error(
-                    "YouTube ready/play:",
-                    error
-                  );
-
-                  toast(
-                    "Tap Play again to start YouTube"
-                  );
-
-                }
+                setPlayingUI(true);
 
               },
-
 
             onStateChange:
-              function(event) {
-
-                /*
-                 * PLAYING
-                 */
-
-                if (
-                  event.data ===
-                  YT.PlayerState.PLAYING
-                ) {
-
-                  state.playing =
-                    true;
-
-                  updatePlayButton();
-
-                  return;
-
-                }
-
-
-                /*
-                 * PAUSED
-                 */
-
-                if (
-                  event.data ===
-                  YT.PlayerState.PAUSED
-                ) {
-
-                  state.playing =
-                    false;
-
-                  updatePlayButton();
-
-                  return;
-
-                }
-
-
-                /*
-                 * ENDED
-                 */
-
-                if (
-                  event.data ===
-                  YT.PlayerState.ENDED
-                ) {
-
-                  state.playing =
-                    false;
-
-                  updatePlayButton();
-
-                  nextSong();
-
-                }
-
-              },
-
+              onYouTubeStateChange,
 
             onError:
-              function(event) {
+              () => {
 
-                console.error(
-                  "YouTube error:",
-                  event.data
+                setPlayingUI(false);
+
+                toast(
+                  "YouTube could not play this video"
                 );
-
-
-                state.playing =
-                  false;
-
-
-                updatePlayButton();
-
-
-                /*
-                 * 2 = invalid ID
-                 * 5 = HTML5 error
-                 * 100 = unavailable
-                 * 101/150 = embedding disabled
-                 */
-
-                if (
-                  event.data === 101 ||
-                  event.data === 150
-                ) {
-
-                  toast(
-                    "This YouTube video does not allow embedding."
-                  );
-
-                } else if (
-                  event.data === 100
-                ) {
-
-                  toast(
-                    "YouTube video is unavailable."
-                  );
-
-                } else {
-
-                  toast(
-                    "Unable to play this YouTube song."
-                  );
-
-                }
 
               }
 
@@ -1762,114 +1235,40 @@
   }
 
 
-  /* =====================================================
-     DESTROY YOUTUBE
-  ====================================================== */
+  function onYouTubeStateChange(
+    event
+  ) {
 
-  function destroyYouTubePlayer() {
+    if (
+      event.data ===
+      YT.PlayerState.PLAYING
+    ) {
 
-    if (!youtubePlayer) {
-      return;
-    }
-
-
-    try {
-
-      youtubePlayer.stopVideo();
-
-    } catch (error) {
-
-      console.warn(
-        error
-      );
-
-    }
-
-
-    try {
-
-      youtubePlayer.destroy();
-
-    } catch (error) {
-
-      console.warn(
-        error
-      );
-
-    }
-
-
-    youtubePlayer =
-      null;
-
-
-    E.videoFrame.innerHTML =
-      "";
-
-  }
-
-
-  /* =====================================================
-     YOUTUBE PLAY / PAUSE
-  ====================================================== */
-
-  function toggleYouTubePlayback() {
-
-    if (!youtubePlayer) {
-
-      const song =
-        state.playlist[
-          state.index
-        ];
-
-
-      if (song) {
-
-        playYouTubeAudio(
-          song
-        );
-
-      }
+      setPlayingUI(true);
 
       return;
 
     }
 
 
-    try {
+    if (
+      event.data ===
+      YT.PlayerState.PAUSED
+    ) {
 
-      const playerState =
-        youtubePlayer.getPlayerState();
+      setPlayingUI(false);
 
+      return;
 
-      if (
-        playerState ===
-        YT.PlayerState.PLAYING
-      ) {
-
-        youtubePlayer.pauseVideo();
-
-        state.playing =
-          false;
-
-      } else {
-
-        youtubePlayer.playVideo();
-
-        state.playing =
-          true;
-
-      }
+    }
 
 
-      updatePlayButton();
+    if (
+      event.data ===
+      YT.PlayerState.ENDED
+    ) {
 
-    } catch (error) {
-
-      console.error(
-        "YouTube toggle:",
-        error
-      );
+      playNext();
 
     }
 
@@ -1877,191 +1276,333 @@
 
 
   /* =====================================================
-     OPEN VIDEO
-  ====================================================== */
+     YOUTUBE AUDIO
+  ===================================================== */
 
-  function openVideo(
+  function startYouTubeAudio(
     song
   ) {
+
+    if (!song.youtubeId) {
+
+      toast(
+        "YouTube video ID not found"
+      );
+
+      return;
+
+    }
+
+
+    setPlaylist(
+      state.youtubePlaylist,
+      song
+    );
+
+
+    audio.pause();
+
+    stopVisibleVideo();
+
+
+    state.currentSong =
+      song;
+
+    state.currentMode =
+      "youtube";
+
+
+    updatePlayer(
+      song
+    );
+
+
+    showWatchVideo();
+
+
+    pendingYouTubeSong =
+      song;
+
+
+    if (
+      ytPlayer &&
+      typeof ytPlayer.loadVideoById ===
+        "function"
+    ) {
+
+      ytPlayer.loadVideoById(
+        song.youtubeId
+      );
+
+      ytPlayer.playVideo();
+
+      setPlayingUI(true);
+
+      return;
+
+    }
+
+
+    loadYouTubeAPI();
+
+
+    if (!ytReady) {
+
+      toast(
+        "Starting YouTube audio..."
+      );
+
+      return;
+
+    }
+
+
+    createYouTubePlayer();
+
+  }
+
+
+  /* =====================================================
+     STOP YOUTUBE
+  ===================================================== */
+
+  function stopYouTube() {
+
+    if (
+      ytPlayer &&
+      typeof ytPlayer.stopVideo ===
+        "function"
+    ) {
+
+      try {
+
+        ytPlayer.stopVideo();
+
+      } catch {}
+
+    }
+
+  }
+
+
+  /* =====================================================
+     VIDEO PLAY
+  ===================================================== */
+
+  function playYouTubeVideo(
+    song
+  ) {
+
+    if (!song.youtubeId) {
+
+      toast(
+        "YouTube video unavailable"
+      );
+
+      return;
+
+    }
+
+
+    setPlaylist(
+      state.youtubePlaylist,
+      song
+    );
+
+
+    audio.pause();
+
+    stopYouTube();
+
+
+    state.currentSong =
+      song;
+
+    state.currentMode =
+      "video";
+
+
+    updatePlayer(
+      song
+    );
+
+
+    E.videoPlayer.classList.remove(
+      "hidden"
+    );
+
+
+    E.videoPlayerTitle.textContent =
+      song.title;
+
+    E.videoPlayerArtist.textContent =
+      song.artist;
+
+
+    E.videoFrame.innerHTML = `
+
+      <iframe
+        src="https://www.youtube.com/embed/${encodeURIComponent(song.youtubeId)}?autoplay=1&playsinline=1&rel=0&modestbranding=1"
+        title="${escapeHTML(song.title)}"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+
+    `;
+
 
     showView(
       "video"
     );
 
 
-    /*
-     * YouTube Video
-     */
+    setPlayingUI(true);
 
-    if (
-      song.youtubeId
-    ) {
-
-      destroyYouTubePlayer();
-
-
-      E.videoPlayer.classList.remove(
-        "hidden"
-      );
-
-
-      /*
-       * Restore normal video dimensions.
-       */
-
-      E.videoPlayer.style.position =
-        "";
-
-      E.videoPlayer.style.width =
-        "";
-
-      E.videoPlayer.style.height =
-        "";
-
-      E.videoPlayer.style.left =
-        "";
-
-      E.videoPlayer.style.top =
-        "";
-
-      E.videoPlayer.style.bottom =
-        "";
-
-      E.videoPlayer.style.opacity =
-        "";
-
-      E.videoPlayer.style.pointerEvents =
-        "";
-
-      E.videoPlayer.style.overflow =
-        "";
-
-
-      E.videoFrame.innerHTML =
-
-        `
-        <iframe
-          src="https://www.youtube.com/embed/${encodeURIComponent(song.youtubeId)}?autoplay=1&rel=0&playsinline=1"
-          title="${escapeHTML(song.title)}"
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowfullscreen>
-        </iframe>
-        `;
-
-
-      return;
-
-    }
-
-
-    /*
-     * Uploaded Video
-     */
-
-    if (
-      song.url
-    ) {
-
-      E.videoPlayer.classList.remove(
-        "hidden"
-      );
-
-
-      E.videoPlayer.style.position =
-        "";
-
-      E.videoPlayer.style.width =
-        "";
-
-      E.videoPlayer.style.height =
-        "";
-
-      E.videoPlayer.style.left =
-        "";
-
-      E.videoPlayer.style.top =
-        "";
-
-      E.videoPlayer.style.bottom =
-        "";
-
-      E.videoPlayer.style.opacity =
-        "";
-
-      E.videoPlayer.style.pointerEvents =
-        "";
-
-      E.videoPlayer.style.overflow =
-        "";
-
-
-      E.videoFrame.innerHTML =
-
-        `
-        <video
-          src="${escapeHTML(song.url)}"
-          controls
-          autoplay
-          playsinline>
-        </video>
-        `;
-
-
-      return;
-
-    }
-
-
-    toast(
-      "Video URL unavailable"
-    );
+    hideWatchVideo();
 
   }
 
 
   /* =====================================================
-     NEXT
-  ====================================================== */
+     WATCH VIDEO BUTTON
+  ===================================================== */
 
-  function nextSong() {
+  function showWatchVideo() {
+
+    E.watchVideo.classList.remove(
+      "hidden"
+    );
+
+  }
+
+
+  function hideWatchVideo() {
+
+    E.watchVideo.classList.add(
+      "hidden"
+    );
+
+  }
+
+
+  E.watchVideo.addEventListener(
+    "click",
+    () => {
+
+      if (
+        state.currentSong &&
+        state.currentSong.youtubeId
+      ) {
+
+        playYouTubeVideo(
+          state.currentSong
+        );
+
+      }
+
+    }
+  );
+
+
+  /* =====================================================
+     CLOSE VIDEO
+  ===================================================== */
+
+  function stopVisibleVideo() {
+
+    E.videoFrame.innerHTML = "";
+
+    E.videoPlayer.classList.add(
+      "hidden"
+    );
+
+  }
+
+
+  E.videoClose.addEventListener(
+    "click",
+    () => {
+
+      stopVisibleVideo();
+
+    }
+  );
+
+
+  /* =====================================================
+     NEXT
+  ===================================================== */
+
+  function playNext() {
 
     if (
-      !state.playlist.length
+      !state.currentPlaylist.length
     ) {
-
-      playAll();
 
       return;
 
     }
 
 
-    state.index++;
+    let next =
+      state.currentIndex + 1;
 
 
     if (
-      state.index >=
-      state.playlist.length
+      next >=
+      state.currentPlaylist.length
     ) {
 
-      state.index = 0;
+      next = 0;
 
     }
 
 
-    loadCurrent();
+    const song =
+      state.currentPlaylist[next];
+
+
+    if (!song) {
+      return;
+    }
+
+
+    if (
+      state.currentMode ===
+      "video"
+    ) {
+
+      playYouTubeVideo(
+        song
+      );
+
+    } else if (
+      song.youtubeId
+    ) {
+
+      startYouTubeAudio(
+        song
+      );
+
+    } else {
+
+      startMP3(
+        song
+      );
+
+    }
 
   }
 
 
   /* =====================================================
      PREVIOUS
-  ====================================================== */
+  ===================================================== */
 
-  function previousSong() {
+  function playPrevious() {
 
     if (
-      !state.playlist.length
+      !state.currentPlaylist.length
     ) {
 
       return;
@@ -2069,183 +1610,299 @@
     }
 
 
-    state.index--;
+    let previous =
+      state.currentIndex - 1;
 
 
     if (
-      state.index < 0
+      previous < 0
     ) {
 
-      state.index =
-        state.playlist.length - 1;
+      previous =
+        state.currentPlaylist.length - 1;
 
     }
 
 
-    loadCurrent();
+    const song =
+      state.currentPlaylist[
+        previous
+      ];
+
+
+    if (!song) {
+      return;
+    }
+
+
+    if (
+      state.currentMode ===
+      "video"
+    ) {
+
+      playYouTubeVideo(
+        song
+      );
+
+    } else if (
+      song.youtubeId
+    ) {
+
+      startYouTubeAudio(
+        song
+      );
+
+    } else {
+
+      startMP3(
+        song
+      );
+
+    }
 
   }
 
 
   /* =====================================================
      STOP
-  ====================================================== */
+  ===================================================== */
 
-  function stopSong() {
+  function stopPlayback() {
 
-    /*
-     * MP3
-     */
+    audio.pause();
 
-    try {
-
-      audio.pause();
-
-      audio.currentTime =
-        0;
-
-    } catch (error) {
-
-      console.warn(
-        error
-      );
-
-    }
-
-
-    /*
-     * YouTube
-     */
-
-    if (
-      youtubePlayer
-    ) {
-
-      try {
-
-        youtubePlayer.stopVideo();
-
-      } catch (error) {
-
-        console.warn(
-          error
-        );
-
-      }
-
-    }
-
+    stopYouTube();
 
     state.playing =
       false;
 
+    state.currentSong =
+      state.currentSong;
 
-    updatePlayButton();
+    setPlayingUI(false);
 
   }
 
 
   /* =====================================================
      PLAY / PAUSE
-  ====================================================== */
+  ===================================================== */
 
-  function togglePlay() {
+  E.playPause.addEventListener(
+    "click",
+    async () => {
 
-    const song =
-      state.playlist[
-        state.index
-      ];
+      if (
+        !state.currentSong
+      ) {
+
+        if (
+          state.mp3Playlist.length
+        ) {
+
+          startMP3(
+            state.mp3Playlist[0]
+          );
+
+        } else if (
+          state.youtubePlaylist.length
+        ) {
+
+          startYouTubeAudio(
+            state.youtubePlaylist[0]
+          );
+
+        }
+
+        return;
+
+      }
 
 
-    if (!song) {
+      if (
+        state.currentMode ===
+        "mp3"
+      ) {
 
-      playAll();
+        if (
+          audio.paused
+        ) {
 
-      return;
+          try {
+
+            await audio.play();
+
+            setPlayingUI(true);
+
+          } catch {}
+
+        } else {
+
+          audio.pause();
+
+          setPlayingUI(false);
+
+        }
+
+        return;
+
+      }
+
+
+      if (
+        ytPlayer
+      ) {
+
+        if (
+          state.playing
+        ) {
+
+          ytPlayer.pauseVideo();
+
+        } else {
+
+          ytPlayer.playVideo();
+
+        }
+
+      }
 
     }
-
-
-    /*
-     * YouTube
-     */
-
-    if (
-      song.source === "youtube" ||
-      song.youtubeId
-    ) {
-
-      toggleYouTubePlayback();
-
-      return;
-
-    }
-
-
-    /*
-     * MP3
-     */
-
-    if (
-      audio.paused
-    ) {
-
-      audio.play()
-        .then(
-          () => {
-
-            state.playing =
-              true;
-
-            updatePlayButton();
-
-          }
-        )
-        .catch(
-          error => {
-
-            console.error(
-              error
-            );
-
-            toast(
-              "Unable to play audio"
-            );
-
-          }
-        );
-
-    } else {
-
-      audio.pause();
-
-      state.playing =
-        false;
-
-      updatePlayButton();
-
-    }
-
-  }
+  );
 
 
   /* =====================================================
-     PLAY BUTTON
-  ====================================================== */
+     PLAYER BUTTONS
+  ===================================================== */
 
-  function updatePlayButton() {
+  E.next.addEventListener(
+    "click",
+    playNext
+  );
 
-    E.playPause.textContent =
-      state.playing
-        ? "Ⅱ"
-        : "▶";
 
-  }
+  E.previous.addEventListener(
+    "click",
+    playPrevious
+  );
+
+
+  E.stop.addEventListener(
+    "click",
+    stopPlayback
+  );
+
+
+  /* =====================================================
+     MP3 EVENTS
+  ===================================================== */
+
+  audio.addEventListener(
+    "play",
+    () => {
+
+      setPlayingUI(true);
+
+    }
+  );
+
+
+  audio.addEventListener(
+    "pause",
+    () => {
+
+      if (
+        state.currentMode ===
+        "mp3"
+      ) {
+
+        setPlayingUI(false);
+
+      }
+
+    }
+  );
+
+
+  audio.addEventListener(
+    "ended",
+    () => {
+
+      playNext();
+
+    }
+  );
+
+
+  audio.addEventListener(
+    "timeupdate",
+    () => {
+
+      if (
+        !audio.duration ||
+        !Number.isFinite(
+          audio.duration
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      const percent =
+        (
+          audio.currentTime /
+          audio.duration
+        ) * 100;
+
+
+      E.progress.value =
+        percent;
+
+
+      E.currentTime.textContent =
+        formatTime(
+          audio.currentTime
+        );
+
+      E.duration.textContent =
+        formatTime(
+          audio.duration
+        );
+
+    }
+  );
+
+
+  E.progress.addEventListener(
+    "input",
+    () => {
+
+      if (
+        !audio.duration
+      ) {
+
+        return;
+
+      }
+
+
+      audio.currentTime =
+        (
+          Number(
+            E.progress.value
+          ) / 100
+        ) *
+        audio.duration;
+
+    }
+  );
 
 
   /* =====================================================
      TIME
-  ====================================================== */
+  ===================================================== */
 
   function formatTime(
     seconds
@@ -2267,7 +1924,6 @@
         seconds / 60
       );
 
-
     const secs =
       Math.floor(
         seconds % 60
@@ -2275,326 +1931,141 @@
 
 
     return (
-      `${mins}:${String(secs).padStart(2,"0")}`
+      mins +
+      ":" +
+      String(secs)
+        .padStart(2, "0")
     );
 
   }
 
 
   /* =====================================================
-     YOUTUBE ADMIN SUBMIT
-  ====================================================== */
+     PLAY ALL MP3
+  ===================================================== */
 
-  async function submitYouTubeSong(
-    form
+  E.playAll.addEventListener(
+    "click",
+    () => {
+
+      if (
+        state.mp3Playlist.length
+      ) {
+
+        startMP3(
+          state.mp3Playlist[0]
+        );
+
+        return;
+
+      }
+
+
+      if (
+        state.youtubePlaylist.length
+      ) {
+
+        startYouTubeAudio(
+          state.youtubePlaylist[0]
+        );
+
+        return;
+
+      }
+
+
+      toast(
+        "No songs available"
+      );
+
+    }
+  );
+
+
+  /* =====================================================
+     NAVIGATION
+  ===================================================== */
+
+  function showView(
+    view
   ) {
 
-    const youtubeUrl =
-      form.querySelector(
-        '[name="youtube_url"]'
-      )?.value.trim();
+    document
+      .querySelectorAll(
+        ".page-view"
+      )
+      .forEach(
+        section => {
 
+          section.classList.remove(
+            "active"
+          );
 
-    if (!youtubeUrl) {
-
-      toast(
-        "Enter a YouTube URL"
+        }
       );
 
-      return;
+
+    const target =
+      $(
+        `view-${view}`
+      );
+
+
+    if (target) {
+
+      target.classList.add(
+        "active"
+      );
 
     }
 
 
-    const youtubeId =
-      extractYouTubeId(
-        youtubeUrl
-      );
+    E.navButtons.forEach(
+      button => {
 
-
-    if (!youtubeId) {
-
-      toast(
-        "Invalid YouTube URL"
-      );
-
-      return;
-
-    }
-
-
-    const data = {
-
-      title:
-        form.querySelector(
-          '[name="title"]'
-        )?.value.trim()
-        ||
-        "Untitled",
-
-
-      artist:
-        form.querySelector(
-          '[name="artist"]'
-        )?.value.trim()
-        ||
-        "SwarAJ",
-
-
-      album:
-        form.querySelector(
-          '[name="album"]'
-        )?.value.trim()
-        ||
-        "Singles",
-
-
-      category:
-        form.querySelector(
-          '[name="category"]'
-        )?.value.trim()
-        ||
-        "Other",
-
-
-      language:
-        form.querySelector(
-          '[name="language"]'
-        )?.value.trim()
-        ||
-        "",
-
-
-      /*
-       * Send both names.
-       * This makes the frontend compatible
-       * with either backend naming convention.
-       */
-
-      youtubeUrl:
-        youtubeUrl,
-
-      youtube_url:
-        youtubeUrl,
-
-
-      youtubeVideoId:
-        youtubeId,
-
-      youtube_video_id:
-        youtubeId,
-
-
-      coverUrl:
-        form.querySelector(
-          '[name="cover_url"]'
-        )?.value.trim()
-        ||
-        `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`,
-
-      cover_url:
-        form.querySelector(
-          '[name="cover_url"]'
-        )?.value.trim()
-        ||
-        `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`
-
-    };
-
-
-    try {
-
-      const result =
-        await api(
-          "/api/admin/songs/youtube",
-          {
-
-            method: "POST",
-
-            headers: {
-
-              "Content-Type":
-                "application/json"
-
-            },
-
-            body:
-              JSON.stringify(
-                data
-              ),
-
-            admin: true
-
-          }
+        button.classList.toggle(
+          "active",
+          button.dataset.view ===
+            view
         );
 
-
-      toast(
-        result.message ||
-        "YouTube song added successfully"
-      );
+      }
+    );
 
 
-      form.reset();
+    E.sidebar.classList.remove(
+      "open"
+    );
 
 
-      await loadSongs();
+    if (
+      view === "admin"
+    ) {
 
-      await loadAdminSongs();
-
-
-    } catch (error) {
-
-      console.error(
-        "YouTube submit:",
-        error
-      );
-
-
-      toast(
-        error.message ||
-        "Unable to add YouTube song"
-      );
+      updateAdminScreen();
 
     }
 
   }
 
 
-  /* =====================================================
-     MULTIPART UPLOAD
-  ====================================================== */
-
-  async function submitMultipart(
-    form,
-    endpoint
-  ) {
-
-    const formData =
-      new FormData(
-        form
-      );
-
-
-    try {
-
-      const result =
-        await api(
-          endpoint,
-          {
-
-            method: "POST",
-
-            body:
-              formData,
-
-            admin: true
-
-          }
-        );
-
-
-      toast(
-        result.message ||
-        "Upload successful"
-      );
-
-
-      form.reset();
-
-
-      await loadSongs();
-
-      await loadAdminSongs();
-
-
-    } catch (error) {
-
-      console.error(
-        "Upload:",
-        error
-      );
-
-
-      toast(
-        error.message ||
-        "Upload failed"
-      );
-
-    }
-
-  }
-
-
-  /* =====================================================
-     ADMIN LOAD
-  ====================================================== */
-
-  async function loadAdminSongs() {
-
-    try {
-
-      const data =
-        await api(
-          "/api/songs",
-          {
-            method: "GET",
-            admin: false
-          }
-        );
-
-
-      const songs =
-
-        Array.isArray(data)
-
-          ? data
-
-          : (
-              data.songs ||
-              data.data ||
-              []
-            );
-
-
-      state.songs =
-        songs.map(
-          normalizeSong
-        );
-
-
-      renderAdminSongs();
-
-      renderAll();
-
-
-    } catch (error) {
-
-      console.error(
-        "Admin songs:",
-        error
-      );
-
-    }
-
-  }
-
-
-  /* =====================================================
-     NAV BUTTONS
-  ====================================================== */
-
-  E.nav.forEach(
+  E.viewButtons.forEach(
     button => {
 
       button.addEventListener(
         "click",
-        event => {
+        () => {
 
-          event.preventDefault();
+          const view =
+            button.dataset.view;
+
+          if (!view) {
+            return;
+          }
+
 
           showView(
-            button.dataset.view
+            view
           );
 
         }
@@ -2604,113 +2075,21 @@
   );
 
 
-  /*
-   * Hero Browse Audio and
-   * any other data-view buttons.
-   */
-
-  E.viewButtons.forEach(
-    button => {
-
-      if (
-        button.classList.contains(
-          "nav-btn"
-        )
-      ) {
-        return;
-      }
-
-
-      button.addEventListener(
-        "click",
-        event => {
-
-          event.preventDefault();
-
-          const view =
-            button.dataset.view;
-
-
-          if (view) {
-
-            showView(
-              view
-            );
-
-          }
-
-        }
-      );
-
-    }
-  );
-
-
-  /* =====================================================
-     MOBILE MENU
-  ====================================================== */
-
   E.menuBtn.addEventListener(
     "click",
     () => {
 
-      E.sidebar.classList.add(
+      E.sidebar.classList.toggle(
         "open"
       );
 
     }
-  );
-
-
-  E.closeMenu.addEventListener(
-    "click",
-    () => {
-
-      E.sidebar.classList.remove(
-        "open"
-      );
-
-    }
-  );
-
-
-  /* =====================================================
-     PLAYER
-  ====================================================== */
-
-  E.playAll.addEventListener(
-    "click",
-    playAll
-  );
-
-
-  E.previous.addEventListener(
-    "click",
-    previousSong
-  );
-
-
-  E.next.addEventListener(
-    "click",
-    nextSong
-  );
-
-
-  E.stop.addEventListener(
-    "click",
-    stopSong
-  );
-
-
-  E.playPause.addEventListener(
-    "click",
-    togglePlay
   );
 
 
   /* =====================================================
      SEARCH
-  ====================================================== */
+  ===================================================== */
 
   E.search.addEventListener(
     "input",
@@ -2719,66 +2098,591 @@
 
 
   /* =====================================================
-     YOUTUBE FORM
-  ====================================================== */
+     ADMIN SCREEN
+  ===================================================== */
+
+  function updateAdminScreen() {
+
+    if (
+      state.adminKey
+    ) {
+
+      E.adminLock.classList.add(
+        "hidden"
+      );
+
+      E.adminPanel.classList.remove(
+        "hidden"
+      );
+
+      loadAdminSongs();
+
+    } else {
+
+      E.adminLock.classList.remove(
+        "hidden"
+      );
+
+      E.adminPanel.classList.add(
+        "hidden"
+      );
+
+    }
+
+  }
+
+
+  /* =====================================================
+     ADMIN LOGIN
+  ===================================================== */
+
+  E.adminLoginForm.addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      const key =
+        E.adminKeyInput.value.trim();
+
+
+      if (!key) {
+        return;
+      }
+
+
+      try {
+
+        await api(
+          "/api/admin/login",
+          {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                adminKey: key
+              }),
+
+            // Login itself does not
+            // require an existing key.
+            admin: false
+
+          }
+        );
+
+
+        state.adminKey =
+          key;
+
+
+        localStorage.setItem(
+          "swaraj-admin-key",
+          key
+        );
+
+
+        E.adminKeyInput.value =
+          "";
+
+
+        updateAdminScreen();
+
+        toast(
+          "Admin unlocked"
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+        toast(
+          error.message ||
+          "Invalid admin key"
+        );
+
+      }
+
+    }
+  );
+
+
+  /* =====================================================
+     ADMIN LOGOUT
+  ===================================================== */
+
+  E.adminLogout.addEventListener(
+    "click",
+    () => {
+
+      state.adminKey =
+        "";
+
+      localStorage.removeItem(
+        "swaraj-admin-key"
+      );
+
+
+      updateAdminScreen();
+
+      toast(
+        "Admin locked"
+      );
+
+    }
+  );
+
+
+  /* =====================================================
+     ADMIN YOUTUBE
+  ===================================================== */
 
   E.youtubeForm.addEventListener(
     "submit",
-    event => {
+    async event => {
 
       event.preventDefault();
 
-      submitYouTubeSong(
-        E.youtubeForm
-      );
+
+      if (!state.adminKey) {
+
+        toast(
+          "Admin access required"
+        );
+
+        return;
+
+      }
+
+
+      const form =
+        new FormData(
+          E.youtubeForm
+        );
+
+
+      const body = {
+
+        title:
+          form.get("title"),
+
+        artist:
+          form.get("artist"),
+
+        album:
+          form.get("album"),
+
+        category:
+          form.get("category"),
+
+        youtubeUrl:
+          form.get("youtubeUrl"),
+
+        coverUrl:
+          form.get("coverUrl")
+
+      };
+
+
+      try {
+
+        await api(
+          "/api/admin/songs/youtube",
+          {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify(body)
+
+          }
+        );
+
+
+        E.youtubeForm.reset();
+
+        await loadSongs();
+
+        await loadAdminSongs();
+
+        toast(
+          "YouTube song added"
+        );
+
+
+      } catch (error) {
+
+        toast(
+          error.message
+        );
+
+      }
 
     }
   );
 
 
   /* =====================================================
-     MP3 FORM
-  ====================================================== */
+     ADMIN MP3 FILE
+  ===================================================== */
 
   E.mp3Form.addEventListener(
     "submit",
-    event => {
+    async event => {
 
       event.preventDefault();
 
-      submitMultipart(
-        E.mp3Form,
 
-        "/api/admin/songs/mp3"
-      );
+      if (!state.adminKey) {
+
+        toast(
+          "Admin access required"
+        );
+
+        return;
+
+      }
+
+
+      const form =
+        new FormData(
+          E.mp3Form
+        );
+
+
+      try {
+
+        await api(
+          "/api/admin/songs/upload",
+          {
+
+            method: "POST",
+
+            body:
+              form
+
+          }
+        );
+
+
+        E.mp3Form.reset();
+
+        await loadSongs();
+
+        await loadAdminSongs();
+
+        toast(
+          "MP3 uploaded successfully"
+        );
+
+
+      } catch (error) {
+
+        toast(
+          error.message
+        );
+
+      }
 
     }
   );
 
 
   /* =====================================================
-     VIDEO FORM
-  ====================================================== */
+     ADMIN MP3 URL
+  ===================================================== */
 
-  E.videoForm.addEventListener(
+  E.mp3UrlForm.addEventListener(
     "submit",
-    event => {
+    async event => {
 
       event.preventDefault();
 
-      submitMultipart(
-        E.videoForm,
 
-        "/api/admin/songs/video"
-      );
+      if (!state.adminKey) {
+
+        toast(
+          "Admin access required"
+        );
+
+        return;
+
+      }
+
+
+      const form =
+        new FormData(
+          E.mp3UrlForm
+        );
+
+
+      const body = {
+
+        title:
+          form.get("title"),
+
+        artist:
+          form.get("artist"),
+
+        category:
+          form.get("category"),
+
+        audioUrl:
+          form.get("audioUrl"),
+
+        coverUrl:
+          form.get("coverUrl")
+
+      };
+
+
+      try {
+
+        await api(
+          "/api/admin/songs/mp3-url",
+          {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify(body)
+
+          }
+        );
+
+
+        E.mp3UrlForm.reset();
+
+        await loadSongs();
+
+        await loadAdminSongs();
+
+        toast(
+          "MP3 URL added"
+        );
+
+
+      } catch (error) {
+
+        toast(
+          error.message
+        );
+
+      }
 
     }
   );
 
 
   /* =====================================================
-     REFRESH
-  ====================================================== */
+     ADMIN LIST
+  ===================================================== */
+
+  async function loadAdminSongs() {
+
+    if (!state.adminKey) {
+      return;
+    }
+
+
+    try {
+
+      const data =
+        await api(
+          "/api/admin/songs"
+        );
+
+
+      const songs =
+        data.songs || [];
+
+
+      renderAdminSongs(
+        songs
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      if (
+        error.message
+          .toLowerCase()
+          .includes("invalid admin")
+      ) {
+
+        state.adminKey =
+          "";
+
+        localStorage.removeItem(
+          "swaraj-admin-key"
+        );
+
+        updateAdminScreen();
+
+      }
+
+
+      toast(
+        error.message
+      );
+
+    }
+
+  }
+
+
+  function renderAdminSongs(
+    songs
+  ) {
+
+    if (!songs) {
+      return;
+    }
+
+
+    if (!songs.length) {
+
+      E.adminSongs.innerHTML =
+        `<div class="empty">
+          No songs in database
+        </div>`;
+
+      return;
+
+    }
+
+
+    E.adminSongs.innerHTML =
+      songs.map(
+        song => `
+
+          <div class="admin-song">
+
+            <img
+              src="${escapeHTML(song.cover || "/images/ganpati.jpg")}"
+              onerror="this.src='/images/ganpati.jpg'"
+              alt=""
+            >
+
+            <div class="admin-song-info">
+
+              <strong>
+                ${escapeHTML(song.title)}
+              </strong>
+
+              <small>
+                ${escapeHTML(song.artist)}
+                ·
+                ${
+                  song.youtubeId ||
+                  song.youtube_video_id
+                    ? "YouTube"
+                    : "MP3"
+                }
+              </small>
+
+            </div>
+
+            <button
+              class="delete-btn"
+              data-delete-id="${escapeHTML(song.id)}"
+              type="button"
+              title="Delete"
+            >
+              ×
+            </button>
+
+          </div>
+
+        `
+      ).join("");
+
+
+    E.adminSongs
+      .querySelectorAll(
+        "[data-delete-id]"
+      )
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            async () => {
+
+              const id =
+                button.dataset.deleteId;
+
+
+              if (
+                !confirm(
+                  "Delete this song?"
+                )
+              ) {
+
+                return;
+
+              }
+
+
+              try {
+
+                await api(
+                  `/api/admin/songs/${encodeURIComponent(id)}`,
+                  {
+                    method: "DELETE"
+                  }
+                );
+
+
+                await loadSongs();
+
+                await loadAdminSongs();
+
+                toast(
+                  "Song deleted"
+                );
+
+
+              } catch (error) {
+
+                toast(
+                  error.message
+                );
+
+              }
+
+            }
+          );
+
+        }
+      );
+
+  }
+
 
   E.refreshAdmin.addEventListener(
     "click",
@@ -2787,137 +2691,13 @@
 
 
   /* =====================================================
-     MP3 EVENTS
-  ====================================================== */
-
-  audio.addEventListener(
-    "loadedmetadata",
-    () => {
-
-      E.duration.textContent =
-        formatTime(
-          audio.duration
-        );
-
-    }
-  );
-
-
-  audio.addEventListener(
-    "timeupdate",
-    () => {
-
-      if (
-        !audio.duration
-      ) {
-
-        return;
-
-      }
-
-
-      E.currentTime.textContent =
-        formatTime(
-          audio.currentTime
-        );
-
-
-      E.progress.value =
-
-        (
-          audio.currentTime /
-          audio.duration
-        ) * 100;
-
-    }
-  );
-
-
-  audio.addEventListener(
-    "play",
-    () => {
-
-      state.playing =
-        true;
-
-      updatePlayButton();
-
-    }
-  );
-
-
-  audio.addEventListener(
-    "pause",
-    () => {
-
-      state.playing =
-        false;
-
-      updatePlayButton();
-
-    }
-  );
-
-
-  audio.addEventListener(
-    "ended",
-    nextSong
-  );
-
-
-  /* =====================================================
-     SEEK
-  ====================================================== */
-
-  E.progress.addEventListener(
-    "input",
-    () => {
-
-      if (
-        !audio.duration
-      ) {
-
-        return;
-
-      }
-
-
-      audio.currentTime =
-
-        (
-          Number(
-            E.progress.value
-          ) / 100
-        ) *
-        audio.duration;
-
-    }
-  );
-
-
-  /* =====================================================
-     START
-  ====================================================== */
-
-  showView(
-    "home"
-  );
-
-
-  /*
-   * Load API immediately.
-   * This means YouTube playback is ready
-   * when the user presses a song.
-   */
+     INITIALIZE
+  ===================================================== */
 
   loadYouTubeAPI();
 
-
-  /*
-   * Load database.
-   */
-
   loadSongs();
 
+  updateAdminScreen();
 
 })();

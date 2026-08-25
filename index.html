@@ -2,28 +2,42 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
 
-  <meta name="theme-color" content="#060812">
+  <meta
+    name="theme-color"
+    content="#060812"
+  >
 
   <title>स्वरAJ Music</title>
 
-  <link rel="stylesheet" href="/styles.css">
+  <link
+    rel="stylesheet"
+    href="/styles.css"
+  >
+
 </head>
+
 
 <body>
 
 <div class="app">
 
-  <!-- =====================================================
-       SIDEBAR / DRAWER
-  ====================================================== -->
 
-  <aside id="sidebar" class="sidebar">
+  <!-- =================================================
+       SIDE DRAWER
+  ================================================== -->
+
+  <aside
+    id="sidebar"
+    class="sidebar"
+  >
 
     <div class="brand">
 
@@ -31,7 +45,7 @@
         <span>स्व</span>
       </div>
 
-      <div class="brand-text">
+      <div>
         <strong>स्वरAJ</strong>
         <small>Music</small>
       </div>
@@ -46,40 +60,45 @@
         data-page="home"
       >
         <span>⌂</span>
-        <span>Home</span>
+        Home
       </button>
+
 
       <button
         class="menu-item"
         data-page="search"
       >
         <span>⌕</span>
-        <span>Search</span>
+        Search
       </button>
+
 
       <button
         class="menu-item"
         data-page="library"
       >
         <span>♫</span>
-        <span>Library</span>
+        Library
       </button>
+
 
       <button
         class="menu-item"
         data-page="liked"
       >
         <span>♥</span>
-        <span>Liked</span>
+        Liked
       </button>
+
 
       <button
         class="menu-item"
         data-page="playlist"
       >
-        <span>▦</span>
-        <span>Playlist</span>
+        <span>☷</span>
+        Playlist
       </button>
+
 
       <button
         id="adminMenu"
@@ -87,7 +106,7 @@
         data-page="admin"
       >
         <span>⚙</span>
-        <span>Admin</span>
+        Admin
       </button>
 
     </nav>
@@ -114,16 +133,14 @@
   ></div>
 
 
-  <!-- =====================================================
+  <!-- =================================================
        MAIN
-  ====================================================== -->
+  ================================================== -->
 
   <main class="main">
 
 
-    <!-- ===================================================
-         TOP BAR
-    ==================================================== -->
+    <!-- TOP BAR -->
 
     <header class="topbar">
 
@@ -144,7 +161,6 @@
           id="searchInput"
           type="search"
           placeholder="Search songs, artists..."
-          autocomplete="off"
         >
 
       </div>
@@ -153,7 +169,7 @@
       <button
         id="refreshBtn"
         class="icon-btn"
-        aria-label="Refresh"
+        title="Refresh"
       >
         ↻
       </button>
@@ -161,9 +177,9 @@
     </header>
 
 
-    <!-- ===================================================
+    <!-- =================================================
          HOME
-    ==================================================== -->
+    ================================================== -->
 
     <section
       id="homePage"
@@ -174,9 +190,10 @@
 
         <div class="hero-content">
 
-          <span class="eyebrow">
+          <div class="eyebrow">
             ✦ SWARAJ MUSIC
-          </span>
+          </div>
+
 
           <h1>
             Your Music.
@@ -184,43 +201,38 @@
             Your Vibe.
           </h1>
 
+
           <p>
             MP3 and YouTube music together
             in one seamless playlist.
           </p>
 
-          <div class="hero-actions">
 
-            <button
-              id="heroPlay"
-              class="primary-btn"
-            >
-              ▶ Play Music
-            </button>
-
-            <button
-              id="watchVideoBtn"
-              class="watch-btn hidden"
-            >
-              ▶ Watch Video
-            </button>
-
-          </div>
+          <button
+            id="heroPlay"
+            class="primary-btn"
+          >
+            ▶ Play Music
+          </button>
 
         </div>
 
 
+        <!-- =================================================
+             3D LIQUID SWARAJ LOGO
+        ================================================== -->
+
         <div class="hero-logo">
 
-          <div class="liquid-orb">
+          <div class="hero-liquid-logo">
 
-            <div class="orb-letter">
+            <div class="hero-logo-letter">
               स्व
             </div>
 
-            <i></i>
-            <i></i>
-            <i></i>
+            <div class="hero-logo-name">
+              स्वरAJ
+            </div>
 
           </div>
 
@@ -232,7 +244,7 @@
       <div class="section-title">
 
         <h2>
-          All Music
+          Recently Added
         </h2>
 
         <span id="songCount">
@@ -250,9 +262,9 @@
     </section>
 
 
-    <!-- ===================================================
+    <!-- =================================================
          SEARCH
-    ==================================================== -->
+    ================================================== -->
 
     <section
       id="searchPage"
@@ -280,9 +292,9 @@
     </section>
 
 
-    <!-- ===================================================
+    <!-- =================================================
          LIBRARY
-    ==================================================== -->
+    ================================================== -->
 
     <section
       id="libraryPage"
@@ -310,9 +322,9 @@
     </section>
 
 
-    <!-- ===================================================
+    <!-- =================================================
          LIKED
-    ==================================================== -->
+    ================================================== -->
 
     <section
       id="likedPage"
@@ -326,7 +338,7 @@
         </h1>
 
         <p>
-          Songs you have saved.
+          Your favorite music.
         </p>
 
       </div>
@@ -340,9 +352,9 @@
     </section>
 
 
-    <!-- ===================================================
+    <!-- =================================================
          PLAYLIST
-    ==================================================== -->
+    ================================================== -->
 
     <section
       id="playlistPage"
@@ -370,9 +382,9 @@
     </section>
 
 
-    <!-- ===================================================
+    <!-- =================================================
          ADMIN
-    ==================================================== -->
+    ================================================== -->
 
     <section
       id="adminPage"
@@ -392,7 +404,7 @@
       </div>
 
 
-      <!-- ADMIN LOGIN -->
+      <!-- ADMIN LOCK -->
 
       <div
         id="adminLocked"
@@ -404,7 +416,7 @@
         </h2>
 
         <p>
-          Enter your admin key to continue.
+          Enter your admin key.
         </p>
 
 
@@ -413,7 +425,7 @@
           <input
             id="adminKey"
             type="password"
-            placeholder="Enter admin key"
+            placeholder="Admin key"
           >
 
           <button
@@ -440,6 +452,7 @@
         id="adminContent"
         class="admin-content hidden"
       >
+
 
         <!-- YOUTUBE -->
 
@@ -469,7 +482,6 @@
             <input
               id="ytArtist"
               value="YouTube"
-              required
             >
 
 
@@ -480,7 +492,6 @@
             <input
               id="ytCategory"
               value="Music"
-              required
             >
 
 
@@ -491,7 +502,6 @@
             <input
               id="ytCover"
               type="url"
-              placeholder="https://..."
             >
 
 
@@ -502,22 +512,25 @@
             <input
               id="ytUrl"
               type="url"
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder="https://youtube.com/watch?v=..."
               required
             >
 
 
             <button
-              type="submit"
               class="primary-btn"
+              type="submit"
             >
               Add YouTube Song
             </button>
 
-
-            <div id="youtubeStatus"></div>
-
           </form>
+
+
+          <div
+            id="youtubeStatus"
+            class="admin-status"
+          ></div>
 
         </div>
 
@@ -550,7 +563,6 @@
             <input
               id="mp3Artist"
               value="SwarAJ"
-              required
             >
 
 
@@ -561,7 +573,6 @@
             <input
               id="mp3Category"
               value="Music"
-              required
             >
 
 
@@ -572,22 +583,25 @@
             <input
               id="mp3File"
               type="file"
-              accept="audio/mpeg,audio/mp3,.mp3"
+              accept=".mp3,audio/mpeg"
               required
             >
 
 
             <button
-              type="submit"
               class="primary-btn"
+              type="submit"
             >
               Upload MP3
             </button>
 
-
-            <div id="mp3Status"></div>
-
           </form>
+
+
+          <div
+            id="mp3Status"
+            class="admin-status"
+          ></div>
 
         </div>
 
@@ -598,9 +612,23 @@
   </main>
 
 
-  <!-- =====================================================
-       AUDIO PLAYER
-  ====================================================== -->
+  <!-- =================================================
+       YOUTUBE PLAYER
+  ================================================== -->
+
+  <div
+    id="youtubeFrame"
+    class="youtube-frame hidden-video"
+  >
+
+    <div id="youtubePlayer"></div>
+
+  </div>
+
+
+  <!-- =================================================
+       AUDIO
+  ================================================== -->
 
   <audio
     id="audioPlayer"
@@ -608,9 +636,9 @@
   ></audio>
 
 
-  <!-- =====================================================
-       FIXED PLAYER
-  ====================================================== -->
+  <!-- =================================================
+       PLAYER
+  ================================================== -->
 
   <div class="player">
 
@@ -630,7 +658,7 @@
       <div class="track-info">
 
         <strong id="playerTitle">
-          स्वरAJ
+          SwarAJ
         </strong>
 
         <span id="playerArtist">
@@ -648,7 +676,7 @@
 
         <button
           id="prevBtn"
-          aria-label="Previous"
+          title="Previous"
         >
           ⏮
         </button>
@@ -657,7 +685,7 @@
         <button
           id="playBtn"
           class="play-btn"
-          aria-label="Play"
+          title="Play/Pause"
         >
           ▶
         </button>
@@ -665,7 +693,7 @@
 
         <button
           id="nextBtn"
-          aria-label="Next"
+          title="Next"
         >
           ⏭
         </button>
@@ -679,14 +707,15 @@
           0:00
         </span>
 
+
         <input
           id="progress"
           type="range"
           min="0"
           max="100"
           value="0"
-          step="0.1"
         >
+
 
         <span id="duration">
           0:00
@@ -699,30 +728,13 @@
 
     <div class="player-actions">
 
-      <button
-        id="watchVideoBtn"
-        class="watch-btn hidden"
-      >
-        ▶ Video
-      </button>
+      <!--
+        No separate Watch Video button here.
+        YouTube Watch button is now beside
+        each YouTube song.
+      -->
 
     </div>
-
-  </div>
-
-
-  <!-- =====================================================
-       YOUTUBE PLAYER
-  ====================================================== -->
-
-  <div
-    id="youtubeFrame"
-    class="youtube-frame hidden-video"
-  >
-
-    <div
-      id="youtubePlayer"
-    ></div>
 
   </div>
 
@@ -730,14 +742,14 @@
 </div>
 
 
-<!-- YOUTUBE IFRAME API -->
+<!-- =====================================================
+     YOUTUBE IFRAME API
+===================================================== -->
 
 <script
   src="https://www.youtube.com/iframe_api"
 ></script>
 
-
-<!-- APP -->
 
 <script
   src="/script.js"
@@ -745,4 +757,5 @@
 ></script>
 
 </body>
+
 </html>

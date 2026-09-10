@@ -137,43 +137,18 @@
     class="card"
   >
 
-    <label>
-      Song Title *
-    </label>
+    <label>Song Title *</label>
+    <input type="text" name="title" placeholder="Song title" required>
 
-    <input
-      type="text"
-      name="title"
-      placeholder="Song title"
-      required
-    >
+    <label>Artist</label>
+    <input type="text" name="artist" placeholder="Artist name">
 
-    <label>
-      Artist
-    </label>
+    <label>Album</label>
+    <input type="text" name="album" placeholder="Album name">
 
-    <input
-      type="text"
-      name="artist"
-      placeholder="Artist name"
-    >
-
-    <label>
-      Album
-    </label>
-
-    <input
-      type="text"
-      name="album"
-      placeholder="Album name"
-    >
-
-    <label>
-      Category
-    </label>
+    <label>Category</label>
 
     <select name="category">
-
       <option>Bhakti</option>
       <option>Marathi</option>
       <option>Hindi</option>
@@ -183,103 +158,41 @@
       <option>Party</option>
       <option>Devotional</option>
       <option>Instrumental</option>
-
     </select>
 
-    <label>
-      Language
-    </label>
+    <label>Language</label>
+    <input type="text" name="language" placeholder="Marathi">
 
-    <input
-      type="text"
-      name="language"
-      placeholder="Marathi"
-    >
+    <label>Genre</label>
+    <input type="text" name="genre" placeholder="Devotional">
 
-    <label>
-      Genre
-    </label>
+    <label>MP3 URL</label>
+    <input type="text" name="audio_url" placeholder="https://example.com/song.mp3">
 
-    <input
-      type="text"
-      name="genre"
-      placeholder="Devotional"
-    >
+    <label>YouTube URL</label>
+    <input type="text" name="youtube_url" placeholder="https://youtu.be/VIDEO_ID">
 
-    <label>
-      MP3 URL
-    </label>
+    <label>OR Upload MP3</label>
+    <input type="file" name="audio" accept=".mp3,audio/mpeg,audio/*">
 
-    <input
-      type="text"
-      name="audio_url"
-      placeholder="https://example.com/song.mp3"
-    >
+    <label>Cover Image URL</label>
+    <input type="text" name="cover_url" placeholder="https://example.com/cover.jpg">
+
+    <label>Lyrics</label>
+    <textarea name="lyrics" placeholder="Lyrics..."></textarea>
 
     <label>
-      YouTube URL
-    </label>
-
-    <input
-      type="text"
-      name="youtube_url"
-      placeholder="https://youtu.be/VIDEO_ID"
-    >
-
-    <label>
-      OR Upload MP3
-    </label>
-
-    <input
-      type="file"
-      name="audio"
-      accept=".mp3,audio/mpeg,audio/*"
-    >
-
-    <label>
-      Cover Image URL
-    </label>
-
-    <input
-      type="text"
-      name="cover_url"
-      placeholder="https://example.com/cover.jpg"
-    >
-
-    <label>
-      Lyrics
-    </label>
-
-    <textarea
-      name="lyrics"
-      placeholder="Lyrics..."
-    ></textarea>
-
-    <label>
-
-      <input
-        type="checkbox"
-        name="featured"
-        value="true"
-      >
-
+      <input type="checkbox" name="featured" value="true">
       Featured song
-
     </label>
 
-    <button
-      id="submitButton"
-      type="submit"
-    >
+    <button id="submitButton" type="submit">
       🎵 ADD SONG
     </button>
 
   </form>
 
-  <div
-    id="result"
-    class="result"
-  >
+  <div id="result" class="result">
     Ready.
   </div>
 
@@ -293,9 +206,7 @@
 
     <br>
 
-    <code>
-      https://example.com/song.mp3
-    </code>
+    <code>https://example.com/song.mp3</code>
 
     <br><br>
 
@@ -303,9 +214,7 @@
 
     <br>
 
-    <code>
-      https://youtu.be/VIDEO_ID
-    </code>
+    <code>https://youtu.be/VIDEO_ID</code>
 
     <br><br>
 

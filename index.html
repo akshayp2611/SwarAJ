@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#060812">
+  <title>स्वरAJ Music</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/swaraj-enhancements.css">
+  <link rel="stylesheet" href="/swaraj-final.css">
+</head>
+<body>
+<div class="app">
+
+  <aside id="sidebar" class="sidebar">
+    <div class="brand">
+      <div class="logo-disc"><span>स्वरAJ</span></div>
+      <div class="brand-text"><strong>स्वरAJ</strong><small>Music</small></div>
+    </div>
+    <nav class="menu">
+      <button class="menu-item active" data-page="home"><span>⌂</span><label>Home</label></button>
+      <button class="menu-item" data-page="search"><span>⌕</span><label>Search</label></button>
+      <button class="menu-item" data-page="library"><span>♫</span><label>Library</label></button>
+      <button class="menu-item" data-page="liked"><span>♥</span><label>Liked</label></button>
+      <button class="menu-item" data-page="playlist"><span>☷</span><label>Playlist</label></button>
+    </nav>
+    <div class="sidebar-footer"><strong>स्वरAJ</strong><small>Music Platform</small></div>
+  </aside>
+
+  <div id="drawerOverlay" class="drawer-overlay"></div>
+
+  <main class="main">
+    <header class="topbar">
+      <button id="mobileMenu" class="mobile-menu" aria-label="Open menu">☰</button>
+      <div class="search-box">
+        <span>⌕</span>
+        <input id="searchInput" type="search" placeholder="Search songs, artists..." autocomplete="off">
+      </div>
+      <button id="refreshBtn" class="icon-btn" title="Refresh" aria-label="Refresh">↻</button>
+      <button id="sjThemeToggle" class="icon-btn sj-theme-trigger" type="button" title="Themes" aria-label="Choose theme">◈</button>
+    </header>
+
+    <section id="homePage" class="page active">
+      <div class="hero">
+        <div class="hero-liquid-logo-wrap">
+          <div class="hero-liquid-orbit">
+            <div class="hero-liquid-logo">
+              <div class="liquid-shine"></div>
+              <div class="liquid-bubble bubble-one"></div>
+              <div class="liquid-bubble bubble-two"></div>
+              <div class="liquid-bubble bubble-three"></div>
+              <div class="hero-logo-text"><span>स्वर</span><b>AJ</b></div>
+            </div>
+            <div class="orbit-ring orbit-ring-1"></div>
+            <div class="orbit-ring orbit-ring-2"></div>
+          </div>
+        </div>
+        <div class="hero-content">
+          <div class="eyebrow">✦ SWARAJ MUSIC</div>
+          <h1>Your Music.<br>Your Vibe.</h1>
+          <p>MP3 and YouTube music together in one seamless playlist.</p>
+          <button id="heroPlay" class="primary-btn">▶ Play Music</button>
+        </div>
+      </div>
+
+      <div class="section-title"><h2>Recently Added</h2><span id="songCount">0 songs</span></div>
+      <div id="songList" class="song-list"></div>
+      <div id="sjCategoryContainer"></div>
+    </section>
+
+    <section id="searchPage" class="page">
+      <div class="page-title"><h1>Search</h1><p>Find your favorite songs and artists.</p></div>
+      <div id="searchResults" class="song-list"></div>
+    </section>
+
+    <section id="libraryPage" class="page">
+      <div class="page-title"><h1>Library</h1><p>Your complete music library.</p></div>
+      <div id="libraryList" class="song-list"></div>
+    </section>
+
+    <section id="likedPage" class="page">
+      <div class="page-title"><h1>Liked Songs</h1><p>Your favorite music.</p></div>
+      <div id="likedList" class="song-list"></div>
+    </section>
+
+    <section id="playlistPage" class="page">
+      <div class="page-title"><h1>Playlist</h1><p>Your music playlist.</p></div>
+      <div id="playlistList" class="song-list"></div>
+    </section>
+
+    <section id="adminPage" class="page" style="display:none"></section>
+  </main>
+
+  <section id="sjCommonVideo" class="sj-common-video" aria-label="Video player">
+    <div class="sj-video-inner">
+      <button id="sjVideoClose" class="sj-video-close" type="button" aria-label="Close video">×</button>
+      <div id="youtubeFrame" class="youtube-frame hidden-video">
+        <div id="youtubePlayer"></div>
+      </div>
+      <button id="sjFullscreen" class="sj-video-fullscreen" type="button" aria-label="Fullscreen">⛶</button>
+    </div>
+  </section>
+
+  <audio id="audioPlayer" preload="metadata"></audio>
+
+  <div class="player">
+    <div class="now-playing">
+      <div class="cover-wrap"><img id="playerCover" src="/images/default-cover.jpg" alt="Cover"></div>
+      <div class="track-info">
+        <strong id="playerTitle">SwarAJ</strong>
+        <span id="playerArtist">Music</span>
+        <small id="sjPlayerCategory">Ready to play</small>
+      </div>
+      <button id="sjFavorite" class="sj-round-control" type="button" aria-label="Favorite" title="Favorite">♡</button>
+    </div>
+
+    <div class="controls">
+      <div class="control-buttons">
+        <button id="sjShuffle" class="sj-player-control" type="button" title="Shuffle">🔀</button>
+        <button id="prevBtn" class="sj-player-control" type="button" title="Previous">⏮</button>
+        <button id="playBtn" class="play-btn sj-player-control" title="Play/Pause">▶</button>
+        <button id="nextBtn" class="sj-player-control" type="button" title="Next">⏭</button>
+        <button id="sjRepeat" class="sj-player-control" type="button" title="Repeat">↻</button>
+      </div>
+
+      <div class="progress-row">
+        <span id="currentTime">0:00</span>
+        <input id="progress" type="range" min="0" max="100" value="0" aria-label="Playback progress">
+        <span id="duration">0:00</span>
+      </div>
+    </div>
+
+    <div class="player-actions">
+      <button id="sjMute" class="sj-player-control" type="button" title="Mute">🔊</button>
+      <input id="sjVolume" class="sj-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume">
+      <button id="sjQueue" class="sj-player-control" type="button" title="Queue">☷</button>
+      <button id="sjMiniFullscreen" class="sj-player-control" type="button" title="Fullscreen">⛶</button>
+    </div>
+  </div>
+
+  <div id="sjThemePanel" class="sj-theme-panel" aria-label="Theme selector">
+    <div class="sj-theme-panel-head">
+      <div><strong>Choose your look</strong><span>3D · Liquid · Glass</span></div>
+      <button id="sjThemeClose" type="button" aria-label="Close themes">×</button>
+    </div>
+    <div id="sjThemeGrid" class="sj-theme-grid"></div>
+  </div>
+
+  <div id="sjQueuePanel" class="sj-queue-panel" aria-label="Queue">
+    <div class="sj-panel-head"><strong>Queue</strong><button id="sjQueueClose" type="button">×</button></div>
+    <div id="sjQueueList"></div>
+  </div>
+
+  <div id="sjToast" class="sj-toast" role="status" aria-live="polite"></div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script src="/script.js" defer></script>
+<script src="/swaraj-enhancements.js" defer></script>
+<script src="/swaraj-final.js" defer></script>
+</body>
+</html>

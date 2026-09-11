@@ -1,97 +1,198 @@
 (() => {
   "use strict";
 
-  /* =========================================================
+  /* =====================================================
      SWARAJ THEMES
-     ========================================================= */
+     ===================================================== */
 
   const THEMES = [
-    ["liquid", "Liquid Glass", "#8b5cf6", "#06b6d4"],
-    ["deep-3d", "Deep 3D", "#475569", "#cbd5e1"],
-    ["neon-3d", "Neon 3D", "#00f5ff", "#ff00d4"],
-    ["aurora-liquid", "Aurora Liquid", "#22c55e", "#8b5cf6"],
-    ["galaxy-6d", "Galaxy 6D", "#7c3aed", "#38bdf8"],
-    ["premium-gold", "Premium Gold", "#f59e0b", "#fde68a"],
-    ["ocean-liquid", "Ocean Liquid", "#06b6d4", "#2563eb"],
-    ["purple-crystal", "Purple Crystal", "#a855f7", "#e879f9"],
-    ["red-pulse", "Red Pulse", "#ef4444", "#fb7185"],
-    ["minimal-dark", "Minimal Dark", "#64748b", "#94a3b8"]
+
+    [
+      "liquid",
+      "Liquid Glass",
+      "#8b5cf6",
+      "#06b6d4"
+    ],
+
+    [
+      "deep-3d",
+      "Deep 3D",
+      "#475569",
+      "#cbd5e1"
+    ],
+
+    [
+      "neon-3d",
+      "Neon 3D",
+      "#00f5ff",
+      "#ff00d4"
+    ],
+
+    [
+      "aurora-liquid",
+      "Aurora Liquid",
+      "#22c55e",
+      "#8b5cf6"
+    ],
+
+    [
+      "galaxy-6d",
+      "Galaxy 6D",
+      "#7c3aed",
+      "#38bdf8"
+    ],
+
+    [
+      "premium-gold",
+      "Premium Gold",
+      "#f59e0b",
+      "#fde68a"
+    ],
+
+    [
+      "ocean-liquid",
+      "Ocean Liquid",
+      "#06b6d4",
+      "#2563eb"
+    ],
+
+    [
+      "purple-crystal",
+      "Purple Crystal",
+      "#a855f7",
+      "#e879f9"
+    ],
+
+    [
+      "red-pulse",
+      "Red Pulse",
+      "#ef4444",
+      "#fb7185"
+    ],
+
+    [
+      "minimal-dark",
+      "Minimal Dark",
+      "#64748b",
+      "#94a3b8"
+    ]
+
   ];
 
-  const $ = (id) =>
-    document.getElementById(id);
 
-  /* =========================================================
-     THEMES
-     ========================================================= */
+  const $ =
+    id =>
+      document.getElementById(
+        id
+      );
+
+
+  /* =====================================================
+     BUILD THEME BUTTONS
+     ===================================================== */
 
   function buildThemes() {
+
     const grid =
       $("themeGrid");
 
-    if (!grid) return;
+
+    if (!grid) {
+      return;
+    }
+
 
     grid.innerHTML =
-      THEMES.map(theme => `
-        <button
-          class="theme-choice"
-          type="button"
-          data-theme="${theme[0]}"
-          style="
-            --theme-a:${theme[2]};
-            --theme-b:${theme[3]};
-          "
-        >
-          <span class="theme-preview"></span>
+      THEMES
+        .map(
+          theme => `
 
-          <strong>
-            ${theme[1]}
-          </strong>
+            <button
+              class="theme-choice"
+              type="button"
+              data-theme="${theme[0]}"
+              style="
+                --theme-a:${theme[2]};
+                --theme-b:${theme[3]};
+              "
+            >
 
-          <small>
-            3D • Liquid • SwarAJ
-          </small>
-        </button>
-      `).join("");
+              <span
+                class="theme-preview"
+              ></span>
+
+              <strong>
+                ${theme[1]}
+              </strong>
+
+              <small>
+                3D • Liquid • SwarAJ
+              </small>
+
+            </button>
+
+          `
+        )
+        .join("");
+
 
     grid
       .querySelectorAll(
         ".theme-choice"
       )
-      .forEach(button => {
+      .forEach(
+        button => {
 
-        button.addEventListener(
-          "click",
-          event => {
+          button.addEventListener(
+            "click",
+            event => {
 
-            event.preventDefault();
-            event.stopPropagation();
+              event.preventDefault();
 
-            applyTheme(
-              button.dataset.theme
-            );
-          }
-        );
-      });
-  }
+              event.stopPropagation();
 
-  function applyTheme(theme) {
 
-    const exists =
-      THEMES.some(
-        item =>
-          item[0] === theme
+              applyTheme(
+                button.dataset.theme
+              );
+
+            }
+          );
+
+        }
       );
 
-    if (!exists) {
+  }
+
+
+  /* =====================================================
+     APPLY THEME
+     ===================================================== */
+
+  function applyTheme(
+    theme
+  ) {
+
+    const valid =
+      THEMES.some(
+        item =>
+          item[0] ===
+          theme
+      );
+
+
+    if (!valid) {
       theme = "liquid";
     }
+
 
     const selected =
       THEMES.find(
         item =>
-          item[0] === theme
+          item[0] ===
+          theme
       );
+
 
     document.documentElement
       .setAttribute(
@@ -99,252 +200,407 @@
         theme
       );
 
+
     document.body
       .setAttribute(
         "data-swaraj-theme",
         theme
       );
 
+
     if (selected) {
 
-      document.documentElement
-        .style
-        .setProperty(
-          "--accent",
-          selected[2]
-        );
+      document.documentElement.style.setProperty(
+        "--accent",
+        selected[2]
+      );
 
-      document.documentElement
-        .style
-        .setProperty(
-          "--accent2",
-          selected[3]
-        );
 
-      document.documentElement
-        .style
-        .setProperty(
-          "--sj-theme-a",
-          selected[2]
-        );
+      document.documentElement.style.setProperty(
+        "--accent2",
+        selected[3]
+      );
 
-      document.documentElement
-        .style
-        .setProperty(
-          "--sj-theme-b",
-          selected[3]
-        );
+
+      document.documentElement.style.setProperty(
+        "--sj-theme-a",
+        selected[2]
+      );
+
+
+      document.documentElement.style.setProperty(
+        "--sj-theme-b",
+        selected[3]
+      );
+
     }
+
 
     localStorage.setItem(
       "swaraj-theme",
       theme
     );
 
+
     document
       .querySelectorAll(
         ".theme-choice"
       )
-      .forEach(button => {
+      .forEach(
+        button => {
 
-        button.classList.toggle(
-          "active",
-          button.dataset.theme ===
+          button.classList.toggle(
+            "active",
+            button.dataset.theme ===
             theme
-        );
+          );
 
-      });
+        }
+      );
+
   }
+
+
+  /* =====================================================
+     THEME PANEL
+     ===================================================== */
 
   function setupThemePanel() {
 
     const toggle =
       $("themeToggle");
 
+
     const panel =
       $("themePanel");
+
 
     const close =
       $("themeClose");
 
-    if (!toggle || !panel) {
+
+    if (
+      !toggle ||
+      !panel
+    ) {
       return;
     }
+
 
     toggle.addEventListener(
       "click",
       event => {
 
         event.preventDefault();
+
         event.stopPropagation();
 
-        panel.classList.toggle(
-          "open"
+
+        const open =
+          panel.classList.toggle(
+            "open"
+          );
+
+
+        panel.setAttribute(
+          "aria-hidden",
+          String(!open)
         );
+
       }
     );
+
 
     close?.addEventListener(
       "click",
       event => {
 
         event.preventDefault();
+
         event.stopPropagation();
+
 
         panel.classList.remove(
           "open"
         );
+
+
+        panel.setAttribute(
+          "aria-hidden",
+          "true"
+        );
+
       }
     );
+
 
     panel.addEventListener(
       "click",
       event => {
+
         event.stopPropagation();
+
       }
     );
+
 
     document.addEventListener(
       "click",
       event => {
 
         if (
-          panel.classList.contains(
+          !panel.classList.contains(
             "open"
-          ) &&
-          !panel.contains(
-            event.target
-          ) &&
-          !toggle.contains(
+          )
+        ) {
+          return;
+        }
+
+
+        if (
+          panel.contains(
             event.target
           )
         ) {
-          panel.classList.remove(
-            "open"
-          );
+          return;
         }
+
+
+        if (
+          toggle.contains(
+            event.target
+          )
+        ) {
+          return;
+        }
+
+
+        panel.classList.remove(
+          "open"
+        );
+
+
+        panel.setAttribute(
+          "aria-hidden",
+          "true"
+        );
+
       }
     );
+
   }
 
-  /* =========================================================
+
+  /* =====================================================
      MOBILE MENU
-     ========================================================= */
+     ===================================================== */
 
   function setupMobileMenu() {
 
     const menu =
       $("mobileMenu");
 
+
     const sidebar =
       $("sidebar");
 
-    if (!menu || !sidebar) {
+
+    if (
+      !menu ||
+      !sidebar
+    ) {
       return;
     }
+
 
     menu.addEventListener(
       "click",
       event => {
 
         event.preventDefault();
+
         event.stopPropagation();
+
 
         sidebar.classList.toggle(
           "open"
         );
+
       }
     );
+
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        if (
+          !sidebar.classList.contains(
+            "open"
+          )
+        ) {
+          return;
+        }
+
+
+        if (
+          sidebar.contains(
+            event.target
+          )
+        ) {
+          return;
+        }
+
+
+        if (
+          menu.contains(
+            event.target
+          )
+        ) {
+          return;
+        }
+
+
+        sidebar.classList.remove(
+          "open"
+        );
+
+      }
+    );
+
   }
 
-  /* =========================================================
-     VIDEO MODAL
-     ========================================================= */
+
+  /* =====================================================
+     VIDEO CLOSE
+
+     CRITICAL FIX:
+     Never destroy youtubeFrame.
+     ===================================================== */
 
   function setupVideoClose() {
 
     const modal =
       $("videoModal");
 
+
     const close =
       $("videoClose");
 
-    if (!modal) return;
+
+    if (!modal) {
+      return;
+    }
+
 
     function closeVideo() {
 
       /*
-       * IMPORTANT:
-       *
-       * DO NOT use:
-       *
-       * youtubeFrame.innerHTML = "";
-       *
-       * That destroys the YouTube iframe.
-       *
-       * We only hide the modal.
+       * Let main player handle the
+       * YouTube Watch player.
+       */
+
+      if (
+        window.SwarAJPlayer &&
+        typeof
+          window.SwarAJPlayer.closeVideo ===
+          "function"
+      ) {
+
+        window.SwarAJPlayer.closeVideo();
+
+        return;
+
+      }
+
+
+      /*
+       * Fallback.
        */
 
       modal.classList.add(
         "hidden"
       );
 
-      modal.classList.remove(
-        "open"
+
+      modal.setAttribute(
+        "aria-hidden",
+        "true"
       );
+
 
       const frame =
         $("youtubeFrame");
 
+
       if (frame) {
+
         frame.style.pointerEvents =
           "none";
+
       }
+
     }
+
 
     close?.addEventListener(
       "click",
       event => {
 
         event.preventDefault();
+
         event.stopPropagation();
 
         closeVideo();
+
       }
     );
+
 
     modal.addEventListener(
       "click",
       event => {
 
         if (
-          event.target === modal
+          event.target ===
+          modal
         ) {
+
           closeVideo();
+
         }
+
       }
     );
+
 
     document.addEventListener(
       "keydown",
       event => {
 
         if (
-          event.key === "Escape"
+          event.key ===
+          "Escape"
         ) {
+
           closeVideo();
+
         }
+
       }
     );
+
   }
 
-  /* =========================================================
+
+  /* =====================================================
      INIT
-     ========================================================= */
+     ===================================================== */
 
   function init() {
 
     buildThemes();
+
 
     const savedTheme =
       localStorage.getItem(
@@ -352,9 +608,11 @@
       ) ||
       "liquid";
 
+
     applyTheme(
       savedTheme
     );
+
 
     setupThemePanel();
 
@@ -362,10 +620,13 @@
 
     setupVideoClose();
 
+
     console.log(
       "SwarAJ themes initialized"
     );
+
   }
+
 
   if (
     document.readyState ===
@@ -374,12 +635,16 @@
 
     document.addEventListener(
       "DOMContentLoaded",
-      init
+      init,
+      {
+        once: true
+      }
     );
 
   } else {
 
     init();
+
   }
 
 })();

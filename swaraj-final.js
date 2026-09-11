@@ -2,435 +2,231 @@
   "use strict";
 
   const THEMES = [
-    [
-      "liquid-glass",
-      "Liquid Glass",
-      "#8b5cf6",
-      "#06b6d4"
-    ],
-    [
-      "deep-3d",
-      "Deep 3D",
-      "#475569",
-      "#cbd5e1"
-    ],
-    [
-      "neon-3d",
-      "Neon 3D",
-      "#00f5ff",
-      "#ff00d4"
-    ],
-    [
-      "aurora-liquid",
-      "Aurora Liquid",
-      "#22c55e",
-      "#8b5cf6"
-    ],
-    [
-      "galaxy-6d",
-      "Galaxy 6D",
-      "#7c3aed",
-      "#38bdf8"
-    ],
-    [
-      "premium-gold",
-      "Premium Gold",
-      "#f59e0b",
-      "#fde68a"
-    ],
-    [
-      "ocean-liquid",
-      "Ocean Liquid",
-      "#06b6d4",
-      "#2563eb"
-    ],
-    [
-      "purple-crystal",
-      "Purple Crystal",
-      "#a855f7",
-      "#e879f9"
-    ],
-    [
-      "red-pulse",
-      "Red Pulse",
-      "#ef4444",
-      "#fb7185"
-    ],
-    [
-      "minimal-dark",
-      "Minimal Dark",
-      "#64748b",
-      "#94a3b8"
-    ]
+    ["liquid", "Liquid Glass", "#8b5cf6", "#06b6d4"],
+    ["deep-3d", "Deep 3D", "#475569", "#cbd5e1"],
+    ["neon-3d", "Neon 3D", "#00f5ff", "#ff00d4"],
+    ["aurora-liquid", "Aurora Liquid", "#22c55e", "#8b5cf6"],
+    ["galaxy-6d", "Galaxy 6D", "#7c3aed", "#38bdf8"],
+    ["premium-gold", "Premium Gold", "#f59e0b", "#fde68a"],
+    ["ocean-liquid", "Ocean Liquid", "#06b6d4", "#2563eb"],
+    ["purple-crystal", "Purple Crystal", "#a855f7", "#e879f9"],
+    ["red-pulse", "Red Pulse", "#ef4444", "#fb7185"],
+    ["minimal-dark", "Minimal Dark", "#64748b", "#94a3b8"]
   ];
 
-
-  const $ =
-    id =>
-      document.getElementById(id);
-
-
-  function escapeHtml(value) {
-
-    return String(
-      value ?? ""
-    ).replace(
-      /[&<>"']/g,
-      char =>
-        ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;"
-        })[char]
-    );
-
-  }
-
-
-  function toast(message) {
-
-    const element =
-      $("sjToast");
-
-    if (!element) {
-      return;
-    }
-
-    element.textContent =
-      message;
-
-    element.classList.add(
-      "show"
-    );
-
-    clearTimeout(
-      window.__sjThemeToast
-    );
-
-    window.__sjThemeToast =
-      setTimeout(
-        () => {
-          element.classList.remove(
-            "show"
-          );
-        },
-        1800
-      );
-
-  }
-
-
-  /* =====================================================
-     THEMES
-  ===================================================== */
+  const $ = id => document.getElementById(id);
 
   function buildThemes() {
-
-    const grid =
-      $("sjThemeGrid");
+    const grid = $("themeGrid");
 
     if (!grid) {
+      console.error("SwarAJ: #themeGrid not found");
       return;
     }
 
+    grid.innerHTML = THEMES.map(theme => `
+      <button
+        class="theme-choice"
+        type="button"
+        data-theme="${theme[0]}"
+        style="
+          --theme-a:${theme[2]};
+          --theme-b:${theme[3]};
+        "
+      >
+        <span class="theme-preview"></span>
 
-    grid.innerHTML =
-      THEMES.map(
-        theme =>
-          `
-          <button
-            class="sj-theme-card"
-            data-theme="${theme[0]}"
-            type="button"
-            style="
-              --theme-a:${theme[2]};
-              --theme-b:${theme[3]};
-            "
-          >
+        <strong>${theme[1]}</strong>
 
-            <span
-              class="sj-theme-preview"
-            ></span>
+        <small>3D • Liquid • SwarAJ</small>
+      </button>
+    `).join("");
 
-            <b>
-              ${escapeHtml(
-                theme[1]
-              )}
-            </b>
+    grid.querySelectorAll(".theme-choice").forEach(button => {
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
 
-            <small>
-              3D · Liquid
-            </small>
-
-          </button>
-          `
-      ).join("");
-
-
-    grid
-      .querySelectorAll(
-        "[data-theme]"
-      )
-      .forEach(
-        button => {
-
-          button.onclick =
-            event => {
-
-              event.preventDefault();
-
-              event.stopPropagation();
-
-              applyTheme(
-                button.dataset
-                  .theme
-              );
-
-            };
-
-        }
-      );
-
+        applyTheme(button.dataset.theme);
+      });
+    });
   }
 
+  function applyTheme(theme) {
+    const validTheme =
+      THEMES.some(item => item[0] === theme);
 
-  function applyTheme(
-    theme
-  ) {
-
-    const valid =
-      THEMES.some(
-        item =>
-          item[0] === theme
-      );
-
-
-    if (!valid) {
-      theme =
-        "liquid-glass";
+    if (!validTheme) {
+      theme = "liquid";
     }
 
+    const selected =
+      THEMES.find(item => item[0] === theme);
 
-    document.body.dataset
-      .sjTheme =
-      theme;
+    /*
+     * IMPORTANT:
+     * Use the SAME attribute used by the CSS.
+     */
+    document.documentElement.setAttribute(
+      "data-swaraj-theme",
+      theme
+    );
 
+    document.body.setAttribute(
+      "data-swaraj-theme",
+      theme
+    );
+
+    /*
+     * Also keep the old variable names for compatibility
+     * with any existing SwarAJ enhancement CSS.
+     */
+    if (selected) {
+      document.documentElement.style.setProperty(
+        "--accent",
+        selected[2]
+      );
+
+      document.documentElement.style.setProperty(
+        "--accent2",
+        selected[3]
+      );
+
+      document.documentElement.style.setProperty(
+        "--sj-theme-a",
+        selected[2]
+      );
+
+      document.documentElement.style.setProperty(
+        "--sj-theme-b",
+        selected[3]
+      );
+    }
 
     localStorage.setItem(
       "swaraj-theme",
       theme
     );
 
-
     document
-      .querySelectorAll(
-        ".sj-theme-card"
-      )
-      .forEach(
-        button => {
-
-          button.classList.toggle(
-            "active",
-            button.dataset
-              .theme === theme
-          );
-
-        }
-      );
-
-
-    const selected =
-      THEMES.find(
-        item =>
-          item[0] === theme
-      );
-
-
-    if (selected) {
-
-      document.documentElement
-        .style
-        .setProperty(
-          "--sj-theme-a",
-          selected[2]
+      .querySelectorAll(".theme-choice")
+      .forEach(button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.theme === theme
         );
+      });
+  }
 
-      document.documentElement
-        .style
-        .setProperty(
-          "--sj-theme-b",
-          selected[3]
-        );
+  function setupThemePanel() {
+    const toggle = $("themeToggle");
+    const panel = $("themePanel");
+    const close = $("themeClose");
 
+    if (!toggle || !panel) {
+      console.error(
+        "SwarAJ: Theme elements not found"
+      );
+      return;
     }
 
+    toggle.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      panel.classList.toggle("open");
+    });
+
+    close?.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      panel.classList.remove("open");
+    });
+
+    document.addEventListener("click", event => {
+      if (
+        panel.classList.contains("open") &&
+        !panel.contains(event.target) &&
+        !toggle.contains(event.target)
+      ) {
+        panel.classList.remove("open");
+      }
+    });
   }
 
+  function setupMobileMenu() {
+    const menu = $("mobileMenu");
+    const sidebar = $("sidebar");
 
-  function setupThemes() {
+    if (!menu || !sidebar) return;
 
-    buildThemes();
+    menu.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
 
+      sidebar.classList.toggle("open");
+    });
+  }
 
-    const saved =
-      localStorage.getItem(
-        "swaraj-theme"
-      ) ||
-      "liquid-glass";
+  function setupVideoClose() {
+    const modal = $("videoModal");
+    const close = $("videoClose");
+    const frame = $("youtubeFrame");
 
+    function closeVideo() {
+      if (frame) {
+        frame.innerHTML = "";
+      }
 
-    applyTheme(
-      saved
+      modal?.classList.add("hidden");
+    }
+
+    close?.addEventListener(
+      "click",
+      closeVideo
     );
 
-
-    $("sjThemeToggle")
-      ?.addEventListener(
-        "click",
-        event => {
-
-          event.preventDefault();
-
-          event.stopPropagation();
-
-          $("sjThemePanel")
-            ?.classList.toggle(
-              "open"
-            );
-
-        }
-      );
-
-
-    $("sjThemeClose")
-      ?.addEventListener(
-        "click",
-        event => {
-
-          event.preventDefault();
-
-          $("sjThemePanel")
-            ?.classList.remove(
-              "open"
-            );
-
-        }
-      );
-
-
-    document.addEventListener(
+    modal?.addEventListener(
       "click",
       event => {
-
-        const panel =
-          $("sjThemePanel");
-
-        const button =
-          $("sjThemeToggle");
-
-
-        if (
-          panel &&
-          panel.classList.contains(
-            "open"
-          ) &&
-          !panel.contains(
-            event.target
-          ) &&
-          !button?.contains(
-            event.target
-          )
-        ) {
-
-          panel.classList.remove(
-            "open"
-          );
-
+        if (event.target === modal) {
+          closeVideo();
         }
-
       }
     );
-
   }
-
-
-  /* =====================================================
-     REMOVE ADMIN FROM MAIN PAGE
-  ===================================================== */
-
-  function hideAdmin() {
-
-    document
-      .querySelectorAll(
-        "#adminMenu," +
-        "[data-admin]," +
-        ".admin-menu," +
-        ".admin-link," +
-        ".admin-button," +
-        ".admin-icon"
-      )
-      .forEach(
-        element =>
-          element.remove()
-      );
-
-  }
-
-
-  /* =====================================================
-     VIDEO
-  ===================================================== */
-
-  function setupVideo() {
-
-    $("sjVideoClose")
-      ?.addEventListener(
-        "click",
-        () => {
-
-          $("sjCommonVideo")
-            ?.classList.remove(
-              "open"
-            );
-
-          $("youtubeFrame")
-            ?.classList.add(
-              "hidden-video"
-            );
-
-        }
-      );
-
-  }
-
 
   function init() {
+    buildThemes();
 
-    hideAdmin();
+    const savedTheme =
+      localStorage.getItem(
+        "swaraj-theme"
+      ) || "liquid";
 
-    setupThemes();
+    applyTheme(savedTheme);
 
-    setupVideo();
+    setupThemePanel();
 
+    setupMobileMenu();
+
+    setupVideoClose();
+
+    console.log(
+      "SwarAJ theme system initialized"
+    );
   }
 
-
   if (
-    document.readyState ===
-    "loading"
+    document.readyState === "loading"
   ) {
-
     document.addEventListener(
       "DOMContentLoaded",
       init
     );
-
   } else {
-
     init();
-
   }
 
 })();

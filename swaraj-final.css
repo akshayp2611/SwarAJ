@@ -1,6 +1,11 @@
 /* =====================================================
-   SWARAJ THEMES
-   ===================================================== */
+   SWARAJ FINAL SYSTEM
+===================================================== */
+
+
+/* =====================================================
+   THEME VARIABLES
+===================================================== */
 
 html[data-swaraj-theme="liquid"] {
   --accent: #8b5cf6;
@@ -8,8 +13,8 @@ html[data-swaraj-theme="liquid"] {
 }
 
 html[data-swaraj-theme="deep-3d"] {
-  --accent: #64748b;
-  --accent2: #e2e8f0;
+  --accent: #475569;
+  --accent2: #cbd5e1;
 }
 
 html[data-swaraj-theme="neon-3d"] {
@@ -52,99 +57,631 @@ html[data-swaraj-theme="minimal-dark"] {
   --accent2: #94a3b8;
 }
 
-/* =====================================================
-   3D EFFECTS
-   ===================================================== */
-
-html[data-swaraj-theme="deep-3d"] .song-card,
-html[data-swaraj-theme="deep-3d"] .hero,
-html[data-swaraj-theme="deep-3d"] .theme-panel {
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.10),
-    0 20px 50px rgba(0,0,0,.45);
-}
-
-html[data-swaraj-theme="neon-3d"] .song-card:hover {
-  box-shadow:
-    0 0 25px rgba(0,245,255,.20);
-}
-
-html[data-swaraj-theme="galaxy-6d"] .hero {
-  box-shadow:
-    0 0 80px rgba(124,58,237,.15);
-}
-
-html[data-swaraj-theme="premium-gold"] .brand-logo {
-  box-shadow:
-    0 0 30px rgba(245,158,11,.25);
-}
 
 /* =====================================================
-   ACTIVE ELEMENTS
-   ===================================================== */
+   THEME PANEL
+===================================================== */
 
-.nav-item.active::before {
+.theme-panel {
+
+  position: fixed !important;
+
+  top: 0 !important;
+  right: 0 !important;
+
+  width: min(420px, 92vw) !important;
+
+  height: 100vh !important;
+
+  z-index: 99999 !important;
+
+  display: block !important;
+
+  padding: 20px !important;
+
   background:
-    linear-gradient(
-      180deg,
-      var(--accent),
-      var(--accent2)
-    );
+    rgba(10,10,18,.96) !important;
+
+  backdrop-filter:
+    blur(30px) !important;
+
+  border-left:
+    1px solid
+    rgba(255,255,255,.1) !important;
+
+  box-shadow:
+    -20px 0 60px
+    rgba(0,0,0,.35) !important;
+
+  transform:
+    translateX(110%) !important;
+
+  opacity: 0 !important;
+
+  visibility: hidden !important;
+
+  pointer-events: none !important;
+
+  transition:
+    transform .25s ease,
+    opacity .25s ease,
+    visibility .25s ease !important;
+
 }
 
-.category.active {
+
+.theme-panel.open {
+
+  transform:
+    translateX(0) !important;
+
+  opacity: 1 !important;
+
+  visibility: visible !important;
+
+  pointer-events: auto !important;
+
+}
+
+
+.theme-panel-header {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+
+  color: white;
+
+}
+
+
+/* =====================================================
+   THEME GRID
+===================================================== */
+
+.theme-grid {
+
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(2, minmax(0,1fr)) !important;
+
+  gap: 12px !important;
+
+}
+
+
+/* =====================================================
+   THEME BUTTON
+===================================================== */
+
+.theme-choice {
+
+  position: relative !important;
+
+  overflow: hidden !important;
+
+  min-height: 82px !important;
+
+  width: 100% !important;
+
+  border:
+    1px solid
+    rgba(255,255,255,.15) !important;
+
+  border-radius: 16px !important;
+
+  padding: 13px !important;
+
+  color: white !important;
+
   background:
     linear-gradient(
       135deg,
-      var(--accent),
-      var(--accent2)
-    );
+      var(--theme-a),
+      var(--theme-b)
+    ) !important;
+
+  text-align: left !important;
+
+  cursor: pointer !important;
+
+  pointer-events: auto !important;
+
+  z-index: 100000 !important;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease !important;
+
 }
+
+
+.theme-choice:hover {
+
+  transform:
+    translateY(-3px) !important;
+
+}
+
+
+.theme-choice.active {
+
+  outline:
+    2px solid white !important;
+
+  box-shadow:
+    0 10px 35px
+    rgba(0,0,0,.45) !important;
+
+}
+
+
+.theme-choice strong {
+
+  position: relative;
+
+  z-index: 2;
+
+  display: block;
+
+}
+
+
+.theme-choice small {
+
+  position: relative;
+
+  z-index: 2;
+
+  display: block;
+
+  margin-top: 5px;
+
+  opacity: .75;
+
+}
+
+
+.theme-preview {
+
+  position: absolute;
+
+  width: 110px;
+
+  height: 110px;
+
+  right: -35px;
+
+  top: -45px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255,255,255,.25);
+
+  filter:
+    blur(5px);
+
+}
+
+
+/* =====================================================
+   THEME COLORS
+===================================================== */
 
 .play-button,
 .card-play {
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    ) !important;
+
+}
+
+
+.category.active {
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    ) !important;
+
+  color: white !important;
+
+}
+
+
+.search-container:focus-within {
+
+  border-color:
+    var(--accent) !important;
+
+}
+
+
+/* =====================================================
+   SONG CARDS
+===================================================== */
+
+.song-card {
+
+  position: relative;
+
+  cursor: pointer;
+
+  pointer-events: auto;
+
+}
+
+
+.song-card * {
+
+  pointer-events: auto;
+
+}
+
+
+.song-card.playing {
+
+  border-color:
+    var(--accent) !important;
+
+  box-shadow:
+    0 0 25px
+    color-mix(
+      in srgb,
+      var(--accent) 25%,
+      transparent
+    );
+
+}
+
+
+/* =====================================================
+   PLAY BUTTON
+===================================================== */
+
+.card-play {
+
+  position: relative;
+
+  z-index: 20;
+
+  cursor: pointer;
+
+  pointer-events: auto;
+
+}
+
+
+/* =====================================================
+   WATCH BUTTON
+===================================================== */
+
+.card-watch-button {
+
+  position: absolute;
+
+  right: 10px;
+
+  bottom: 10px;
+
+  z-index: 50;
+
+  padding:
+    8px 12px;
+
+  border: 0;
+
+  border-radius: 999px;
+
+  color: white;
+
   background:
     linear-gradient(
       135deg,
       var(--accent),
       var(--accent2)
     );
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  pointer-events: auto;
+
 }
 
-.hero h1 span {
-  background:
-    linear-gradient(
-      90deg,
-      var(--accent),
-      var(--accent2)
-    );
 
-  -webkit-background-clip: text;
-  background-clip: text;
+.card-watch-button:hover {
 
-  color: transparent;
+  transform:
+    scale(1.04);
+
 }
 
-.song-card.playing {
-  box-shadow:
-    0 0 0 1px var(--accent);
-}
-
-.player-icon.active {
-  color:
-    var(--accent2) !important;
-}
 
 /* =====================================================
-   ACCESSIBILITY
-   ===================================================== */
+   VIDEO MODAL
+===================================================== */
 
-button:focus-visible,
-input:focus-visible,
-a:focus-visible {
-  outline:
-    2px solid var(--accent2);
+.video-modal {
 
-  outline-offset:
-    2px;
+  position: fixed !important;
+
+  inset: 0 !important;
+
+  z-index: 999999 !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+  padding: 20px !important;
+
+  background:
+    rgba(0,0,0,.84) !important;
+
+}
+
+
+.video-modal.hidden {
+
+  display: none !important;
+
+}
+
+
+.video-dialog {
+
+  position: relative !important;
+
+  width:
+    min(1000px, 95vw) !important;
+
+  height:
+    min(620px, 82vh) !important;
+
+  background:
+    #000 !important;
+
+  border-radius:
+    18px !important;
+
+  overflow:
+    hidden !important;
+
+  z-index:
+    1000000 !important;
+
+  box-shadow:
+    0 30px 100px
+    rgba(0,0,0,.7) !important;
+
+}
+
+
+.video-close {
+
+  position: absolute !important;
+
+  top: 12px !important;
+
+  right: 12px !important;
+
+  z-index: 1000001 !important;
+
+  width: 42px !important;
+
+  height: 42px !important;
+
+  border: 0 !important;
+
+  border-radius: 50% !important;
+
+  background:
+    rgba(0,0,0,.75) !important;
+
+  color: white !important;
+
+  font-size: 25px !important;
+
+  cursor: pointer !important;
+
+}
+
+
+.youtube-frame {
+
+  position: relative !important;
+
+  width: 100% !important;
+
+  height: 100% !important;
+
+  min-height: 300px !important;
+
+  display: block !important;
+
+  pointer-events: auto !important;
+
+}
+
+
+.youtube-frame > div {
+
+  width: 100% !important;
+
+  height: 100% !important;
+
+}
+
+
+.youtube-frame iframe {
+
+  width: 100% !important;
+
+  height: 100% !important;
+
+  min-height: 300px !important;
+
+  border: 0 !important;
+
+  display: block !important;
+
+  pointer-events: auto !important;
+
+}
+
+
+/* =====================================================
+   HIDDEN YOUTUBE AUDIO PLAYER
+===================================================== */
+
+#youtubeAudioPlayer {
+
+  position: fixed !important;
+
+  width: 2px !important;
+
+  height: 2px !important;
+
+  left: -10000px !important;
+
+  top: -10000px !important;
+
+  opacity: 0 !important;
+
+  overflow: hidden !important;
+
+  pointer-events: none !important;
+
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+.toast {
+
+  pointer-events: none;
+
+  opacity: 0;
+
+  transform:
+    translateY(12px);
+
+  transition:
+    opacity .2s ease,
+    transform .2s ease;
+
+}
+
+
+.toast.show {
+
+  opacity: 1;
+
+  transform:
+    translateY(0);
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (
+  max-width: 800px
+) {
+
+  .sidebar {
+
+    transform:
+      translateX(-105%);
+
+    transition:
+      transform .25s ease;
+
+    z-index: 100000;
+
+  }
+
+
+  .sidebar.open {
+
+    transform:
+      translateX(0);
+
+  }
+
+
+  .main {
+
+    margin-left: 0;
+
+  }
+
+
+  .song-grid {
+
+    grid-template-columns:
+      repeat(2, minmax(0,1fr));
+
+  }
+
+
+  .video-dialog {
+
+    width: 96vw !important;
+
+    height: 60vh !important;
+
+  }
+
+
+  .youtube-frame iframe {
+
+    min-height: 250px !important;
+
+  }
+
+}
+
+
+@media (
+  max-width: 480px
+) {
+
+  .theme-grid {
+
+    grid-template-columns:
+      1fr !important;
+
+  }
+
+
+  .song-grid {
+
+    grid-template-columns:
+      repeat(2, minmax(0,1fr));
+
+  }
+
 }

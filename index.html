@@ -2,36 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#08080f">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#08080f"
+  >
+
+  <meta
+    name="description"
+    content="SwarAJ — Premium Music Player"
+  >
 
   <title>स्वरAJ — Music</title>
 
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="swaraj-enhancements.css">
   <link rel="stylesheet" href="swaraj-final.css">
 </head>
 
 <body>
 
-  <!-- Animated liquid background -->
-  <div class="liquid-background">
+  <!-- =====================================================
+       LIQUID BACKGROUND
+       ===================================================== -->
+
+  <div
+    class="liquid-background"
+    aria-hidden="true"
+  >
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
   </div>
 
-  <!-- ================= SIDEBAR ================= -->
 
-  <aside id="sidebar" class="sidebar">
+  <!-- =====================================================
+       SIDEBAR
+       ===================================================== -->
+
+  <aside
+    id="sidebar"
+    class="sidebar"
+  >
 
     <div class="brand">
-      <div class="brand-logo">स्व</div>
+
+      <div class="brand-logo">
+        स्व
+      </div>
 
       <div class="brand-text">
-        <strong>स्वरAJ</strong>
-        <small>MUSIC</small>
+
+        <strong>
+          स्वरAJ
+        </strong>
+
+        <small>
+          MUSIC
+        </small>
+
       </div>
+
     </div>
+
 
     <nav class="navigation">
 
@@ -44,6 +82,7 @@
         <span>Home</span>
       </button>
 
+
       <button
         class="nav-item"
         data-view="liked"
@@ -53,6 +92,7 @@
         <span>Liked Songs</span>
       </button>
 
+
       <button
         class="nav-item"
         data-view="library"
@@ -61,6 +101,7 @@
         <span class="nav-icon">▤</span>
         <span>Library</span>
       </button>
+
 
       <button
         class="nav-item"
@@ -73,6 +114,7 @@
 
     </nav>
 
+
     <button
       id="themeToggle"
       class="theme-open-button"
@@ -83,11 +125,12 @@
 
   </aside>
 
-  <!-- ================= MAIN ================= -->
+
+  <!-- =====================================================
+       MAIN
+       ===================================================== -->
 
   <main class="main">
-
-    <!-- Top bar -->
 
     <header class="topbar">
 
@@ -100,9 +143,12 @@
         ☰
       </button>
 
+
       <div class="search-container">
 
-        <span class="search-icon">⌕</span>
+        <span class="search-icon">
+          ⌕
+        </span>
 
         <input
           id="searchInput"
@@ -122,16 +168,19 @@
 
       </div>
 
+
       <button
         id="refreshBtn"
         class="icon-button"
         type="button"
         title="Refresh songs"
+        aria-label="Refresh songs"
       >
         ↻
       </button>
 
-      <!-- Admin is intentionally separate from normal navigation -->
+
+      <!-- Admin remains separate -->
       <a
         href="/admin.html"
         class="icon-button admin-button"
@@ -143,11 +192,15 @@
 
     </header>
 
-    <!-- ================= CONTENT ================= -->
+
+    <!-- ===================================================
+         CONTENT
+         =================================================== -->
 
     <div class="content">
 
-      <!-- Hero -->
+
+      <!-- HERO -->
 
       <section class="hero">
 
@@ -163,7 +216,8 @@
           </h1>
 
           <p>
-            Your music collection, automatically organised
+            Your music collection,
+            automatically organised
             category-wise.
           </p>
 
@@ -171,14 +225,19 @@
 
       </section>
 
-      <!-- Categories -->
+
+      <!-- =================================================
+           CATEGORIES
+           ================================================= -->
 
       <section class="section">
 
         <div class="section-header">
 
           <div>
-            <h2>Categories</h2>
+            <h2>
+              Categories
+            </h2>
           </div>
 
           <span
@@ -190,6 +249,7 @@
 
         </div>
 
+
         <div
           id="categoryBar"
           class="category-bar"
@@ -197,7 +257,10 @@
 
       </section>
 
-      <!-- Songs -->
+
+      <!-- =================================================
+           SONGS
+           ================================================= -->
 
       <section class="section">
 
@@ -209,13 +272,16 @@
 
         </div>
 
+
         <div
           id="songGrid"
           class="song-grid"
         >
+
           <div class="loading">
             Loading songs...
           </div>
+
         </div>
 
       </section>
@@ -224,11 +290,15 @@
 
   </main>
 
-  <!-- ================= THEME PANEL ================= -->
+
+  <!-- =====================================================
+       THEME PANEL
+       ===================================================== -->
 
   <aside
     id="themePanel"
     class="theme-panel"
+    aria-hidden="true"
   >
 
     <div class="theme-panel-header">
@@ -241,11 +311,13 @@
         id="themeClose"
         class="icon-button"
         type="button"
+        aria-label="Close themes"
       >
         ×
       </button>
 
     </div>
+
 
     <div
       id="themeGrid"
@@ -254,11 +326,15 @@
 
   </aside>
 
-  <!-- ================= YOUTUBE VIDEO ================= -->
+
+  <!-- =====================================================
+       YOUTUBE VIDEO MODAL
+       ===================================================== -->
 
   <div
     id="videoModal"
     class="video-modal hidden"
+    aria-hidden="true"
   >
 
     <div class="video-dialog">
@@ -267,9 +343,11 @@
         id="videoClose"
         class="video-close"
         type="button"
+        aria-label="Close video"
       >
         ×
       </button>
+
 
       <div
         id="youtubeFrame"
@@ -280,26 +358,53 @@
 
   </div>
 
-  <!-- ================= TOAST ================= -->
+
+  <!-- =====================================================
+       TOAST
+       ===================================================== -->
 
   <div
     id="toast"
     class="toast"
+    role="status"
+    aria-live="polite"
   ></div>
 
-  <!-- ================= AUDIO ================= -->
+
+  <!-- =====================================================
+       LOCAL AUDIO
+       ===================================================== -->
 
   <audio
     id="audioPlayer"
     preload="metadata"
     playsinline
+    webkit-playsinline
   ></audio>
 
-  <!-- ================= PLAYER ================= -->
+
+  <!-- =====================================================
+       HIDDEN YOUTUBE BACKGROUND PLAYER
+
+       This is NOT the Watch video.
+
+       It is used only for YouTube background audio.
+       ===================================================== -->
+
+  <div
+    id="youtubeAudioPlayer"
+    aria-hidden="true"
+  ></div>
+
+
+  <!-- =====================================================
+       PLAYER
+       ===================================================== -->
 
   <footer class="player">
 
-    <!-- Song information -->
+
+    <!-- NOW PLAYING -->
 
     <div class="now-playing">
 
@@ -309,6 +414,7 @@
       >
         ♪
       </div>
+
 
       <div class="now-playing-text">
 
@@ -322,75 +428,90 @@
 
       </div>
 
+
       <button
         id="likeBtn"
         class="player-icon"
         type="button"
         title="Like"
+        aria-label="Like"
       >
         ♡
       </button>
 
     </div>
 
-    <!-- Controls -->
+
+    <!-- CENTER CONTROLS -->
 
     <div class="player-center">
 
       <div class="player-controls">
+
 
         <button
           id="shuffleBtn"
           class="player-icon"
           type="button"
           title="Shuffle"
+          aria-label="Shuffle"
         >
           ⤨
         </button>
+
 
         <button
           id="prevBtn"
           class="player-icon"
           type="button"
           title="Previous"
+          aria-label="Previous"
         >
           ⏮
         </button>
+
 
         <button
           id="playBtn"
           class="play-button"
           type="button"
           title="Play"
+          aria-label="Play"
         >
           ▶
         </button>
+
 
         <button
           id="nextBtn"
           class="player-icon"
           type="button"
           title="Next"
+          aria-label="Next"
         >
           ⏭
         </button>
+
 
         <button
           id="repeatBtn"
           class="player-icon"
           type="button"
           title="Repeat"
+          aria-label="Repeat"
         >
           ↻
         </button>
 
       </div>
 
+
       <div class="timeline">
 
         <span id="currentTime">
           0:00
         </span>
+
 
         <input
           id="seekBar"
@@ -399,7 +520,9 @@
           max="100"
           value="0"
           step="0.1"
+          aria-label="Song progress"
         >
+
 
         <span id="duration">
           0:00
@@ -409,7 +532,8 @@
 
     </div>
 
-    <!-- Right controls -->
+
+    <!-- RIGHT -->
 
     <div class="player-right">
 
@@ -422,14 +546,17 @@
         ▷ Watch
       </button>
 
+
       <button
         id="muteBtn"
         class="player-icon"
         type="button"
         title="Mute"
+        aria-label="Mute"
       >
         🔊
       </button>
+
 
       <input
         id="volumeBar"
@@ -438,11 +565,17 @@
         max="1"
         value="1"
         step="0.01"
+        aria-label="Volume"
       >
 
     </div>
 
   </footer>
+
+
+  <!-- =====================================================
+       SCRIPTS
+       ===================================================== -->
 
   <script src="script.js"></script>
   <script src="swaraj-final.js"></script>

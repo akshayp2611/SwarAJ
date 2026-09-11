@@ -1,95 +1,95 @@
 (() => {
+
   "use strict";
 
+
   /* =====================================================
-     SWARAJ THEMES
-     ===================================================== */
+     THEMES
+  ===================================================== */
 
   const THEMES = [
 
-    [
-      "liquid",
-      "Liquid Glass",
-      "#8b5cf6",
-      "#06b6d4"
-    ],
+    {
+      id: "liquid",
+      name: "Liquid Glass",
+      a: "#8b5cf6",
+      b: "#06b6d4"
+    },
 
-    [
-      "deep-3d",
-      "Deep 3D",
-      "#475569",
-      "#cbd5e1"
-    ],
+    {
+      id: "deep-3d",
+      name: "Deep 3D",
+      a: "#475569",
+      b: "#cbd5e1"
+    },
 
-    [
-      "neon-3d",
-      "Neon 3D",
-      "#00f5ff",
-      "#ff00d4"
-    ],
+    {
+      id: "neon-3d",
+      name: "Neon 3D",
+      a: "#00f5ff",
+      b: "#ff00d4"
+    },
 
-    [
-      "aurora-liquid",
-      "Aurora Liquid",
-      "#22c55e",
-      "#8b5cf6"
-    ],
+    {
+      id: "aurora-liquid",
+      name: "Aurora Liquid",
+      a: "#22c55e",
+      b: "#8b5cf6"
+    },
 
-    [
-      "galaxy-6d",
-      "Galaxy 6D",
-      "#7c3aed",
-      "#38bdf8"
-    ],
+    {
+      id: "galaxy-6d",
+      name: "Galaxy 6D",
+      a: "#7c3aed",
+      b: "#38bdf8"
+    },
 
-    [
-      "premium-gold",
-      "Premium Gold",
-      "#f59e0b",
-      "#fde68a"
-    ],
+    {
+      id: "premium-gold",
+      name: "Premium Gold",
+      a: "#f59e0b",
+      b: "#fde68a"
+    },
 
-    [
-      "ocean-liquid",
-      "Ocean Liquid",
-      "#06b6d4",
-      "#2563eb"
-    ],
+    {
+      id: "ocean-liquid",
+      name: "Ocean Liquid",
+      a: "#06b6d4",
+      b: "#2563eb"
+    },
 
-    [
-      "purple-crystal",
-      "Purple Crystal",
-      "#a855f7",
-      "#e879f9"
-    ],
+    {
+      id: "purple-crystal",
+      name: "Purple Crystal",
+      a: "#a855f7",
+      b: "#e879f9"
+    },
 
-    [
-      "red-pulse",
-      "Red Pulse",
-      "#ef4444",
-      "#fb7185"
-    ],
+    {
+      id: "red-pulse",
+      name: "Red Pulse",
+      a: "#ef4444",
+      b: "#fb7185"
+    },
 
-    [
-      "minimal-dark",
-      "Minimal Dark",
-      "#64748b",
-      "#94a3b8"
-    ]
+    {
+      id: "minimal-dark",
+      name: "Minimal Dark",
+      a: "#64748b",
+      b: "#94a3b8"
+    }
 
   ];
 
 
   const $ =
     id =>
-      document.getElementById(
-        id
-      );
+      document.getElementById(id);
 
 
   /* =====================================================
-     BUILD THEME BUTTONS
-     ===================================================== */
+     CREATE THEME BUTTONS
+  ===================================================== */
 
   function buildThemes() {
 
@@ -108,21 +108,19 @@
           theme => `
 
             <button
-              class="theme-choice"
               type="button"
-              data-theme="${theme[0]}"
+              class="theme-choice"
+              data-theme="${theme.id}"
               style="
-                --theme-a:${theme[2]};
-                --theme-b:${theme[3]};
+                --theme-a:${theme.a};
+                --theme-b:${theme.b};
               "
             >
 
-              <span
-                class="theme-preview"
-              ></span>
+              <span class="theme-preview"></span>
 
               <strong>
-                ${theme[1]}
+                ${theme.name}
               </strong>
 
               <small>
@@ -167,21 +165,18 @@
 
   /* =====================================================
      APPLY THEME
-     ===================================================== */
+  ===================================================== */
 
-  function applyTheme(
-    theme
-  ) {
+  function applyTheme(theme) {
 
-    const valid =
+    const exists =
       THEMES.some(
         item =>
-          item[0] ===
-          theme
+          item.id === theme
       );
 
 
-    if (!valid) {
+    if (!exists) {
       theme = "liquid";
     }
 
@@ -189,10 +184,13 @@
     const selected =
       THEMES.find(
         item =>
-          item[0] ===
-          theme
+          item.id === theme
       );
 
+
+    /*
+     * MAIN THEME ATTRIBUTE
+     */
 
     document.documentElement
       .setAttribute(
@@ -208,39 +206,59 @@
       );
 
 
+    /*
+     * CSS variables
+     */
+
     if (selected) {
 
-      document.documentElement.style.setProperty(
-        "--accent",
-        selected[2]
-      );
+      document.documentElement
+        .style
+        .setProperty(
+          "--accent",
+          selected.a
+        );
 
 
-      document.documentElement.style.setProperty(
-        "--accent2",
-        selected[3]
-      );
+      document.documentElement
+        .style
+        .setProperty(
+          "--accent2",
+          selected.b
+        );
 
 
-      document.documentElement.style.setProperty(
-        "--sj-theme-a",
-        selected[2]
-      );
+      document.documentElement
+        .style
+        .setProperty(
+          "--sj-theme-a",
+          selected.a
+        );
 
 
-      document.documentElement.style.setProperty(
-        "--sj-theme-b",
-        selected[3]
-      );
+      document.documentElement
+        .style
+        .setProperty(
+          "--sj-theme-b",
+          selected.b
+        );
 
     }
 
+
+    /*
+     * SAVE
+     */
 
     localStorage.setItem(
       "swaraj-theme",
       theme
     );
 
+
+    /*
+     * ACTIVE BUTTON
+     */
 
     document
       .querySelectorAll(
@@ -263,7 +281,7 @@
 
   /* =====================================================
      THEME PANEL
-     ===================================================== */
+  ===================================================== */
 
   function setupThemePanel() {
 
@@ -393,11 +411,11 @@
 
   /* =====================================================
      MOBILE MENU
-     ===================================================== */
+  ===================================================== */
 
   function setupMobileMenu() {
 
-    const menu =
+    const button =
       $("mobileMenu");
 
 
@@ -406,14 +424,14 @@
 
 
     if (
-      !menu ||
+      !button ||
       !sidebar
     ) {
       return;
     }
 
 
-    menu.addEventListener(
+    button.addEventListener(
       "click",
       event => {
 
@@ -453,7 +471,7 @@
 
 
         if (
-          menu.contains(
+          button.contains(
             event.target
           )
         ) {
@@ -472,20 +490,15 @@
 
 
   /* =====================================================
-     VIDEO CLOSE
+     VIDEO MODAL
 
-     CRITICAL FIX:
-     Never destroy youtubeFrame.
-     ===================================================== */
+     DO NOT DESTROY youtubeFrame.
+  ===================================================== */
 
-  function setupVideoClose() {
+  function setupVideoModal() {
 
     const modal =
       $("videoModal");
-
-
-    const close =
-      $("videoClose");
 
 
     if (!modal) {
@@ -493,68 +506,26 @@
     }
 
 
-    function closeVideo() {
+    $("videoClose")
+      ?.addEventListener(
+        "click",
+        event => {
 
-      /*
-       * Let main player handle the
-       * YouTube Watch player.
-       */
+          event.preventDefault();
 
-      if (
-        window.SwarAJPlayer &&
-        typeof
-          window.SwarAJPlayer.closeVideo ===
-          "function"
-      ) {
-
-        window.SwarAJPlayer.closeVideo();
-
-        return;
-
-      }
+          event.stopPropagation();
 
 
-      /*
-       * Fallback.
-       */
+          if (
+            window.SwarAJPlayer
+          ) {
 
-      modal.classList.add(
-        "hidden"
+            window.SwarAJPlayer.closeVideo();
+
+          }
+
+        }
       );
-
-
-      modal.setAttribute(
-        "aria-hidden",
-        "true"
-      );
-
-
-      const frame =
-        $("youtubeFrame");
-
-
-      if (frame) {
-
-        frame.style.pointerEvents =
-          "none";
-
-      }
-
-    }
-
-
-    close?.addEventListener(
-      "click",
-      event => {
-
-        event.preventDefault();
-
-        event.stopPropagation();
-
-        closeVideo();
-
-      }
-    );
 
 
     modal.addEventListener(
@@ -566,7 +537,13 @@
           modal
         ) {
 
-          closeVideo();
+          if (
+            window.SwarAJPlayer
+          ) {
+
+            window.SwarAJPlayer.closeVideo();
+
+          }
 
         }
 
@@ -583,7 +560,13 @@
           "Escape"
         ) {
 
-          closeVideo();
+          if (
+            window.SwarAJPlayer
+          ) {
+
+            window.SwarAJPlayer.closeVideo();
+
+          }
 
         }
 
@@ -595,14 +578,14 @@
 
   /* =====================================================
      INIT
-     ===================================================== */
+  ===================================================== */
 
   function init() {
 
     buildThemes();
 
 
-    const savedTheme =
+    const saved =
       localStorage.getItem(
         "swaraj-theme"
       ) ||
@@ -610,7 +593,7 @@
 
 
     applyTheme(
-      savedTheme
+      saved
     );
 
 
@@ -618,11 +601,11 @@
 
     setupMobileMenu();
 
-    setupVideoClose();
+    setupVideoModal();
 
 
     console.log(
-      "SwarAJ themes initialized"
+      "SwarAJ theme system ready"
     );
 
   }
@@ -641,7 +624,8 @@
       }
     );
 
-  } else {
+  }
+  else {
 
     init();
 

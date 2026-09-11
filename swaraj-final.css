@@ -1,1058 +1,5 @@
 /* =====================================================
-   SWARAJ FINAL UI
-===================================================== */
-
-:root {
-  --sj-theme-a: #8b5cf6;
-  --sj-theme-b: #06b6d4;
-}
-
-
-/* =====================================================
-   CRITICAL CLICK FIX
-===================================================== */
-
-button,
-input,
-.song,
-.sj-song-card,
-.menu-item,
-.icon-btn,
-.primary-btn {
-  pointer-events: auto;
-}
-
-button {
-  cursor: pointer;
-}
-
-
-/* =====================================================
-   THEME PANEL
-===================================================== */
-
-.sj-theme-panel {
-
-  position: fixed;
-
-  top: 85px;
-
-  right: 25px;
-
-  width: min(
-    430px,
-    calc(100vw - 30px)
-  );
-
-  padding: 18px;
-
-  border-radius: 22px;
-
-  background:
-    rgba(10, 12, 25, .96);
-
-  border:
-    1px solid rgba(
-      255,
-      255,
-      255,
-      .12
-    );
-
-  box-shadow:
-    0 25px 80px
-    rgba(0,0,0,.55);
-
-  backdrop-filter:
-    blur(30px);
-
-  z-index: 1000;
-
-  opacity: 0;
-
-  visibility: hidden;
-
-  transform:
-    translateY(-10px)
-    scale(.97);
-
-  transition:
-    .2s ease;
-
-}
-
-.sj-theme-panel.open {
-
-  opacity: 1;
-
-  visibility: visible;
-
-  transform:
-    translateY(0)
-    scale(1);
-
-}
-
-
-.sj-theme-panel-head {
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  margin-bottom: 15px;
-
-}
-
-
-.sj-theme-panel-head strong {
-
-  display: block;
-
-  color: white;
-
-  font-size: 16px;
-
-}
-
-
-.sj-theme-panel-head span {
-
-  display: block;
-
-  color: #9097ad;
-
-  font-size: 12px;
-
-  margin-top: 3px;
-
-}
-
-
-.sj-theme-panel-head button {
-
-  border: 0;
-
-  width: 35px;
-
-  height: 35px;
-
-  border-radius: 50%;
-
-  background:
-    rgba(255,255,255,.08);
-
-  color: white;
-
-  font-size: 22px;
-
-}
-
-
-/* =====================================================
-   THEME GRID
-===================================================== */
-
-.sj-theme-grid {
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, 1fr);
-
-  gap: 10px;
-
-}
-
-
-.sj-theme-card {
-
-  position: relative;
-
-  overflow: hidden;
-
-  min-height: 85px;
-
-  padding: 14px;
-
-  text-align: left;
-
-  border-radius: 16px;
-
-  border:
-    1px solid
-    rgba(255,255,255,.08);
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--theme-a),
-      var(--theme-b)
-    );
-
-  color: white;
-
-  transition:
-    transform .2s ease,
-    box-shadow .2s ease;
-
-}
-
-
-.sj-theme-card:hover {
-
-  transform:
-    translateY(-3px);
-
-}
-
-
-.sj-theme-card.active {
-
-  box-shadow:
-    0 0 0 2px white,
-    0 10px 30px
-    rgba(0,0,0,.35);
-
-}
-
-
-.sj-theme-card b {
-
-  position: relative;
-
-  z-index: 2;
-
-  display: block;
-
-}
-
-
-.sj-theme-card small {
-
-  position: relative;
-
-  z-index: 2;
-
-  display: block;
-
-  margin-top: 5px;
-
-  opacity: .75;
-
-}
-
-
-.sj-theme-preview {
-
-  position: absolute;
-
-  width: 90px;
-
-  height: 90px;
-
-  right: -25px;
-
-  top: -30px;
-
-  border-radius: 50%;
-
-  background:
-    rgba(255,255,255,.22);
-
-  filter:
-    blur(3px);
-
-}
-
-
-/* =====================================================
-   CATEGORY
-===================================================== */
-
-.sj-category-block {
-
-  margin-top: 35px;
-
-}
-
-
-.sj-category-header {
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  margin-bottom: 15px;
-
-}
-
-
-.sj-category-title {
-
-  margin: 0;
-
-  font-size: 22px;
-
-}
-
-
-.sj-category-count {
-
-  color:
-    var(--muted);
-
-  font-size: 13px;
-
-}
-
-
-.sj-category-scroll {
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(
-      auto-fill,
-      minmax(180px, 1fr)
-    );
-
-  gap: 14px;
-
-}
-
-
-.sj-song-card {
-
-  position: relative;
-
-  overflow: hidden;
-
-  min-height: 210px;
-
-  padding: 12px;
-
-  border-radius: 18px;
-
-  background:
-    rgba(255,255,255,.045);
-
-  border:
-    1px solid
-    rgba(255,255,255,.08);
-
-  cursor: pointer;
-
-  transition:
-    transform .2s ease,
-    background .2s ease;
-
-}
-
-
-.sj-song-card:hover {
-
-  transform:
-    translateY(-5px);
-
-  background:
-    rgba(255,255,255,.08);
-
-}
-
-
-.sj-song-card > img {
-
-  width: 100%;
-
-  height: 145px;
-
-  object-fit: cover;
-
-  border-radius: 13px;
-
-  display: block;
-
-}
-
-
-.sj-card-title {
-
-  margin-top: 10px;
-
-  font-weight: 700;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-}
-
-
-.sj-card-artist {
-
-  color:
-    var(--muted);
-
-  font-size: 12px;
-
-  margin-top: 4px;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-}
-
-
-.sj-card-play {
-
-  position: absolute;
-
-  right: 20px;
-
-  bottom: 48px;
-
-  width: 40px;
-
-  height: 40px;
-
-  border: 0;
-
-  border-radius: 50%;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--sj-theme-a),
-      var(--sj-theme-b)
-    );
-
-  color: white;
-
-  box-shadow:
-    0 8px 20px
-    rgba(0,0,0,.35);
-
-}
-
-
-/* =====================================================
-   QUEUE
-===================================================== */
-
-.sj-queue-panel {
-
-  position: fixed;
-
-  right: 20px;
-
-  bottom: 105px;
-
-  width: 360px;
-
-  max-width:
-    calc(100vw - 30px);
-
-  max-height:
-    70vh;
-
-  overflow-y: auto;
-
-  padding: 15px;
-
-  border-radius: 22px;
-
-  background:
-    rgba(8,10,20,.97);
-
-  border:
-    1px solid
-    rgba(255,255,255,.1);
-
-  box-shadow:
-    0 25px 70px
-    rgba(0,0,0,.55);
-
-  backdrop-filter:
-    blur(25px);
-
-  z-index: 1100;
-
-  opacity: 0;
-
-  visibility: hidden;
-
-  transform:
-    translateY(15px);
-
-  transition:
-    .2s ease;
-
-}
-
-
-.sj-queue-panel.open {
-
-  opacity: 1;
-
-  visibility: visible;
-
-  transform:
-    translateY(0);
-
-}
-
-
-.sj-panel-head {
-
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  margin-bottom: 10px;
-
-}
-
-
-.sj-panel-head button {
-
-  border: 0;
-
-  width: 34px;
-
-  height: 34px;
-
-  border-radius: 50%;
-
-  background:
-    rgba(255,255,255,.08);
-
-  color: white;
-
-}
-
-
-.sj-queue-row {
-
-  width: 100%;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-
-  padding: 10px;
-
-  margin-bottom: 6px;
-
-  border: 0;
-
-  border-radius: 12px;
-
-  background:
-    rgba(255,255,255,.045);
-
-  color: white;
-
-  text-align: left;
-
-}
-
-
-.sj-queue-row:hover,
-.sj-queue-row.active {
-
-  background:
-    rgba(124,92,255,.18);
-
-}
-
-
-.sj-queue-row img {
-
-  width: 48px;
-
-  height: 48px;
-
-  object-fit: cover;
-
-  border-radius: 9px;
-
-}
-
-
-.sj-queue-row span {
-
-  min-width: 0;
-
-}
-
-
-.sj-queue-row b,
-.sj-queue-row small {
-
-  display: block;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-
-}
-
-
-.sj-queue-row small {
-
-  margin-top: 4px;
-
-  color:
-    var(--muted);
-
-}
-
-
-/* =====================================================
-   VIDEO
-===================================================== */
-
-.sj-common-video {
-
-  position: fixed;
-
-  inset: 0;
-
-  display: none;
-
-  align-items: center;
-
-  justify-content: center;
-
-  background:
-    rgba(0,0,0,.85);
-
-  backdrop-filter:
-    blur(10px);
-
-  z-index: 2000;
-
-  padding: 20px;
-
-}
-
-
-.sj-common-video.open {
-
-  display: flex;
-
-}
-
-
-.sj-video-inner {
-
-  position: relative;
-
-  width: min(
-    1000px,
-    95vw
-  );
-
-  aspect-ratio: 16 / 9;
-
-  background: black;
-
-  border-radius: 18px;
-
-  overflow: hidden;
-
-}
-
-
-.youtube-frame {
-
-  width: 100%;
-
-  height: 100%;
-
-}
-
-
-.hidden-video {
-
-  display: none !important;
-
-}
-
-
-.sj-video-close {
-
-  position: absolute;
-
-  right: 12px;
-
-  top: 12px;
-
-  z-index: 20;
-
-  width: 40px;
-
-  height: 40px;
-
-  border: 0;
-
-  border-radius: 50%;
-
-  background:
-    rgba(0,0,0,.7);
-
-  color: white;
-
-  font-size: 25px;
-
-}
-
-
-.sj-video-fullscreen {
-
-  position: absolute;
-
-  right: 12px;
-
-  bottom: 12px;
-
-  z-index: 20;
-
-  width: 42px;
-
-  height: 42px;
-
-  border: 0;
-
-  border-radius: 50%;
-
-  background:
-    rgba(0,0,0,.7);
-
-  color: white;
-
-}
-
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-.sj-toast {
-
-  position: fixed;
-
-  left: 50%;
-
-  bottom: 120px;
-
-  transform:
-    translateX(-50%)
-    translateY(15px);
-
-  padding:
-    11px 18px;
-
-  border-radius: 30px;
-
-  background:
-    rgba(10,12,25,.95);
-
-  border:
-    1px solid
-    rgba(255,255,255,.12);
-
-  color: white;
-
-  font-size: 13px;
-
-  z-index: 3000;
-
-  opacity: 0;
-
-  pointer-events: none;
-
-  transition:
-    .2s ease;
-
-}
-
-
-.sj-toast.show {
-
-  opacity: 1;
-
-  transform:
-    translateX(-50%)
-    translateY(0);
-
-}
-
-
-/* =====================================================
-   ACTIVE PLAYER BUTTONS
-===================================================== */
-
-.sj-player-control.active {
-
-  color:
-    var(--sj-theme-b) !important;
-
-  background:
-    rgba(124,92,255,.18) !important;
-
-}
-
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
-@media (
-  max-width: 768px
-) {
-
-  .sidebar {
-
-    transform:
-      translateX(-110%);
-
-    z-index: 1200;
-
-    bottom: 0;
-
-  }
-
-
-  .sidebar.mobile-open {
-
-    transform:
-      translateX(0);
-
-  }
-
-
-  .main {
-
-    margin-left: 0;
-
-  }
-
-
-  .topbar {
-
-    padding:
-      10px 14px;
-
-  }
-
-
-  .mobile-menu {
-
-    display: block;
-
-  }
-
-
-  .page {
-
-    padding:
-      18px 15px 130px;
-
-  }
-
-
-  .hero {
-
-    min-height:
-      auto;
-
-    padding:
-      30px 20px;
-
-    flex-direction:
-      column;
-
-    text-align:
-      center;
-
-  }
-
-
-  .hero-liquid-logo-wrap {
-
-    width: 220px;
-
-    height: 220px;
-
-    flex-basis: 220px;
-
-  }
-
-
-  .hero-liquid-orbit {
-
-    width: 210px;
-
-    height: 210px;
-
-  }
-
-
-  .hero-liquid-logo {
-
-    width: 160px;
-
-    height: 160px;
-
-  }
-
-
-  .hero-logo-text span {
-
-    font-size: 43px;
-
-  }
-
-
-  .hero-logo-text b {
-
-    font-size: 34px;
-
-  }
-
-
-  .hero-content h1 {
-
-    font-size: 35px;
-
-  }
-
-
-  .song {
-
-    padding:
-      9px;
-
-  }
-
-
-  .player {
-
-    padding:
-      8px;
-
-  }
-
-
-  .now-playing {
-
-    min-width: 0;
-
-  }
-
-
-  .track-info {
-
-    min-width: 0;
-
-  }
-
-
-  .controls {
-
-    width: 100%;
-
-  }
-
-
-  .player-actions {
-
-    display: none;
-
-  }
-
-
-  .sj-category-scroll {
-
-    display: flex;
-
-    overflow-x: auto;
-
-    scroll-snap-type:
-      x mandatory;
-
-  }
-
-
-  .sj-song-card {
-
-    min-width: 180px;
-
-    max-width: 180px;
-
-    scroll-snap-align:
-      start;
-
-  }
-
-
-  .sj-theme-panel {
-
-    right: 10px;
-
-    top: 70px;
-
-  }
-
-
-  .sj-theme-grid {
-
-    grid-template-columns:
-      1fr 1fr;
-
-  }
-
-
-  .sj-queue-panel {
-
-    right: 10px;
-
-    bottom: 95px;
-
-  }
-
-}
-
-
-@media (
-  min-width: 769px
-) {
-
-  .mobile-menu {
-
-    display: none;
-
-  }
-  
-  /* =====================================================
-   CURRENT SWARAJ THEME SYSTEM
+   SWARAJ FINAL THEME SYSTEM
    ===================================================== */
 
 html[data-swaraj-theme="liquid"] {
@@ -1105,17 +52,28 @@ html[data-swaraj-theme="minimal-dark"] {
   --accent2: #94a3b8;
 }
 
+
+/* =====================================================
+   THEME BUTTONS
+   ===================================================== */
+
 .theme-choice {
+
   position: relative;
+
   overflow: hidden;
-  min-height: 78px;
 
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 15px;
+  min-height: 82px;
 
-  padding: 12px;
+  border:
+    1px solid
+    rgba(255,255,255,.12);
 
-  color: #fff;
+  border-radius: 16px;
+
+  padding: 13px;
+
+  color: white;
 
   background:
     linear-gradient(
@@ -1131,88 +89,474 @@ html[data-swaraj-theme="minimal-dark"] {
   transition:
     transform .2s ease,
     box-shadow .2s ease;
+
 }
+
 
 .theme-choice:hover {
-  transform: translateY(-3px);
+
+  transform:
+    translateY(-3px);
+
 }
+
 
 .theme-choice.active {
-  outline: 2px solid #fff;
+
+  outline:
+    2px solid white;
 
   box-shadow:
-    0 10px 30px rgba(0,0,0,.35);
+    0 12px 35px
+    rgba(0,0,0,.4);
+
 }
 
-.theme-choice strong,
-.theme-choice small {
+
+.theme-choice strong {
+
   position: relative;
+
   z-index: 2;
 
   display: block;
+
+  font-size: 13px;
+
 }
+
 
 .theme-choice small {
+
+  position: relative;
+
+  z-index: 2;
+
+  display: block;
+
   margin-top: 5px;
+
   opacity: .75;
+
   font-size: 10px;
+
 }
 
+
 .theme-preview {
+
   position: absolute;
 
-  width: 100px;
-  height: 100px;
+  width: 110px;
 
-  right: -30px;
-  top: -40px;
+  height: 110px;
+
+  right: -35px;
+
+  top: -45px;
 
   border-radius: 50%;
 
   background:
     rgba(255,255,255,.25);
 
-  filter: blur(4px);
+  filter:
+    blur(4px);
+
 }
 
-/* Current UI uses these classes */
+
+/* =====================================================
+   DYNAMIC BUTTONS
+   ===================================================== */
 
 .play-button,
 .card-play {
+
   background:
     linear-gradient(
       135deg,
       var(--accent),
       var(--accent2)
     ) !important;
+
 }
+
 
 .category.active {
+
   background:
     linear-gradient(
       135deg,
       var(--accent),
       var(--accent2)
     ) !important;
+
+  color: white !important;
+
 }
+
 
 .search-container:focus-within {
+
   border-color:
     var(--accent) !important;
+
 }
 
+
+/* =====================================================
+   PLAYING SONG
+   ===================================================== */
+
 .song-card.playing {
+
   border-color:
     var(--accent) !important;
 
   box-shadow:
     0 0 25px
-    color-mix(
-      in srgb,
-      var(--accent) 20%,
-      transparent
-    );
+    rgba(139,92,246,.20);
+
 }
-  
+
+
+.song-card {
+
+  cursor: pointer;
+
+  pointer-events: auto;
+
+}
+
+
+.song-card * {
+
+  pointer-events: auto;
+
+}
+
+
+/* =====================================================
+   CARD PLAY
+   ===================================================== */
+
+.card-play {
+
+  z-index: 10;
+
+  cursor: pointer;
+
+  pointer-events: auto;
+
+}
+
+
+/* =====================================================
+   WATCH BUTTON
+   ===================================================== */
+
+.card-watch-button {
+
+  position: absolute;
+
+  z-index: 20;
+
+  right: 10px;
+
+  bottom: 10px;
+
+  padding:
+    8px 12px;
+
+  border: 0;
+
+  border-radius: 999px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    );
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  pointer-events: auto;
+
+}
+
+
+.card-watch-button:hover {
+
+  transform:
+    scale(1.04);
+
+}
+
+
+/* =====================================================
+   PLAYER WATCH
+   ===================================================== */
+
+#watchBtn {
+
+  cursor: pointer;
+
+  pointer-events: auto;
+
+}
+
+
+/* =====================================================
+   YOUTUBE VIDEO
+   ===================================================== */
+
+#youtubeFrame {
+
+  position: relative;
+
+  width: 100%;
+
+  height: 100%;
+
+  min-height: 300px;
+
+  pointer-events: auto;
+
+}
+
+
+#youtubeFrame iframe {
+
+  width: 100% !important;
+
+  height: 100% !important;
+
+  min-height: 300px;
+
+  border: 0;
+
+}
+
+
+/* =====================================================
+   HIDDEN YOUTUBE BACKGROUND PLAYER
+   ===================================================== */
+
+#youtubeAudioPlayer {
+
+  position: fixed !important;
+
+  width: 2px !important;
+
+  height: 2px !important;
+
+  left: -10000px !important;
+
+  top: -10000px !important;
+
+  overflow: hidden !important;
+
+  opacity: 0 !important;
+
+  pointer-events: none !important;
+
+}
+
+
+/* =====================================================
+   TOAST
+   ===================================================== */
+
+.toast {
+
+  pointer-events: none;
+
+  opacity: 0;
+
+  transform:
+    translateY(12px);
+
+  transition:
+    opacity .2s ease,
+    transform .2s ease;
+
+}
+
+
+.toast.show {
+
+  opacity: 1;
+
+  transform:
+    translateY(0);
+
+}
+
+
+/* =====================================================
+   EMPTY STATE
+   ===================================================== */
+
+.empty-state {
+
+  grid-column:
+    1 / -1;
+
+  padding:
+    70px 20px;
+
+  text-align: center;
+
+  color: var(--muted);
+
+}
+
+
+.empty-icon {
+
+  font-size: 45px;
+
+  margin-bottom: 12px;
+
+  color: var(--accent);
+
+}
+
+
+.empty-state h3 {
+
+  margin: 0 0 8px;
+
+  color: white;
+
+}
+
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (
+  max-width: 800px
+) {
+
+  .mobile-menu {
+
+    display: grid;
+
+  }
+
+
+  .sidebar {
+
+    transform:
+      translateX(-105%);
+
+    transition:
+      transform .25s ease;
+
+    z-index: 100;
+
+  }
+
+
+  .sidebar.open {
+
+    transform:
+      translateX(0);
+
+  }
+
+
+  .main {
+
+    margin-left: 0;
+
+  }
+
+
+  .topbar {
+
+    padding:
+      12px;
+
+  }
+
+
+  .content {
+
+    padding:
+      15px;
+
+  }
+
+
+  .hero {
+
+    min-height: 200px;
+
+    padding:
+      25px;
+
+  }
+
+
+  .song-grid {
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0,1fr)
+      );
+
+    gap: 12px;
+
+  }
+
+
+  .player {
+
+    left: 0;
+
+  }
+
+
+  .player-right {
+
+    display: none;
+
+  }
+
+}
+
+
+@media (
+  max-width: 480px
+) {
+
+  .song-grid {
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0,1fr)
+      );
+
+  }
+
+
+  .hero h1 {
+
+    font-size: 34px;
+
+  }
 
 }

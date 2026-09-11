@@ -1050,5 +1050,169 @@ button {
     display: none;
 
   }
+  
+  /* =====================================================
+   CURRENT SWARAJ THEME SYSTEM
+   ===================================================== */
+
+html[data-swaraj-theme="liquid"] {
+  --accent: #8b5cf6;
+  --accent2: #06b6d4;
+}
+
+html[data-swaraj-theme="deep-3d"] {
+  --accent: #475569;
+  --accent2: #cbd5e1;
+}
+
+html[data-swaraj-theme="neon-3d"] {
+  --accent: #00f5ff;
+  --accent2: #ff00d4;
+}
+
+html[data-swaraj-theme="aurora-liquid"] {
+  --accent: #22c55e;
+  --accent2: #8b5cf6;
+}
+
+html[data-swaraj-theme="galaxy-6d"] {
+  --accent: #7c3aed;
+  --accent2: #38bdf8;
+}
+
+html[data-swaraj-theme="premium-gold"] {
+  --accent: #f59e0b;
+  --accent2: #fde68a;
+}
+
+html[data-swaraj-theme="ocean-liquid"] {
+  --accent: #06b6d4;
+  --accent2: #2563eb;
+}
+
+html[data-swaraj-theme="purple-crystal"] {
+  --accent: #a855f7;
+  --accent2: #e879f9;
+}
+
+html[data-swaraj-theme="red-pulse"] {
+  --accent: #ef4444;
+  --accent2: #fb7185;
+}
+
+html[data-swaraj-theme="minimal-dark"] {
+  --accent: #64748b;
+  --accent2: #94a3b8;
+}
+
+.theme-choice {
+  position: relative;
+  overflow: hidden;
+  min-height: 78px;
+
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 15px;
+
+  padding: 12px;
+
+  color: #fff;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--theme-a),
+      var(--theme-b)
+    );
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease;
+}
+
+.theme-choice:hover {
+  transform: translateY(-3px);
+}
+
+.theme-choice.active {
+  outline: 2px solid #fff;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.35);
+}
+
+.theme-choice strong,
+.theme-choice small {
+  position: relative;
+  z-index: 2;
+
+  display: block;
+}
+
+.theme-choice small {
+  margin-top: 5px;
+  opacity: .75;
+  font-size: 10px;
+}
+
+.theme-preview {
+  position: absolute;
+
+  width: 100px;
+  height: 100px;
+
+  right: -30px;
+  top: -40px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255,255,255,.25);
+
+  filter: blur(4px);
+}
+
+/* Current UI uses these classes */
+
+.play-button,
+.card-play {
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    ) !important;
+}
+
+.category.active {
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    ) !important;
+}
+
+.search-container:focus-within {
+  border-color:
+    var(--accent) !important;
+}
+
+.song-card.playing {
+  border-color:
+    var(--accent) !important;
+
+  box-shadow:
+    0 0 25px
+    color-mix(
+      in srgb,
+      var(--accent) 20%,
+      transparent
+    );
+}
+  
 
 }

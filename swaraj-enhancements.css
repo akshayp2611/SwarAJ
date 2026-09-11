@@ -1,339 +1,65 @@
-/* =========================================================
-   SWARAJ ENHANCEMENTS
-   Additive only. Existing styles.css remains loaded first.
-========================================================= */
+/* =====================================================
+   SWARAJ CLICK / PLAYER FIXES
+   ===================================================== */
 
-:root {
-  --sj-accent: #8b5cf6;
-  --sj-accent-2: #06b6d4;
-  --sj-border: rgba(255,255,255,.14);
-  --sj-muted: #a8afc7;
+.song-card {
+  position: relative;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
-/* Theme variables */
-body[data-sj-theme="liquid"] {
-  --sj-accent:#8b5cf6;
-  --sj-accent-2:#06b6d4;
+.song-card * {
+  pointer-events: auto;
 }
 
-body[data-sj-theme="ocean"] {
-  --sj-accent:#00c6ff;
-  --sj-accent-2:#0072ff;
+.card-play,
+.card-watch-button {
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
-body[data-sj-theme="sunset"] {
-  --sj-accent:#ff7b00;
-  --sj-accent-2:#ff006e;
+.card-play {
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    ) !important;
 }
 
-body[data-sj-theme="emerald"] {
-  --sj-accent:#00e676;
-  --sj-accent-2:#00bfa5;
+.song-card.playing {
+  border-color:
+    var(--accent) !important;
 }
 
-body[data-sj-theme="royal"] {
-  --sj-accent:#a855f7;
-  --sj-accent-2:#ec4899;
+
+/* YouTube */
+
+#youtubeAudioPlayer {
+  position: fixed !important;
+  width: 2px !important;
+  height: 2px !important;
+  left: -10000px !important;
+  top: -10000px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-body[data-sj-theme="gold"] {
-  --sj-accent:#ffd166;
-  --sj-accent-2:#f59e0b;
+
+/* Watch */
+
+#youtubeFrame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  pointer-events: auto;
 }
 
-/* Professional icon treatment */
-.sj-nav-icon {
-  width:22px;
-  height:22px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-}
-
-.sj-nav-icon svg {
-  width:100%;
-  height:100%;
-  fill:none;
-  stroke:currentColor;
-  stroke-width:1.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-
-.menu-item {
-  border-radius:16px !important;
-  transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
-}
-
-.menu-item:hover {
-  transform:translateX(4px);
-  box-shadow:0 12px 30px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.12);
-}
-
-.menu-item.active {
-  background:linear-gradient(135deg,var(--sj-accent),var(--sj-accent-2)) !important;
-  box-shadow:0 12px 32px rgba(0,0,0,.35), inset 0 1px rgba(255,255,255,.35);
-}
-
-/* 3D / 6D liquid buttons */
-.sj-3d-btn,
-.sj-player-button {
-  position:relative;
-  border:1px solid rgba(255,255,255,.18);
-  color:#fff;
-  background:linear-gradient(145deg,var(--sj-accent),var(--sj-accent-2));
-  box-shadow:
-    0 8px 0 rgba(0,0,0,.20),
-    0 14px 30px rgba(0,0,0,.35),
-    inset 0 1px 1px rgba(255,255,255,.45),
-    inset 0 -8px 16px rgba(0,0,0,.16);
-  cursor:pointer;
-  transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
-}
-
-.sj-3d-btn::before,
-.sj-player-button::before {
-  content:"";
-  position:absolute;
-  inset:2px;
-  border-radius:inherit;
-  background:linear-gradient(120deg,rgba(255,255,255,.25),transparent 45%);
-  pointer-events:none;
-}
-
-.sj-3d-btn:hover,
-.sj-player-button:hover {
-  transform:translateY(-3px);
-  filter:brightness(1.10);
-  box-shadow:
-    0 11px 0 rgba(0,0,0,.18),
-    0 20px 38px rgba(0,0,0,.42),
-    inset 0 1px 1px rgba(255,255,255,.5);
-}
-
-.sj-3d-btn:active,
-.sj-player-button:active {
-  transform:translateY(4px);
-  box-shadow:0 3px 0 rgba(0,0,0,.24), inset 0 3px 10px rgba(0,0,0,.25);
-}
-
-/* Theme picker */
-.sj-theme-panel {
-  position:fixed;
-  right:20px;
-  top:78px;
-  z-index:10000;
-  width:min(330px,calc(100vw - 40px));
-  padding:20px;
-  border-radius:25px;
-  display:none;
-  background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.04));
-  border:1px solid rgba(255,255,255,.16);
-  box-shadow:0 25px 70px rgba(0,0,0,.55), inset 0 1px rgba(255,255,255,.15);
-  backdrop-filter:blur(25px);
-  -webkit-backdrop-filter:blur(25px);
-}
-
-.sj-theme-panel.open {
-  display:block;
-}
-
-.sj-theme-title {
-  margin:0 0 16px;
-}
-
-.sj-theme-grid {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:13px;
-}
-
-.sj-theme-button {
-  height:52px;
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.18);
-  cursor:pointer;
-  background:linear-gradient(135deg,var(--theme-a),var(--theme-b));
-  box-shadow:0 9px 22px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.45);
-  transition:transform .18s ease;
-}
-
-.sj-theme-button:hover {
-  transform:scale(1.07) translateY(-2px);
-}
-
-.sj-theme-button.active {
-  outline:2px solid #fff;
-  outline-offset:3px;
-}
-
-/* Category separation */
-.sj-category-container {
-  margin-top:34px;
-  display:flex;
-  flex-direction:column;
-  gap:30px;
-}
-
-.sj-category-block {
-  padding:20px;
-  border-radius:26px;
-  background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
-  border:1px solid rgba(255,255,255,.12);
-  box-shadow:0 20px 55px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.12);
-  backdrop-filter:blur(18px);
-}
-
-.sj-category-header {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-  margin-bottom:17px;
-}
-
-.sj-category-title {
-  margin:0;
-  font-size:22px;
-  font-weight:800;
-}
-
-.sj-category-count {
-  color:var(--sj-muted);
-  font-size:13px;
-}
-
-.sj-category-scroll {
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:14px;
-}
-
-.sj-song-card {
-  min-height:105px;
-  padding:13px;
-  border-radius:22px;
-  border:1px solid rgba(255,255,255,.10);
-  background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.025));
-  box-shadow:0 12px 30px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.10);
-  cursor:pointer;
-  transition:transform .2s ease,box-shadow .2s ease;
-}
-
-.sj-song-card:hover {
-  transform:translateY(-5px) scale(1.012);
-  box-shadow:0 20px 45px rgba(0,0,0,.40),inset 0 1px rgba(255,255,255,.15);
-}
-
-.sj-card-row {
-  display:flex;
-  align-items:center;
-  gap:13px;
-}
-
-.sj-song-card img {
-  width:64px;
-  height:64px;
-  object-fit:cover;
-  border-radius:16px;
-  box-shadow:0 8px 20px rgba(0,0,0,.35);
-}
-
-.sj-card-info {
-  min-width:0;
-}
-
-.sj-card-title {
-  font-weight:750;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.sj-card-artist {
-  color:var(--sj-muted);
-  font-size:13px;
-  margin-top:5px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-/* Existing common YouTube screen becomes the one common video window */
-.youtube-frame:not(.hidden-video) {
-  position:fixed !important;
-  z-index:99999 !important;
-  left:50% !important;
-  top:50% !important;
-  width:min(950px,calc(100vw - 30px)) !important;
-  height:auto !important;
-  aspect-ratio:16/9 !important;
-  transform:translate(-50%,-50%) !important;
-  border-radius:28px !important;
-  overflow:hidden !important;
-  border:1px solid rgba(255,255,255,.18) !important;
-  box-shadow:0 35px 100px rgba(0,0,0,.75),0 0 80px rgba(139,92,246,.18) !important;
-  background:#000 !important;
-}
-
-.youtube-frame:not(.hidden-video)::before {
-  content:"SWARAJ • VIDEO";
-  position:absolute;
-  left:15px;
-  top:12px;
-  z-index:5;
-  padding:7px 12px;
-  border-radius:12px;
-  background:rgba(0,0,0,.58);
-  color:#fff;
-  font-size:11px;
-  letter-spacing:.12em;
-  pointer-events:none;
-  backdrop-filter:blur(8px);
-}
-
-.youtube-frame:not(.hidden-video)::after {
-  content:"";
-  position:fixed;
-  inset:-100vh -100vw;
-  z-index:-1;
-  background:rgba(0,0,0,.68);
-  backdrop-filter:blur(12px);
-}
-
-.youtube-frame #youtubePlayer,
-.youtube-frame iframe {
-  width:100% !important;
-  height:100% !important;
-}
-
-/* Admin shortcut */
-#adminMenu {
-  cursor:pointer;
-}
-
-/* Mobile */
-@media (max-width:700px) {
-  .sj-category-scroll {
-    display:flex;
-    overflow-x:auto;
-    scroll-snap-type:x mandatory;
-    padding-bottom:7px;
-  }
-
-  .sj-song-card {
-    min-width:245px;
-    scroll-snap-align:start;
-  }
-
-  .sj-theme-panel {
-    right:12px;
-    top:70px;
-  }
-
-  .youtube-frame:not(.hidden-video) {
-    width:calc(100vw - 18px) !important;
-    border-radius:20px !important;
-  }
+#youtubeFrame iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: 0;
 }

@@ -1,654 +1,3868 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  >
+<title>स्वरAJ — Music</title>
 
-  <meta
-    name="theme-color"
-    content="#060812"
-  >
+<meta name="theme-color" content="#09090f">
 
-  <title>स्वरAJ Music</title>
+<style>
+/* =========================================================
+   SWARAJ — SINGLE FILE FRONTEND
+   HTML + CSS + JAVASCRIPT
+   ========================================================= */
 
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="/swaraj-enhancements.css">
-  <link rel="stylesheet" href="/swaraj-final.css">
+:root{
+  --accent:#8b5cf6;
+  --accent2:#06b6d4;
+  --bg:#08080d;
+  --bg2:#11111a;
+  --card:rgba(255,255,255,.07);
+  --card2:rgba(255,255,255,.11);
+  --text:#fff;
+  --muted:#a5a5b5;
+  --border:rgba(255,255,255,.10);
+  --shadow:0 20px 70px rgba(0,0,0,.35);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+  background:var(--bg);
+}
+
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      color-mix(in srgb,var(--accent) 18%,transparent),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      color-mix(in srgb,var(--accent2) 15%,transparent),
+      transparent 30%
+    ),
+    linear-gradient(135deg,#050508,#11111a);
+  color:var(--text);
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  overflow-x:hidden;
+}
+
+/* =========================================================
+   THEMES
+   ========================================================= */
+
+[data-theme="liquid-glass"]{
+  --accent:#8b5cf6;
+  --accent2:#06b6d4;
+}
+
+[data-theme="deep-3d"]{
+  --accent:#64748b;
+  --accent2:#e2e8f0;
+}
+
+[data-theme="neon-3d"]{
+  --accent:#00f5ff;
+  --accent2:#ff00d4;
+}
+
+[data-theme="aurora-liquid"]{
+  --accent:#22c55e;
+  --accent2:#8b5cf6;
+}
+
+[data-theme="galaxy-6d"]{
+  --accent:#7c3aed;
+  --accent2:#38bdf8;
+}
+
+[data-theme="premium-gold"]{
+  --accent:#f59e0b;
+  --accent2:#fde68a;
+}
+
+[data-theme="ocean-liquid"]{
+  --accent:#06b6d4;
+  --accent2:#2563eb;
+}
+
+[data-theme="purple-crystal"]{
+  --accent:#a855f7;
+  --accent2:#e879f9;
+}
+
+[data-theme="red-pulse"]{
+  --accent:#ef4444;
+  --accent2:#fb7185;
+}
+
+[data-theme="minimal-dark"]{
+  --accent:#64748b;
+  --accent2:#94a3b8;
+}
+
+/* =========================================================
+   LIQUID BACKGROUND
+   ========================================================= */
+
+.liquid-bg{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:-2;
+}
+
+.blob{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(60px);
+  opacity:.30;
+  mix-blend-mode:screen;
+  animation:floatBlob 16s ease-in-out infinite alternate;
+}
+
+.blob.one{
+  width:400px;
+  height:400px;
+  background:var(--accent);
+  left:-120px;
+  top:-100px;
+}
+
+.blob.two{
+  width:350px;
+  height:350px;
+  background:var(--accent2);
+  right:-100px;
+  top:30%;
+  animation-delay:3s;
+}
+
+.blob.three{
+  width:300px;
+  height:300px;
+  background:var(--accent);
+  left:30%;
+  bottom:-150px;
+  animation-delay:6s;
+}
+
+@keyframes floatBlob{
+  from{
+    transform:translate3d(0,0,0) scale(1);
+  }
+  to{
+    transform:translate3d(60px,-50px,0) scale(1.25);
+  }
+}
+
+/* =========================================================
+   APP
+   ========================================================= */
+
+.app{
+  min-height:100vh;
+  display:flex;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  width:245px;
+  padding:25px 15px;
+  background:rgba(5,5,10,.72);
+  backdrop-filter:blur(25px);
+  border-right:1px solid var(--border);
+  z-index:100;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 12px 30px;
+}
+
+.logo-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  font-size:24px;
+  font-weight:900;
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    );
+  box-shadow:
+    0 10px 35px
+    color-mix(in srgb,var(--accent) 35%,transparent);
+}
+
+.logo-text{
+  font-size:21px;
+  font-weight:900;
+  letter-spacing:.5px;
+}
+
+.logo-text small{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:2px;
+  margin-top:3px;
+}
+
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.nav button{
+  width:100%;
+  border:0;
+  color:#aaa;
+  background:transparent;
+  text-align:left;
+  padding:13px 14px;
+  border-radius:13px;
+  font-size:14px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.nav button:hover,
+.nav button.active{
+  color:white;
+  background:rgba(255,255,255,.08);
+}
+
+.nav button.active{
+  box-shadow:
+    inset 3px 0 0 var(--accent);
+}
+
+.sidebar-bottom{
+  position:absolute;
+  bottom:20px;
+  left:15px;
+  right:15px;
+}
+
+.theme-open{
+  width:100%;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.06);
+  color:white;
+  padding:12px;
+  border-radius:13px;
+  cursor:pointer;
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.main{
+  margin-left:245px;
+  width:calc(100% - 245px);
+  min-height:100vh;
+  padding-bottom:180px;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:18px 28px;
+  background:rgba(5,5,10,.68);
+  backdrop-filter:blur(22px);
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.search{
+  flex:1;
+  max-width:650px;
+  height:46px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 16px;
+  border:1px solid var(--border);
+  border-radius:15px;
+  background:rgba(255,255,255,.06);
+}
+
+.search input{
+  width:100%;
+  background:none;
+  border:0;
+  outline:none;
+  color:white;
+  font-size:14px;
+}
+
+.search input::placeholder{
+  color:#777;
+}
+
+.top-button{
+  width:44px;
+  height:44px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:rgba(255,255,255,.06);
+  color:white;
+  cursor:pointer;
+}
+
+.top-button:hover{
+  background:rgba(255,255,255,.12);
+}
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.content{
+  padding:35px 30px;
+}
+
+.hero{
+  position:relative;
+  overflow:hidden;
+  min-height:250px;
+  padding:40px;
+  border:1px solid var(--border);
+  border-radius:28px;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb,var(--accent) 20%,transparent),
+      rgba(255,255,255,.04)
+    );
+  box-shadow:var(--shadow);
+}
+
+.hero::after{
+  content:"";
+  position:absolute;
+  width:350px;
+  height:350px;
+  right:-100px;
+  top:-120px;
+  border-radius:50%;
+  background:
+    radial-gradient(
+      circle,
+      color-mix(in srgb,var(--accent2) 45%,transparent),
+      transparent 65%
+    );
+  filter:blur(20px);
+}
+
+.hero h1{
+  position:relative;
+  z-index:2;
+  font-size:clamp(32px,5vw,65px);
+  line-height:1;
+  margin-bottom:15px;
+}
+
+.gradient-text{
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent),
+      var(--accent2)
+    );
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+.hero p{
+  position:relative;
+  z-index:2;
+  color:var(--muted);
+  max-width:550px;
+}
+
+.section{
+  margin-top:35px;
+}
+
+.section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:17px;
+}
+
+.section-head h2{
+  font-size:22px;
+}
+
+.count{
+  color:var(--muted);
+  font-size:12px;
+}
+
+/* =========================================================
+   CATEGORY
+   ========================================================= */
+
+.category-row{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding-bottom:8px;
+}
+
+.category-row::-webkit-scrollbar{
+  display:none;
+}
+
+.category{
+  flex:none;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.05);
+  color:#bbb;
+  padding:10px 17px;
+  border-radius:999px;
+  cursor:pointer;
+}
+
+.category.active{
+  color:white;
+  border-color:transparent;
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    );
+}
+
+/* =========================================================
+   SONG GRID
+   ========================================================= */
+
+.song-grid{
+  display:grid;
+  grid-template-columns:
+    repeat(auto-fill,minmax(175px,1fr));
+  gap:18px;
+}
+
+.song-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:rgba(255,255,255,.045);
+  cursor:pointer;
+  transition:.25s;
+}
+
+.song-card:hover{
+  transform:translateY(-5px);
+  background:rgba(255,255,255,.075);
+  box-shadow:
+    0 20px 45px rgba(0,0,0,.28);
+}
+
+.cover{
+  position:relative;
+  aspect-ratio:1;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      var(--accent),
+      transparent 60%
+    ),
+    linear-gradient(
+      135deg,
+      #181820,
+      #08080c
+    );
+}
+
+.cover img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.cover-icon{
+  font-size:42px;
+  opacity:.75;
+}
+
+.card-play{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  width:45px;
+  height:45px;
+  border:0;
+  border-radius:50%;
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    );
+  color:white;
+  cursor:pointer;
+  opacity:0;
+  transform:translateY(8px);
+  transition:.2s;
+}
+
+.song-card:hover .card-play,
+.song-card.playing .card-play{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.song-info{
+  padding:13px;
+}
+
+.song-title{
+  font-weight:700;
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.song-category{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.song-menu{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:35px;
+  height:35px;
+  border:0;
+  border-radius:50%;
+  background:rgba(0,0,0,.45);
+  color:white;
+  cursor:pointer;
+  z-index:5;
+}
+
+/* =========================================================
+   PLAYER
+   ========================================================= */
+
+.player{
+  position:fixed;
+  left:245px;
+  right:0;
+  bottom:0;
+  min-height:105px;
+  padding:14px 22px;
+  display:grid;
+  grid-template-columns:
+    minmax(190px,1fr)
+    auto
+    minmax(190px,1fr);
+  gap:20px;
+  align-items:center;
+  background:rgba(7,7,12,.88);
+  backdrop-filter:blur(25px);
+  border-top:1px solid var(--border);
+  z-index:200;
+}
+
+.now-playing{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+
+.now-cover{
+  width:60px;
+  height:60px;
+  flex:none;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    );
+}
+
+.now-text{
+  min-width:0;
+}
+
+.now-title{
+  font-size:14px;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.now-category{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+.control{
+  width:38px;
+  height:38px;
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  color:#ccc;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.control:hover,
+.control.active{
+  color:white;
+  background:rgba(255,255,255,.09);
+}
+
+.play-main{
+  width:50px;
+  height:50px;
+  border:0;
+  border-radius:50%;
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    );
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+  box-shadow:
+    0 10px 30px
+    color-mix(in srgb,var(--accent) 25%,transparent);
+}
+
+.progress-area{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.time{
+  width:36px;
+  color:#888;
+  font-size:10px;
+  text-align:center;
+}
+
+.progress{
+  flex:1;
+  appearance:none;
+  height:4px;
+  border-radius:10px;
+  background:#333;
+  cursor:pointer;
+}
+
+.progress::-webkit-slider-thumb{
+  appearance:none;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:var(--accent2);
+}
+
+.volume{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.volume input{
+  width:80px;
+}
+
+/* =========================================================
+   WATCH VIDEO
+   ========================================================= */
+
+.watch{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.88);
+  z-index:1000;
+  place-items:center;
+  padding:20px;
+}
+
+.watch.open{
+  display:grid;
+}
+
+.video-box{
+  position:relative;
+  width:min(1000px,95vw);
+  aspect-ratio:16/9;
+  background:#000;
+  border-radius:18px;
+  overflow:hidden;
+}
+
+.video-box iframe{
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+.video-close{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:50%;
+  background:rgba(0,0,0,.75);
+  color:white;
+  cursor:pointer;
+  z-index:10;
+}
+
+/*
+ IMPORTANT:
+ Hidden YouTube player must NEVER block the page.
+*/
+#youtubePlayer{
+  position:fixed;
+  width:1px;
+  height:1px;
+  left:-100px;
+  top:-100px;
+  opacity:0;
+  pointer-events:none;
+}
+
+/* =========================================================
+   THEME PANEL
+   ========================================================= */
+
+.theme-panel{
+  position:fixed;
+  left:260px;
+  bottom:120px;
+  width:310px;
+  max-height:70vh;
+  overflow:auto;
+  padding:18px;
+  background:rgba(10,10,16,.94);
+  backdrop-filter:blur(25px);
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  z-index:500;
+  display:none;
+}
+
+.theme-panel.open{
+  display:block;
+}
+
+.theme-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.theme-close{
+  border:0;
+  background:transparent;
+  color:#aaa;
+  cursor:pointer;
+  font-size:20px;
+}
+
+.theme-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.theme-card{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.05);
+  color:white;
+  padding:12px;
+  border-radius:14px;
+  cursor:pointer;
+  text-align:left;
+}
+
+.theme-card:hover{
+  background:rgba(255,255,255,.10);
+}
+
+.theme-card.active{
+  border-color:var(--accent2);
+  box-shadow:
+    0 0 0 2px
+    color-mix(in srgb,var(--accent2) 30%,transparent);
+}
+
+.theme-preview{
+  height:40px;
+  border-radius:10px;
+  margin-bottom:8px;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:125px;
+  transform:translate(-50%,20px);
+  padding:11px 17px;
+  border-radius:999px;
+  background:rgba(20,20,28,.95);
+  border:1px solid var(--border);
+  color:white;
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+  z-index:2000;
+  font-size:13px;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+
+/* =========================================================
+   EMPTY / LOADING
+   ========================================================= */
+
+.message{
+  padding:60px 20px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.loader{
+  width:35px;
+  height:35px;
+  margin:auto;
+  border:3px solid rgba(255,255,255,.1);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+.mobile-nav{
+  display:none;
+}
+
+@media(max-width:800px){
+
+  .sidebar{
+    display:none;
+  }
+
+  .main{
+    margin-left:0;
+    width:100%;
+    padding-bottom:205px;
+  }
+
+  .topbar{
+    padding:12px;
+  }
+
+  .content{
+    padding:20px 14px;
+  }
+
+  .hero{
+    padding:25px;
+    min-height:210px;
+  }
+
+  .song-grid{
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+    gap:12px;
+  }
+
+  .player{
+    left:0;
+    right:0;
+    bottom:58px;
+    min-height:115px;
+    display:block;
+    padding:10px 12px;
+  }
+
+  .now-playing{
+    margin-bottom:7px;
+  }
+
+  .now-cover{
+    width:45px;
+    height:45px;
+  }
+
+  .controls{
+    gap:5px;
+  }
+
+  .control{
+    width:34px;
+    height:34px;
+  }
+
+  .play-main{
+    width:43px;
+    height:43px;
+  }
+
+  .volume{
+    display:none;
+  }
+
+  .progress-area{
+    margin-top:5px;
+  }
+
+  .mobile-nav{
+    position:fixed;
+    display:flex;
+    left:0;
+    right:0;
+    bottom:0;
+    height:58px;
+    background:rgba(5,5,10,.94);
+    backdrop-filter:blur(20px);
+    border-top:1px solid var(--border);
+    z-index:300;
+  }
+
+  .mobile-nav button{
+    flex:1;
+    border:0;
+    background:transparent;
+    color:#888;
+    cursor:pointer;
+  }
+
+  .mobile-nav button.active{
+    color:var(--accent2);
+  }
+
+  .theme-panel{
+    left:10px;
+    right:10px;
+    bottom:75px;
+    width:auto;
+  }
+}
+
+@media(max-width:420px){
+
+  .song-grid{
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+  }
+
+  .hero h1{
+    font-size:34px;
+  }
+}
+</style>
 </head>
 
-<body>
+<body data-theme="liquid-glass">
+
+<!-- =======================================================
+     BACKGROUND
+     ======================================================= -->
+
+<div class="liquid-bg">
+  <div class="blob one"></div>
+  <div class="blob two"></div>
+  <div class="blob three"></div>
+</div>
+
+<!-- =======================================================
+     APP
+     ======================================================= -->
 
 <div class="app">
 
-  <!-- SIDEBAR -->
-  <aside id="sidebar" class="sidebar">
+<!-- SIDEBAR -->
+<aside class="sidebar">
 
-    <div class="brand">
-      <div class="logo-disc">
-        <span>स्वरAJ</span>
-      </div>
+  <div class="logo">
+    <div class="logo-icon">स्व</div>
 
-      <div class="brand-text">
-        <strong>स्वरAJ</strong>
-        <small>Music</small>
-      </div>
+    <div class="logo-text">
+      स्वरAJ
+      <small>MUSIC EXPERIENCE</small>
+    </div>
+  </div>
+
+  <nav class="nav">
+
+    <button
+      type="button"
+      class="active"
+      data-page="home">
+      🏠 &nbsp; Home
+    </button>
+
+    <button
+      type="button"
+      data-page="favorites">
+      ❤️ &nbsp; Favorites
+    </button>
+
+    <button
+      type="button"
+      data-page="recent">
+      🕘 &nbsp; Recently Played
+    </button>
+
+  </nav>
+
+  <div class="sidebar-bottom">
+
+    <button
+      type="button"
+      class="theme-open"
+      id="themeButton">
+      🎨 &nbsp; Themes
+    </button>
+
+  </div>
+
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+
+    <div class="search">
+      🔎
+
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="Search songs, artists, categories..."
+        autocomplete="off">
     </div>
 
-    <nav class="menu">
+    <button
+      class="top-button"
+      id="themeTopButton"
+      type="button"
+      title="Change theme">
+      ✨
+    </button>
 
-      <button
-        class="menu-item active"
-        data-page="home"
-        type="button"
-      >
-        <span>⌂</span>
-        <label>Home</label>
-      </button>
+  </header>
 
-      <button
-        class="menu-item"
-        data-page="search"
-        type="button"
-      >
-        <span>⌕</span>
-        <label>Search</label>
-      </button>
+  <!-- CONTENT -->
+  <section class="content">
 
-      <button
-        class="menu-item"
-        data-page="library"
-        type="button"
-      >
-        <span>♫</span>
-        <label>Library</label>
-      </button>
+    <section class="hero">
 
-      <button
-        class="menu-item"
-        data-page="liked"
-        type="button"
-      >
-        <span>♥</span>
-        <label>Liked</label>
-      </button>
+      <h1>
+        Feel the
+        <span class="gradient-text">
+          Sound.
+        </span>
+      </h1>
 
-      <button
-        class="menu-item"
-        data-page="playlist"
-        type="button"
-      >
-        <span>☷</span>
-        <label>Playlist</label>
-      </button>
+      <p>
+        Welcome to स्वरAJ — your premium music space.
+        Discover songs by category and enjoy uninterrupted
+        listening.
+      </p>
 
-    </nav>
+    </section>
 
-    <div class="sidebar-footer">
-      <strong>स्वरAJ</strong>
-      <small>Music Platform</small>
-    </div>
+    <!-- CATEGORY -->
+    <section class="section">
 
-  </aside>
+      <div class="section-head">
+        <h2>Categories</h2>
 
-
-  <!-- MOBILE OVERLAY -->
-  <div
-    id="drawerOverlay"
-    class="drawer-overlay"
-  ></div>
-
-
-  <!-- MAIN -->
-  <main class="main">
-
-    <!-- TOPBAR -->
-    <header class="topbar">
-
-      <button
-        id="mobileMenu"
-        class="mobile-menu"
-        type="button"
-        aria-label="Open menu"
-      >
-        ☰
-      </button>
-
-      <div class="search-box">
-
-        <span>⌕</span>
-
-        <input
-          id="searchInput"
-          type="search"
-          placeholder="Search songs, artists..."
-          autocomplete="off"
-        >
-
-      </div>
-
-      <button
-        id="refreshBtn"
-        class="icon-btn"
-        type="button"
-        title="Refresh"
-        aria-label="Refresh"
-      >
-        ↻
-      </button>
-
-      <button
-        id="sjThemeToggle"
-        class="icon-btn"
-        type="button"
-        title="Themes"
-        aria-label="Choose theme"
-      >
-        ◈
-      </button>
-
-    </header>
-
-
-    <!-- HOME -->
-    <section
-      id="homePage"
-      class="page active"
-    >
-
-      <div class="hero">
-
-        <div class="hero-liquid-logo-wrap">
-
-          <div class="hero-liquid-orbit">
-
-            <div class="hero-liquid-logo">
-
-              <div class="liquid-shine"></div>
-
-              <div class="liquid-bubble bubble-one"></div>
-
-              <div class="liquid-bubble bubble-two"></div>
-
-              <div class="liquid-bubble bubble-three"></div>
-
-              <div class="hero-logo-text">
-                <span>स्वर</span>
-                <b>AJ</b>
-              </div>
-
-            </div>
-
-            <div class="orbit-ring orbit-ring-1"></div>
-
-            <div class="orbit-ring orbit-ring-2"></div>
-
-          </div>
-
-        </div>
-
-
-        <div class="hero-content">
-
-          <div class="eyebrow">
-            ✦ SWARAJ MUSIC
-          </div>
-
-          <h1>
-            Your Music.<br>
-            Your Vibe.
-          </h1>
-
-          <p>
-            MP3 and YouTube music together
-            in one seamless playlist.
-          </p>
-
-          <button
-            id="heroPlay"
-            class="primary-btn"
-            type="button"
-          >
-            ▶ Play Music
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <div class="section-title">
-
-        <h2>
-          Recently Added
-        </h2>
-
-        <span id="songCount">
+        <span
+          class="count"
+          id="songCount">
           0 songs
         </span>
-
       </div>
 
-
       <div
-        id="songList"
-        class="song-list"
-      ></div>
+        class="category-row"
+        id="categories">
 
+        <button
+          type="button"
+          class="category active"
+          data-category="all">
+          All
+        </button>
 
-      <div
-        id="sjCategoryContainer"
-      ></div>
+      </div>
 
     </section>
 
+    <!-- SONGS -->
+    <section class="section">
 
-    <!-- SEARCH -->
-    <section
-      id="searchPage"
-      class="page"
-    >
+      <div class="section-head">
 
-      <div class="page-title">
-
-        <h1>Search</h1>
-
-        <p>
-          Find your favorite songs and artists.
-        </p>
+        <h2 id="sectionTitle">
+          All Songs
+        </h2>
 
       </div>
 
       <div
-        id="searchResults"
-        class="song-list"
-      ></div>
+        class="song-grid"
+        id="songGrid">
+
+        <div class="message">
+          <div class="loader"></div>
+          <p style="margin-top:15px">
+            Loading songs...
+          </p>
+        </div>
+
+      </div>
 
     </section>
-
-
-    <!-- LIBRARY -->
-    <section
-      id="libraryPage"
-      class="page"
-    >
-
-      <div class="page-title">
-
-        <h1>Library</h1>
-
-        <p>
-          Your complete music library.
-        </p>
-
-      </div>
-
-      <div
-        id="libraryList"
-        class="song-list"
-      ></div>
-
-    </section>
-
-
-    <!-- LIKED -->
-    <section
-      id="likedPage"
-      class="page"
-    >
-
-      <div class="page-title">
-
-        <h1>Liked Songs</h1>
-
-        <p>
-          Your favorite music.
-        </p>
-
-      </div>
-
-      <div
-        id="likedList"
-        class="song-list"
-      ></div>
-
-    </section>
-
-
-    <!-- PLAYLIST -->
-    <section
-      id="playlistPage"
-      class="page"
-    >
-
-      <div class="page-title">
-
-        <h1>Playlist</h1>
-
-        <p>
-          Your music playlist.
-        </p>
-
-      </div>
-
-      <div
-        id="playlistList"
-        class="song-list"
-      ></div>
-
-    </section>
-
-
-    <!-- ADMIN NEVER SHOWN HERE -->
-    <section
-      id="adminPage"
-      class="page"
-      style="display:none"
-    ></section>
-
-  </main>
-
-
-  <!-- VIDEO -->
-  <section
-    id="sjCommonVideo"
-    class="sj-common-video"
-    aria-label="Video player"
-  >
-
-    <div class="sj-video-inner">
-
-      <button
-        id="sjVideoClose"
-        class="sj-video-close"
-        type="button"
-        aria-label="Close video"
-      >
-        ×
-      </button>
-
-      <div
-        id="youtubeFrame"
-        class="youtube-frame hidden-video"
-      >
-        <div id="youtubePlayer"></div>
-      </div>
-
-      <button
-        id="sjFullscreen"
-        class="sj-video-fullscreen"
-        type="button"
-        aria-label="Fullscreen"
-      >
-        ⛶
-      </button>
-
-    </div>
 
   </section>
 
-
-  <!-- AUDIO -->
-  <audio
-    id="audioPlayer"
-    preload="metadata"
-  ></audio>
-
-
-  <!-- PLAYER -->
-  <div class="player">
-
-    <div class="now-playing">
-
-      <div class="cover-wrap">
-
-        <img
-          id="playerCover"
-          src="/images/default-cover.jpg"
-          alt="Cover"
-        >
-
-      </div>
-
-      <div class="track-info">
-
-        <strong id="playerTitle">
-          SwarAJ
-        </strong>
-
-        <span id="playerArtist">
-          Music
-        </span>
-
-        <small id="sjPlayerCategory">
-          Ready to play
-        </small>
-
-      </div>
-
-      <button
-        id="sjFavorite"
-        class="sj-round-control"
-        type="button"
-        aria-label="Favorite"
-      >
-        ♡
-      </button>
-
-    </div>
-
-
-    <div class="controls">
-
-      <div class="control-buttons">
-
-        <button
-          id="sjShuffle"
-          class="sj-player-control"
-          type="button"
-          title="Shuffle"
-        >
-          🔀
-        </button>
-
-        <button
-          id="prevBtn"
-          class="sj-player-control"
-          type="button"
-          title="Previous"
-        >
-          ⏮
-        </button>
-
-        <button
-          id="playBtn"
-          class="play-btn sj-player-control"
-          type="button"
-          title="Play/Pause"
-        >
-          ▶
-        </button>
-
-        <button
-          id="nextBtn"
-          class="sj-player-control"
-          type="button"
-          title="Next"
-        >
-          ⏭
-        </button>
-
-        <button
-          id="sjRepeat"
-          class="sj-player-control"
-          type="button"
-          title="Repeat"
-        >
-          ↻
-        </button>
-
-      </div>
-
-
-      <div class="progress-row">
-
-        <span id="currentTime">
-          0:00
-        </span>
-
-        <input
-          id="progress"
-          type="range"
-          min="0"
-          max="100"
-          value="0"
-          aria-label="Playback progress"
-        >
-
-        <span id="duration">
-          0:00
-        </span>
-
-      </div>
-
-    </div>
-
-
-    <div class="player-actions">
-
-      <button
-        id="sjMute"
-        class="sj-player-control"
-        type="button"
-        title="Mute"
-      >
-        🔊
-      </button>
-
-      <input
-        id="sjVolume"
-        class="sj-volume"
-        type="range"
-        min="0"
-        max="1"
-        step="0.01"
-        value="1"
-        aria-label="Volume"
-      >
-
-      <button
-        id="sjQueue"
-        class="sj-player-control"
-        type="button"
-        title="Queue"
-      >
-        ☷
-      </button>
-
-      <button
-        id="sjMiniFullscreen"
-        class="sj-player-control"
-        type="button"
-        title="Fullscreen"
-      >
-        ⛶
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <!-- THEME PANEL -->
-  <div
-    id="sjThemePanel"
-    class="sj-theme-panel"
-  >
-
-    <div class="sj-theme-panel-head">
-
-      <div>
-
-        <strong>
-          Choose your look
-        </strong>
-
-        <span>
-          3D · Liquid · Glass
-        </span>
-
-      </div>
-
-      <button
-        id="sjThemeClose"
-        type="button"
-      >
-        ×
-      </button>
-
-    </div>
-
-    <div
-      id="sjThemeGrid"
-      class="sj-theme-grid"
-    ></div>
-
-  </div>
-
-
-  <!-- QUEUE -->
-  <div
-    id="sjQueuePanel"
-    class="sj-queue-panel"
-  >
-
-    <div class="sj-panel-head">
-
-      <strong>
-        Queue
-      </strong>
-
-      <button
-        id="sjQueueClose"
-        type="button"
-      >
-        ×
-      </button>
-
-    </div>
-
-    <div
-      id="sjQueueList"
-    ></div>
-
-  </div>
-
-
-  <!-- TOAST -->
-  <div
-    id="sjToast"
-    class="sj-toast"
-    role="status"
-    aria-live="polite"
-  ></div>
+</main>
 
 </div>
 
+<!-- =======================================================
+     PLAYER
+     ======================================================= -->
 
-<!-- YOUTUBE -->
-<script src="https://www.youtube.com/iframe_api"></script>
+<section class="player">
 
-<!-- MAIN APP -->
-<script src="/script.js"></script>
+  <div class="now-playing">
 
-<!-- EXISTING ENHANCEMENTS -->
-<script src="/swaraj-enhancements.js"></script>
+    <div
+      class="now-cover"
+      id="nowCover">
+      🎵
+    </div>
 
-<!-- FINAL UI -->
-<script src="/swaraj-final.js"></script>
+    <div class="now-text">
+
+      <div
+        class="now-title"
+        id="nowTitle">
+        Nothing playing
+      </div>
+
+      <div
+        class="now-category"
+        id="nowCategory">
+        Select a song
+      </div>
+
+    </div>
+
+  </div>
+
+  <div>
+
+    <div class="controls">
+
+      <button
+        class="control"
+        id="shuffleButton"
+        type="button"
+        title="Shuffle">
+        🔀
+      </button>
+
+      <button
+        class="control"
+        id="previousButton"
+        type="button"
+        title="Previous">
+        ⏮
+      </button>
+
+      <button
+        class="play-main"
+        id="playButton"
+        type="button"
+        title="Play">
+        ▶
+      </button>
+
+      <button
+        class="control"
+        id="nextButton"
+        type="button"
+        title="Next">
+        ⏭
+      </button>
+
+      <button
+        class="control"
+        id="repeatButton"
+        type="button"
+        title="Repeat">
+        🔁
+      </button>
+
+      <!-- WATCH IS ONLY FOR VIDEO -->
+      <button
+        class="control"
+        id="watchButton"
+        type="button"
+        title="Watch YouTube video">
+        ▷
+      </button>
+
+    </div>
+
+    <div class="progress-area">
+
+      <span
+        class="time"
+        id="currentTime">
+        0:00
+      </span>
+
+      <input
+        class="progress"
+        id="progress"
+        type="range"
+        min="0"
+        max="100"
+        value="0">
+
+      <span
+        class="time"
+        id="duration">
+        0:00
+      </span>
+
+    </div>
+
+  </div>
+
+  <div class="volume">
+
+    <button
+      class="control"
+      id="muteButton"
+      type="button">
+      🔊
+    </button>
+
+    <input
+      id="volume"
+      type="range"
+      min="0"
+      max="1"
+      step=".01"
+      value=".8">
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     MOBILE NAV
+     ======================================================= -->
+
+<nav class="mobile-nav">
+
+  <button
+    type="button"
+    class="active"
+    data-page="home">
+    🏠<br>
+    <small>Home</small>
+  </button>
+
+  <button
+    type="button"
+    data-page="favorites">
+    ❤️<br>
+    <small>Favorites</small>
+  </button>
+
+  <button
+    type="button"
+    id="mobileTheme">
+    🎨<br>
+    <small>Theme</small>
+  </button>
+
+</nav>
+
+<!-- =======================================================
+     THEME PANEL
+     ======================================================= -->
+
+<section
+  class="theme-panel"
+  id="themePanel">
+
+  <div class="theme-head">
+
+    <strong>
+      Choose Theme
+    </strong>
+
+    <button
+      class="theme-close"
+      id="themeClose"
+      type="button">
+      ×
+    </button>
+
+  </div>
+
+  <div
+    class="theme-grid"
+    id="themeGrid">
+  </div>
+
+</section>
+
+<!-- =======================================================
+     VIDEO
+     ======================================================= -->
+
+<section
+  class="watch"
+  id="watchModal">
+
+  <div class="video-box">
+
+    <button
+      class="video-close"
+      id="videoClose"
+      type="button">
+      ×
+    </button>
+
+    <div id="youtubeVideo"></div>
+
+  </div>
+
+</section>
+
+<!-- Hidden YouTube API player -->
+<div id="youtubePlayer"></div>
+
+<!-- AUDIO -->
+<audio
+  id="audio"
+  preload="metadata">
+</audio>
+
+<!-- TOAST -->
+<div
+  class="toast"
+  id="toast">
+</div>
+
+<script>
+/* =========================================================
+   SWARAJ — SINGLE FILE JAVASCRIPT
+   ========================================================= */
+
+(() => {
+
+"use strict";
+
+/* =========================================================
+   CONFIG
+   ========================================================= */
+
+const API = {
+  songs: "/api/songs",
+  categories: "/api/categories",
+  search: "/api/search"
+};
+
+/* =========================================================
+   STATE
+   ========================================================= */
+
+const state = {
+
+  songs: [],
+
+  filteredSongs: [],
+
+  categories: [],
+
+  currentIndex: -1,
+
+  currentSong: null,
+
+  isPlaying: false,
+
+  shuffle: false,
+
+  repeat: false,
+
+  muted: false,
+
+  volume: .8,
+
+  favorites:
+    JSON.parse(
+      localStorage.getItem("swaraj-favorites") || "[]"
+    ),
+
+  recent:
+    JSON.parse(
+      localStorage.getItem("swaraj-recent") || "[]"
+    ),
+
+  theme:
+    localStorage.getItem("swaraj-theme") ||
+    "liquid-glass",
+
+  youtubePlayer: null,
+
+  youtubeReady: false,
+
+  youtubeVideoId: null
+
+};
+
+/* =========================================================
+   DOM
+   ========================================================= */
+
+const $ = id =>
+  document.getElementById(id);
+
+const audio =
+  $("audio");
+
+/* =========================================================
+   THEMES
+   ========================================================= */
+
+const THEMES = [
+
+  ["liquid-glass",
+   "💧 Liquid Glass",
+   "#8b5cf6",
+   "#06b6d4"],
+
+  ["deep-3d",
+   "⬛ Deep 3D",
+   "#64748b",
+   "#e2e8f0"],
+
+  ["neon-3d",
+   "⚡ Neon 3D",
+   "#00f5ff",
+   "#ff00d4"],
+
+  ["aurora-liquid",
+   "🌌 Aurora Liquid",
+   "#22c55e",
+   "#8b5cf6"],
+
+  ["galaxy-6d",
+   "🌠 Galaxy 6D",
+   "#7c3aed",
+   "#38bdf8"],
+
+  ["premium-gold",
+   "✨ Premium Gold",
+   "#f59e0b",
+   "#fde68a"],
+
+  ["ocean-liquid",
+   "🌊 Ocean Liquid",
+   "#06b6d4",
+   "#2563eb"],
+
+  ["purple-crystal",
+   "💜 Purple Crystal",
+   "#a855f7",
+   "#e879f9"],
+
+  ["red-pulse",
+   "❤️ Red Pulse",
+   "#ef4444",
+   "#fb7185"],
+
+  ["minimal-dark",
+   "🖤 Minimal Dark",
+   "#64748b",
+   "#94a3b8"]
+
+];
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+let toastTimer;
+
+function toast(message){
+
+  const el =
+    $("toast");
+
+  el.textContent =
+    message;
+
+  el.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer =
+    setTimeout(() => {
+
+      el.classList.remove("show");
+
+    },2500);
+
+}
+
+/* =========================================================
+   THEME
+   ========================================================= */
+
+function applyTheme(theme){
+
+  if(
+    !THEMES.some(
+      item => item[0] === theme
+    )
+  ){
+
+    theme =
+      "liquid-glass";
+
+  }
+
+  state.theme =
+    theme;
+
+  document.body.dataset.theme =
+    theme;
+
+  localStorage.setItem(
+    "swaraj-theme",
+    theme
+  );
+
+  document
+    .querySelectorAll(".theme-card")
+    .forEach(card => {
+
+      card.classList.toggle(
+        "active",
+        card.dataset.theme === theme
+      );
+
+    });
+
+}
+
+function buildThemes(){
+
+  const grid =
+    $("themeGrid");
+
+  if(!grid) return;
+
+  grid.innerHTML =
+    THEMES.map(
+      item => {
+
+        const [
+          id,
+          name,
+          a,
+          b
+        ] = item;
+
+        return `
+
+          <button
+            type="button"
+            class="theme-card"
+            data-theme="${id}">
+
+            <div
+              class="theme-preview"
+              style="
+                background:
+                linear-gradient(
+                  135deg,
+                  ${a},
+                  ${b}
+                )
+              ">
+            </div>
+
+            <div>
+              ${name}
+            </div>
+
+          </button>
+
+        `;
+
+      }
+    ).join("");
+
+}
+
+function toggleThemePanel(){
+
+  $("themePanel")
+    ?.classList.toggle("open");
+
+}
+
+/* =========================================================
+   LOAD SONGS
+   ========================================================= */
+
+async function loadSongs(){
+
+  const grid =
+    $("songGrid");
+
+  try{
+
+    grid.innerHTML = `
+      <div class="message">
+        <div class="loader"></div>
+        <p style="margin-top:15px">
+          Loading your music...
+        </p>
+      </div>
+    `;
+
+    const response =
+      await fetch(API.songs,{
+        cache:"no-store"
+      });
+
+    if(!response.ok){
+
+      throw new Error(
+        "Songs API returned " +
+        response.status
+      );
+
+    }
+
+    const data =
+      await response.json();
+
+    /*
+      Supports:
+
+      [
+        {...}
+      ]
+
+      OR
+
+      {
+        songs:[...]
+      }
+    */
+
+    state.songs =
+      Array.isArray(data)
+        ? data
+        : Array.isArray(data.songs)
+          ? data.songs
+          : [];
+
+    state.songs =
+      state.songs.map(
+        normalizeSong
+      );
+
+    state.filteredSongs =
+      [...state.songs];
+
+    updateCount();
+
+    buildCategories();
+
+    renderSongs();
+
+  }catch(error){
+
+    console.error(
+      "SwarAJ songs error:",
+      error
+    );
+
+    grid.innerHTML = `
+      <div class="message">
+        <h3>Unable to load songs</h3>
+        <p style="margin-top:8px">
+          Check /api/songs on your Render server.
+        </p>
+      </div>
+    `;
+
+    toast(
+      "Could not load songs"
+    );
+
+  }
+
+}
+
+/* =========================================================
+   NORMALIZE SONG
+   ========================================================= */
+
+function normalizeSong(song,index){
+
+  const title =
+    song.title ||
+    song.name ||
+    song.filename ||
+    song.file ||
+    `Song ${index + 1}`;
+
+  let category =
+    song.category ||
+    song.genre ||
+    song.folder ||
+    "Other";
+
+  category =
+    String(category)
+      .replaceAll("\\","/")
+      .split("/")
+      .filter(Boolean)
+      .pop() ||
+    "Other";
+
+  let type =
+    song.type;
+
+  const url =
+    song.url ||
+    song.audioUrl ||
+    song.audio ||
+    song.src ||
+    song.path ||
+    song.fileUrl ||
+    "";
+
+  if(!type){
+
+    if(
+      song.youtubeId ||
+      song.youtubeUrl ||
+      /youtube\.com|youtu\.be/i.test(
+        String(url)
+      )
+    ){
+
+      type =
+        "youtube";
+
+    }else{
+
+      type =
+        "local";
+
+    }
+
+  }
+
+  return {
+
+    ...song,
+
+    id:
+      song.id ??
+      song._id ??
+      index,
+
+    title,
+
+    category,
+
+    type,
+
+    url,
+
+    youtubeId:
+      song.youtubeId ||
+      getYouTubeId(
+        song.youtubeUrl ||
+        url
+      ),
+
+    cover:
+      song.cover ||
+      song.coverUrl ||
+      song.image ||
+      song.thumbnail ||
+      ""
+
+  };
+
+}
+
+/* =========================================================
+   CATEGORIES
+   ========================================================= */
+
+function buildCategories(){
+
+  const set =
+    new Set(
+      state.songs
+        .map(
+          song =>
+            song.category
+        )
+        .filter(Boolean)
+    );
+
+  state.categories =
+    Array.from(set)
+      .sort(
+        (a,b) =>
+          a.localeCompare(b)
+      );
+
+  const container =
+    $("categories");
+
+  container.innerHTML = `
+
+    <button
+      type="button"
+      class="category active"
+      data-category="all">
+      All
+    </button>
+
+    ${
+      state.categories
+        .map(
+          category => `
+
+            <button
+              type="button"
+              class="category"
+              data-category="${escapeHtml(category)}">
+
+              ${escapeHtml(category)}
+
+            </button>
+
+          `
+        )
+        .join("")
+    }
+
+  `;
+
+}
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeHtml(value){
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+/* =========================================================
+   RENDER SONGS
+   ========================================================= */
+
+function renderSongs(){
+
+  const grid =
+    $("songGrid");
+
+  if(!state.filteredSongs.length){
+
+    grid.innerHTML = `
+      <div
+        class="message"
+        style="grid-column:1/-1">
+
+        No songs found.
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+  grid.innerHTML =
+    state.filteredSongs
+      .map(
+        (song,position) => {
+
+          const originalIndex =
+            state.songs.indexOf(song);
+
+          const liked =
+            state.favorites
+              .includes(
+                String(song.id)
+              );
+
+          const playing =
+            state.currentSong &&
+            String(state.currentSong.id) ===
+            String(song.id);
+
+          return `
+
+            <article
+              class="
+                song-card
+                ${playing ? "playing" : ""}
+              "
+              data-index="${originalIndex}">
+
+              <button
+                type="button"
+                class="song-menu"
+                data-action="favorite"
+                data-index="${originalIndex}"
+                title="Favorite">
+
+                ${liked ? "♥" : "♡"}
+
+              </button>
+
+              <div class="cover">
+
+                ${
+                  song.cover
+                    ? `
+                      <img
+                        src="${escapeHtml(song.cover)}"
+                        alt=""
+                        loading="lazy"
+                        onerror="
+                          this.style.display='none'
+                        ">
+                    `
+                    : `
+                      <div class="cover-icon">
+                        🎵
+                      </div>
+                    `
+                }
+
+                <button
+                  type="button"
+                  class="card-play"
+                  data-action="play"
+                  data-index="${originalIndex}">
+
+                  ${
+                    playing &&
+                    state.isPlaying
+                      ? "❚❚"
+                      : "▶"
+                  }
+
+                </button>
+
+              </div>
+
+              <div class="song-info">
+
+                <div class="song-title">
+                  ${escapeHtml(song.title)}
+                </div>
+
+                <div class="song-category">
+                  ${escapeHtml(song.category)}
+                  ${
+                    song.type === "youtube"
+                      ? " • YouTube"
+                      : ""
+                  }
+                </div>
+
+              </div>
+
+            </article>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+/* =========================================================
+   UPDATE COUNT
+   ========================================================= */
+
+function updateCount(){
+
+  $("songCount").textContent =
+    `${state.filteredSongs.length} songs`;
+
+}
+
+/* =========================================================
+   PLAY SONG
+   ========================================================= */
+
+async function playSong(index){
+
+  if(
+    index < 0 ||
+    index >= state.songs.length
+  ){
+
+    return;
+
+  }
+
+  const song =
+    state.songs[index];
+
+  state.currentIndex =
+    index;
+
+  state.currentSong =
+    song;
+
+  addRecent(song);
+
+  updateNowPlaying();
+
+  /*
+   IMPORTANT:
+
+   For local songs:
+   normal HTML5 audio.
+
+   For YouTube:
+   hidden YouTube player.
+
+   NO VIDEO MODAL HERE.
+  */
+
+  if(
+    song.type === "youtube" ||
+    song.youtubeId
+  ){
+
+    playYouTube(song);
+
+  }else{
+
+    playLocal(song);
+
+  }
+
+  renderSongs();
+
+}
+
+/* =========================================================
+   LOCAL AUDIO
+   ========================================================= */
+
+function playLocal(song){
+
+  let url =
+    song.url;
+
+  /*
+    Existing backend commonly uses:
+
+    /api/songs/:id/audio
+  */
+
+  if(
+    !url &&
+    song.id !== undefined
+  ){
+
+    url =
+      `/api/songs/${encodeURIComponent(
+        song.id
+      )}/audio`;
+
+  }
+
+  if(!url){
+
+    toast(
+      "Audio URL not available"
+    );
+
+    return;
+
+  }
+
+  /*
+    If API gives a relative path
+    keep it relative.
+  */
+
+  audio.pause();
+
+  audio.src =
+    url;
+
+  audio.load();
+
+  audio.volume =
+    state.muted
+      ? 0
+      : state.volume;
+
+  audio.play()
+    .then(() => {
+
+      state.isPlaying =
+        true;
+
+      updatePlayButton();
+
+      setupMediaSession(
+        song
+      );
+
+    })
+    .catch(error => {
+
+      console.error(
+        "Audio playback error:",
+        error
+      );
+
+      toast(
+        "Tap Play to start audio"
+      );
+
+      state.isPlaying =
+        false;
+
+      updatePlayButton();
+
+    });
+
+}
+
+/* =========================================================
+   YOUTUBE ID
+   ========================================================= */
+
+function getYouTubeId(url){
+
+  if(!url) return null;
+
+  const value =
+    String(url).trim();
+
+  const patterns = [
+
+    /youtu\.be\/([^?&#/]+)/i,
+
+    /youtube\.com\/watch\?v=([^?&#/]+)/i,
+
+    /youtube\.com\/embed\/([^?&#/]+)/i,
+
+    /youtube\.com\/shorts\/([^?&#/]+)/i,
+
+    /youtube\.com\/live\/([^?&#/]+)/i
+
+  ];
+
+  for(
+    const regex of patterns
+  ){
+
+    const match =
+      value.match(regex);
+
+    if(match){
+
+      return match[1];
+
+    }
+
+  }
+
+  /*
+    Direct ID
+  */
+
+  if(
+    /^[a-zA-Z0-9_-]{11}$/.test(value)
+  ){
+
+    return value;
+
+  }
+
+  return null;
+
+}
+
+/* =========================================================
+   YOUTUBE API
+   ========================================================= */
+
+function loadYouTubeAPI(){
+
+  if(
+    window.YT &&
+    window.YT.Player
+  ){
+
+    createYouTubePlayer();
+
+    return;
+
+  }
+
+  window.onYouTubeIframeAPIReady =
+    createYouTubePlayer;
+
+  const script =
+    document.createElement("script");
+
+  script.src =
+    "https://www.youtube.com/iframe_api";
+
+  document.head.appendChild(
+    script
+  );
+
+}
+
+function createYouTubePlayer(){
+
+  if(state.youtubePlayer){
+
+    return;
+
+  }
+
+  state.youtubePlayer =
+    new YT.Player(
+      "youtubePlayer",
+      {
+
+        width:"1",
+
+        height:"1",
+
+        videoId:"",
+
+        playerVars:{
+          autoplay:0,
+          controls:0,
+          playsinline:1,
+          rel:0,
+          modestbranding:1
+        },
+
+        events:{
+
+          onReady(){
+
+            state.youtubeReady =
+              true;
+
+          },
+
+          onStateChange(event){
+
+            if(
+              event.data ===
+              YT.PlayerState.PLAYING
+            ){
+
+              state.isPlaying =
+                true;
+
+              updatePlayButton();
+
+            }
+
+            if(
+              event.data ===
+              YT.PlayerState.PAUSED
+            ){
+
+              state.isPlaying =
+                false;
+
+              updatePlayButton();
+
+            }
+
+            if(
+              event.data ===
+              YT.PlayerState.ENDED
+            ){
+
+              state.isPlaying =
+                false;
+
+              updatePlayButton();
+
+              nextSong();
+
+            }
+
+          }
+
+        }
+
+      }
+    );
+
+}
+
+/* =========================================================
+   PLAY YOUTUBE AUDIO
+   ========================================================= */
+
+function playYouTube(song){
+
+  const videoId =
+    song.youtubeId ||
+    getYouTubeId(
+      song.youtubeUrl ||
+      song.url
+    );
+
+  if(!videoId){
+
+    toast(
+      "Invalid YouTube video"
+    );
+
+    return;
+
+  }
+
+  if(
+    !state.youtubeReady ||
+    !state.youtubePlayer
+  ){
+
+    toast(
+      "YouTube player is still loading"
+    );
+
+    return;
+
+  }
+
+  /*
+    Stop local audio.
+  */
+
+  audio.pause();
+
+  audio.removeAttribute(
+    "src"
+  );
+
+  audio.load();
+
+  /*
+    LOAD AND PLAY YOUTUBE
+    WITHOUT OPENING VIDEO.
+  */
+
+  state.youtubePlayer
+    .loadVideoById(
+      videoId
+    );
+
+  state.youtubePlayer
+    .playVideo();
+
+  state.youtubeVideoId =
+    videoId;
+
+  state.isPlaying =
+    true;
+
+  updatePlayButton();
+
+  setupMediaSession(
+    song
+  );
+
+  /*
+    VERY IMPORTANT:
+    DO NOT CALL showVideo()
+  */
+
+}
+
+/* =========================================================
+   WATCH BUTTON
+   ========================================================= */
+
+function watchCurrentSong(){
+
+  const song =
+    state.currentSong;
+
+  if(!song){
+
+    toast(
+      "Play a song first"
+    );
+
+    return;
+
+  }
+
+  const videoId =
+    song.youtubeId ||
+    getYouTubeId(
+      song.youtubeUrl ||
+      song.url
+    );
+
+  if(!videoId){
+
+    toast(
+      "This song has no YouTube video"
+    );
+
+    return;
+
+  }
+
+  if(
+    !state.youtubeReady ||
+    !state.youtubePlayer
+  ){
+
+    toast(
+      "Video player is loading"
+    );
+
+    return;
+
+  }
+
+  state.youtubePlayer
+    .loadVideoById(
+      videoId
+    );
+
+  state.youtubePlayer
+    .playVideo();
+
+  showVideo();
+
+}
+
+/* =========================================================
+   SHOW VIDEO
+   ========================================================= */
+
+function showVideo(){
+
+  $("watchModal")
+    .classList.add("open");
+
+}
+
+/* =========================================================
+   CLOSE VIDEO
+   ========================================================= */
+
+function closeVideo(){
+
+  $("watchModal")
+    .classList.remove("open");
+
+  /*
+    Do NOT stop audio automatically.
+
+    User asked:
+    audio should continue unless
+    they explicitly stop it.
+  */
+
+}
+
+/* =========================================================
+   PLAY / PAUSE
+   ========================================================= */
+
+function togglePlay(){
+
+  if(!state.currentSong){
+
+    if(state.songs.length){
+
+      playSong(0);
+
+    }else{
+
+      toast(
+        "No songs available"
+      );
+
+    }
+
+    return;
+
+  }
+
+  if(
+    state.currentSong.type === "youtube" ||
+    state.currentSong.youtubeId
+  ){
+
+    if(!state.youtubePlayer){
+
+      return;
+
+    }
+
+    if(state.isPlaying){
+
+      state.youtubePlayer
+        .pauseVideo();
+
+    }else{
+
+      state.youtubePlayer
+        .playVideo();
+
+    }
+
+  }else{
+
+    if(state.isPlaying){
+
+      audio.pause();
+
+    }else{
+
+      audio.play()
+        .catch(() => {
+
+          toast(
+            "Tap Play again"
+          );
+
+        });
+
+    }
+
+  }
+
+}
+
+/* =========================================================
+   NEXT
+   ========================================================= */
+
+function nextSong(){
+
+  if(!state.songs.length){
+
+    return;
+
+  }
+
+  let next;
+
+  if(state.shuffle){
+
+    if(state.songs.length === 1){
+
+      next = 0;
+
+    }else{
+
+      do{
+
+        next =
+          Math.floor(
+            Math.random() *
+            state.songs.length
+          );
+
+      }while(
+        next ===
+        state.currentIndex
+      );
+
+    }
+
+  }else{
+
+    next =
+      state.currentIndex + 1;
+
+    if(
+      next >=
+      state.songs.length
+    ){
+
+      next = 0;
+
+    }
+
+  }
+
+  playSong(next);
+
+}
+
+/* =========================================================
+   PREVIOUS
+   ========================================================= */
+
+function previousSong(){
+
+  if(!state.songs.length){
+
+    return;
+
+  }
+
+  /*
+    If current song already played
+    more than 3 seconds, restart it.
+  */
+
+  if(
+    !state.currentSong?.type ||
+    state.currentSong.type !== "youtube"
+  ){
+
+    if(
+      audio.currentTime >
+      3
+    ){
+
+      audio.currentTime =
+        0;
+
+      return;
+
+    }
+
+  }
+
+  let previous =
+    state.currentIndex - 1;
+
+  if(previous < 0){
+
+    previous =
+      state.songs.length - 1;
+
+  }
+
+  playSong(previous);
+
+}
+
+/* =========================================================
+   AUDIO EVENTS
+   ========================================================= */
+
+audio.addEventListener(
+  "play",
+  () => {
+
+    state.isPlaying =
+      true;
+
+    updatePlayButton();
+
+  }
+);
+
+audio.addEventListener(
+  "pause",
+  () => {
+
+    state.isPlaying =
+      false;
+
+    updatePlayButton();
+
+  }
+);
+
+audio.addEventListener(
+  "ended",
+  () => {
+
+    if(state.repeat){
+
+      audio.currentTime =
+        0;
+
+      audio.play();
+
+    }else{
+
+      nextSong();
+
+    }
+
+  }
+);
+
+audio.addEventListener(
+  "timeupdate",
+  updateProgress
+);
+
+audio.addEventListener(
+  "loadedmetadata",
+  updateProgress
+);
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+function updateProgress(){
+
+  const duration =
+    audio.duration;
+
+  const current =
+    audio.currentTime;
+
+  if(
+    Number.isFinite(duration) &&
+    duration > 0
+  ){
+
+    $("progress").value =
+      (
+        current /
+        duration
+      ) * 100;
+
+    $("duration").textContent =
+      formatTime(duration);
+
+  }
+
+  $("currentTime").textContent =
+    formatTime(current);
+
+}
+
+$("progress")
+  .addEventListener(
+    "input",
+    event => {
+
+      if(
+        !Number.isFinite(
+          audio.duration
+        )
+      ){
+
+        return;
+
+      }
+
+      audio.currentTime =
+        (
+          Number(
+            event.target.value
+          ) / 100
+        ) *
+        audio.duration;
+
+    }
+  );
+
+function formatTime(seconds){
+
+  if(
+    !Number.isFinite(seconds)
+  ){
+
+    return "0:00";
+
+  }
+
+  const min =
+    Math.floor(
+      seconds / 60
+    );
+
+  const sec =
+    Math.floor(
+      seconds % 60
+    )
+    .toString()
+    .padStart(2,"0");
+
+  return `${min}:${sec}`;
+
+}
+
+/* =========================================================
+   PLAYER UI
+   ========================================================= */
+
+function updatePlayButton(){
+
+  $("playButton")
+    .textContent =
+      state.isPlaying
+        ? "❚❚"
+        : "▶";
+
+}
+
+function updateNowPlaying(){
+
+  const song =
+    state.currentSong;
+
+  if(!song){
+
+    return;
+
+  }
+
+  $("nowTitle")
+    .textContent =
+      song.title;
+
+  $("nowCategory")
+    .textContent =
+      song.category;
+
+  const cover =
+    $("nowCover");
+
+  if(song.cover){
+
+    cover.innerHTML =
+      `<img
+        src="${escapeHtml(song.cover)}"
+        style="
+          width:100%;
+          height:100%;
+          object-fit:cover;
+          border-radius:12px
+        "
+        alt=""
+      >`;
+
+  }else{
+
+    cover.textContent =
+      "🎵";
+
+  }
+
+}
+
+/* =========================================================
+   SHUFFLE
+   ========================================================= */
+
+$("shuffleButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      state.shuffle =
+        !state.shuffle;
+
+      $("shuffleButton")
+        .classList.toggle(
+          "active",
+          state.shuffle
+        );
+
+      toast(
+        state.shuffle
+          ? "Shuffle ON"
+          : "Shuffle OFF"
+      );
+
+    }
+  );
+
+/* =========================================================
+   REPEAT
+   ========================================================= */
+
+$("repeatButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      state.repeat =
+        !state.repeat;
+
+      $("repeatButton")
+        .classList.toggle(
+          "active",
+          state.repeat
+        );
+
+      toast(
+        state.repeat
+          ? "Repeat ON"
+          : "Repeat OFF"
+      );
+
+    }
+  );
+
+/* =========================================================
+   VOLUME
+   ========================================================= */
+
+$("volume")
+  .addEventListener(
+    "input",
+    event => {
+
+      state.volume =
+        Number(
+          event.target.value
+        );
+
+      audio.volume =
+        state.muted
+          ? 0
+          : state.volume;
+
+      if(
+        state.youtubePlayer &&
+        state.youtubeReady
+      ){
+
+        state.youtubePlayer
+          .setVolume(
+            state.volume * 100
+          );
+
+      }
+
+    }
+  );
+
+$("muteButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      state.muted =
+        !state.muted;
+
+      audio.volume =
+        state.muted
+          ? 0
+          : state.volume;
+
+      $("muteButton")
+        .textContent =
+          state.muted
+            ? "🔇"
+            : "🔊";
+
+      if(
+        state.youtubePlayer &&
+        state.youtubeReady
+      ){
+
+        if(state.muted){
+
+          state.youtubePlayer
+            .mute();
+
+        }else{
+
+          state.youtubePlayer
+            .unMute();
+
+        }
+
+      }
+
+    }
+  );
+
+/* =========================================================
+   FAVORITES
+   ========================================================= */
+
+function toggleFavorite(song){
+
+  if(!song){
+
+    return;
+
+  }
+
+  const id =
+    String(song.id);
+
+  const index =
+    state.favorites
+      .indexOf(id);
+
+  if(index >= 0){
+
+    state.favorites
+      .splice(index,1);
+
+    toast(
+      "Removed from favorites"
+    );
+
+  }else{
+
+    state.favorites
+      .push(id);
+
+    toast(
+      "Added to favorites ❤️"
+    );
+
+  }
+
+  localStorage.setItem(
+    "swaraj-favorites",
+    JSON.stringify(
+      state.favorites
+    )
+  );
+
+  renderSongs();
+
+}
+
+/* =========================================================
+   RECENT
+   ========================================================= */
+
+function addRecent(song){
+
+  if(!song){
+
+    return;
+
+  }
+
+  const id =
+    String(song.id);
+
+  state.recent =
+    state.recent.filter(
+      item =>
+        String(item) !== id
+    );
+
+  state.recent.unshift(id);
+
+  state.recent =
+    state.recent.slice(
+      0,
+      30
+    );
+
+  localStorage.setItem(
+    "swaraj-recent",
+    JSON.stringify(
+      state.recent
+    )
+  );
+
+}
+
+/* =========================================================
+   CATEGORY FILTER
+   ========================================================= */
+
+function filterCategory(category){
+
+  document
+    .querySelectorAll(".category")
+    .forEach(button => {
+
+      button.classList.toggle(
+        "active",
+        button.dataset.category ===
+        category
+      );
+
+    });
+
+  if(category === "all"){
+
+    state.filteredSongs =
+      [...state.songs];
+
+    $("sectionTitle")
+      .textContent =
+      "All Songs";
+
+  }else{
+
+    state.filteredSongs =
+      state.songs.filter(
+        song =>
+          String(
+            song.category
+          ).toLowerCase() ===
+          String(
+            category
+          ).toLowerCase()
+      );
+
+    $("sectionTitle")
+      .textContent =
+      category;
+
+  }
+
+  updateCount();
+
+  renderSongs();
+
+}
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+$("searchInput")
+  .addEventListener(
+    "input",
+    event => {
+
+      const query =
+        event.target.value
+          .trim()
+          .toLowerCase();
+
+      if(!query){
+
+        state.filteredSongs =
+          [...state.songs];
+
+      }else{
+
+        state.filteredSongs =
+          state.songs.filter(
+            song => {
+
+              return [
+
+                song.title,
+
+                song.category,
+
+                song.artist,
+
+                song.album,
+
+                song.name
+
+              ]
+              .filter(Boolean)
+              .some(
+                value =>
+                  String(value)
+                    .toLowerCase()
+                    .includes(query)
+              );
+
+            }
+          );
+
+      }
+
+      $("sectionTitle")
+        .textContent =
+        query
+          ? `Search: ${query}`
+          : "All Songs";
+
+      updateCount();
+
+      renderSongs();
+
+    }
+  );
+
+/* =========================================================
+   EVENT DELEGATION
+   ========================================================= */
+
+/*
+  This is important.
+
+  Song cards are dynamically generated,
+  so individual click listeners would
+  break after rendering.
+
+  Event delegation keeps everything clickable.
+*/
+
+$("songGrid")
+  .addEventListener(
+    "click",
+    event => {
+
+      const actionButton =
+        event.target.closest(
+          "[data-action]"
+        );
+
+      if(actionButton){
+
+        const index =
+          Number(
+            actionButton.dataset.index
+          );
+
+        const action =
+          actionButton.dataset.action;
+
+        if(action === "play"){
+
+          if(
+            state.currentIndex ===
+            index
+          ){
+
+            togglePlay();
+
+          }else{
+
+            playSong(index);
+
+          }
+
+        }
+
+        if(action === "favorite"){
+
+          toggleFavorite(
+            state.songs[index]
+          );
+
+        }
+
+        return;
+
+      }
+
+      const card =
+        event.target.closest(
+          ".song-card"
+        );
+
+      if(card){
+
+        const index =
+          Number(
+            card.dataset.index
+          );
+
+        if(
+          state.currentIndex ===
+          index
+        ){
+
+          togglePlay();
+
+        }else{
+
+          playSong(index);
+
+        }
+
+      }
+
+    }
+  );
+
+/* =========================================================
+   CATEGORY EVENT
+   ========================================================= */
+
+$("categories")
+  .addEventListener(
+    "click",
+    event => {
+
+      const button =
+        event.target.closest(
+          ".category"
+        );
+
+      if(!button){
+
+        return;
+
+      }
+
+      filterCategory(
+        button.dataset.category
+      );
+
+    }
+  );
+
+/* =========================================================
+   MAIN PLAYER BUTTONS
+   ========================================================= */
+
+$("playButton")
+  .addEventListener(
+    "click",
+    togglePlay
+  );
+
+$("nextButton")
+  .addEventListener(
+    "click",
+    nextSong
+  );
+
+$("previousButton")
+  .addEventListener(
+    "click",
+    previousSong
+  );
+
+$("watchButton")
+  .addEventListener(
+    "click",
+    watchCurrentSong
+  );
+
+/* =========================================================
+   VIDEO CLOSE
+   ========================================================= */
+
+$("videoClose")
+  .addEventListener(
+    "click",
+    closeVideo
+  );
+
+$("watchModal")
+  .addEventListener(
+    "click",
+    event => {
+
+      if(
+        event.target ===
+        $("watchModal")
+      ){
+
+        closeVideo();
+
+      }
+
+    }
+  );
+
+/* =========================================================
+   THEME EVENTS
+   ========================================================= */
+
+$("themeButton")
+  .addEventListener(
+    "click",
+    toggleThemePanel
+  );
+
+$("themeTopButton")
+  .addEventListener(
+    "click",
+    toggleThemePanel
+  );
+
+$("mobileTheme")
+  .addEventListener(
+    "click",
+    toggleThemePanel
+  );
+
+$("themeClose")
+  .addEventListener(
+    "click",
+    () => {
+
+      $("themePanel")
+        .classList.remove(
+          "open"
+        );
+
+    }
+  );
+
+$("themeGrid")
+  .addEventListener(
+    "click",
+    event => {
+
+      const card =
+        event.target.closest(
+          ".theme-card"
+        );
+
+      if(!card){
+
+        return;
+
+      }
+
+      applyTheme(
+        card.dataset.theme
+      );
+
+      toast(
+        "Theme changed ✨"
+      );
+
+    }
+  );
+
+/* =========================================================
+   PAGE NAVIGATION
+   ========================================================= */
+
+document
+  .querySelectorAll(
+    "[data-page]"
+  )
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const page =
+          button.dataset.page;
+
+        document
+          .querySelectorAll(
+            "[data-page]"
+          )
+          .forEach(item => {
+
+            item.classList.toggle(
+              "active",
+              item.dataset.page ===
+              page
+            );
+
+          });
+
+        if(page === "home"){
+
+          state.filteredSongs =
+            [...state.songs];
+
+          $("sectionTitle")
+            .textContent =
+            "All Songs";
+
+          updateCount();
+
+          renderSongs();
+
+        }
+
+        if(page === "favorites"){
+
+          state.filteredSongs =
+            state.songs.filter(
+              song =>
+                state.favorites
+                  .includes(
+                    String(song.id)
+                  )
+            );
+
+          $("sectionTitle")
+            .textContent =
+            "Favorites ❤️";
+
+          updateCount();
+
+          renderSongs();
+
+        }
+
+        if(page === "recent"){
+
+          const map =
+            new Map(
+              state.songs.map(
+                song =>
+                  [
+                    String(song.id),
+                    song
+                  ]
+              )
+            );
+
+          state.filteredSongs =
+            state.recent
+              .map(
+                id =>
+                  map.get(
+                    String(id)
+                  )
+              )
+              .filter(Boolean);
+
+          $("sectionTitle")
+            .textContent =
+            "Recently Played";
+
+          updateCount();
+
+          renderSongs();
+
+        }
+
+      }
+    );
+
+  });
+
+/* =========================================================
+   MEDIA SESSION
+   ========================================================= */
+
+function setupMediaSession(song){
+
+  if(
+    !("mediaSession" in navigator)
+  ){
+
+    return;
+
+  }
+
+  try{
+
+    navigator.mediaSession.metadata =
+      new MediaMetadata({
+
+        title:
+          song.title ||
+          "SwarAJ",
+
+        artist:
+          song.artist ||
+          "स्वरAJ",
+
+        album:
+          song.album ||
+          song.category ||
+          "SwarAJ",
+
+        artwork:
+          song.cover
+            ? [
+                {
+                  src:
+                    song.cover,
+                  sizes:
+                    "512x512",
+                  type:
+                    "image/jpeg"
+                }
+              ]
+            : []
+
+      });
+
+    navigator.mediaSession
+      .setActionHandler(
+        "play",
+        () => togglePlay()
+      );
+
+    navigator.mediaSession
+      .setActionHandler(
+        "pause",
+        () => togglePlay()
+      );
+
+    navigator.mediaSession
+      .setActionHandler(
+        "nexttrack",
+        () => nextSong()
+      );
+
+    navigator.mediaSession
+      .setActionHandler(
+        "previoustrack",
+        () => previousSong()
+      );
+
+  }catch(error){
+
+    console.warn(
+      "Media Session:",
+      error
+    );
+
+  }
+
+}
+
+/* =========================================================
+   KEYBOARD
+   ========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    /*
+      Don't intercept typing.
+    */
+
+    if(
+      event.target.tagName ===
+      "INPUT"
+    ){
+
+      return;
+
+    }
+
+    if(
+      event.code ===
+      "Space"
+    ){
+
+      event.preventDefault();
+
+      togglePlay();
+
+    }
+
+    if(
+      event.code ===
+      "ArrowRight"
+    ){
+
+      nextSong();
+
+    }
+
+    if(
+      event.code ===
+      "ArrowLeft"
+    ){
+
+      previousSong();
+
+    }
+
+    if(
+      event.key ===
+      "Escape"
+    ){
+
+      closeVideo();
+
+      $("themePanel")
+        .classList.remove(
+          "open"
+        );
+
+    }
+
+  }
+);
+
+/* =========================================================
+   PREVENT BACKGROUND OVERLAY CLICK PROBLEMS
+   ========================================================= */
+
+$("youtubePlayer").style.pointerEvents =
+  "none";
+
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
+function init(){
+
+  buildThemes();
+
+  applyTheme(
+    state.theme
+  );
+
+  audio.volume =
+    state.volume;
+
+  loadYouTubeAPI();
+
+  loadSongs();
+
+}
+
+/*
+  DOM is already below all elements,
+  but this also protects the file if
+  moved into another loading position.
+*/
+
+if(
+  document.readyState ===
+  "loading"
+){
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    init
+  );
+
+}else{
+
+  init();
+
+}
+
+})();
+</script>
 
 </body>
 </html>
